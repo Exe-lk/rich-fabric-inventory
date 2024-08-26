@@ -1,0 +1,1 @@
+# rich-fabric-inventory
