@@ -13,9 +13,9 @@ const Brand: FC<IBrandProps> = ({ asideStatus, setAsideStatus }) => {
 		<div className='brand'>
 			<div className='brand-logo'>
 				<h1 className='brand-title '>
-					<Link href='../' aria-label='Logo'>
-						{/* <Logo height={32} /> */}
-					</Link>
+					{/* <Link href='../' aria-label='Logo'> */}
+					<Logo height={40}width={100} />
+					{/* </Link> */}
 				</h1>
 			</div>
 			<button

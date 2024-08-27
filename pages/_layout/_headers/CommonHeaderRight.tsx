@@ -62,137 +62,6 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 	const [item, setItem] = useState<Item[]>([]);
 	const [stockData, setStockData] = useState([]);
 	const [quantityDifference, setQuantityDifference] = useState([]);
-	
-
-	// //get stock count
-	// useEffect(() => {
-	// 	const fetchData = async () => {
-	// 		try {
-	// 			const dataCollection = collection(firestore, 'stock');
-	// 			const q = query(dataCollection, where('active', '==', true));
-	// 			const querySnapshot = await getDocs(q);
-	// 			const firebaseData = querySnapshot.docs.map((doc) => {
-	// 				const data = doc.data();
-	// 				return {
-	// 					...data,
-	// 					cid: doc.id,
-	// 				};
-	// 			});
-
-	// 			// Create a dictionary to group by item_id and sum quantities
-	// 			const stockDictionary: any = {};
-
-	// 			firebaseData.forEach((item: any) => {
-	// 				if (stockDictionary[item.item_id]) {
-	// 					stockDictionary[item.item_id] += item.quentity;
-	// 				} else {
-	// 					stockDictionary[item.item_id] = item.quentity;
-	// 				}
-	// 			});
-
-	// 			// Convert dictionary to array of objects
-	// 			const filteredData: any = Object.keys(stockDictionary).map((item_id) => ({
-	// 				item_id,
-	// 				quantity: stockDictionary[item_id],
-	// 			}));
-
-	// 			console.log(filteredData);
-	// 			setStockData(filteredData);
-	// 		} catch (error) {
-	// 			console.error('Error fetching data: ', error);
-	// 		}
-	// 	};
-	// 	fetchData();
-	// }, []);
-
-	// //grt sells quentity 
-	// useEffect(() => {
-	// 	const fetchData = async () => {
-	// 		try {
-	// 			const dataCollection = collection(firestore, 'orders');
-	// 			const querySnapshot = await getDocs(dataCollection);
-	// 			const firebaseData = querySnapshot.docs.map((doc) => {
-	// 				const data = doc.data();
-	// 				return {
-	// 					...data,
-	// 					cid: doc.id,
-	// 				};
-	// 			});
-
-	// 			// Create a dictionary to group by name and sum quantities
-	// 			const ordersDictionary: any = {};
-
-	// 			firebaseData.forEach((order: any) => {
-	// 				order.orders.forEach((item: any) => {
-	// 					if (ordersDictionary[item.name]) {
-	// 						ordersDictionary[item.name] += item.quentity;
-	// 					} else {
-	// 						ordersDictionary[item.name] = item.quentity;
-	// 					}
-	// 				});
-	// 			});
-
-	// 			// Convert dictionary to array of objects
-	// 			const filteredData: any = Object.keys(ordersDictionary).map((name) => ({
-	// 				name,
-	// 				quantity: ordersDictionary[name],
-	// 			}));
-
-	// 			console.log(filteredData);
-	// 			setOrdersData(filteredData);
-	// 		} catch (error) {
-	// 			console.error('Error fetching data: ', error);
-	// 		}
-	// 	};
-	// 	fetchData();
-	// }, []);
-
-	// useEffect(() => {
-	// 	const calculateQuantityDifference = () => {
-	// 		const differenceArray: any = [];
-
-	// 		stockData.forEach((stockItem: any) => {
-	// 			const orderItem: any = orderData.find(
-	// 				(order: any) => order.name === stockItem.item_id,
-	// 			);
-	// 			if (orderItem) {
-	// 				const difference = stockItem.quantity - orderItem.quantity;
-	// 				differenceArray.push({
-	// 					item_id: stockItem.item_id,
-	// 					quantity_difference: difference,
-	// 				});
-	// 			}
-	// 		});
-	// 		console.log(differenceArray);
-	// 		setQuantityDifference(differenceArray);
-	// 	};
-
-	// 	if (stockData.length > 0 && orderData.length > 0) {
-	// 		calculateQuantityDifference();
-	// 	}
-	// }, [stockData, orderData]);
-	// useEffect(() => {
-	// 	const fetchData = async () => {
-	// 		try {
-	// 			const dataCollection = collection(firestore, 'item');
-	// 			const q = query(dataCollection, where('status', '==', true));
-	// 			const querySnapshot = await getDocs(q);
-	// 			const firebaseData: any = querySnapshot.docs.map((doc) => {
-	// 				const data = doc.data();
-	// 				return {
-	// 					...data,
-	// 					cid: doc.id,
-	// 				};
-	// 			});
-	// 			const tempId = parseInt(firebaseData[firebaseData.length - 1].cid) + 1;
-
-	// 			setItem(firebaseData);
-	// 		} catch (error) {
-	// 			console.error('Error fetching data: ', error);
-	// 		}
-	// 	};
-	// 	fetchData();
-	// }, []);
 
 	return (
 		<HeaderRight>
@@ -229,8 +98,6 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 						/>
 					</Popovers>
 				</div>
-				
-				
 
 				{afterChildren}
 			</div>
@@ -246,19 +113,24 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 				<OffCanvasBody>
 					{item.map((item, index) => (
 						<>
-							{quantityDifference.filter((val: any) => {
-								if (val.quantity_difference < item.reorderlevel) {
-									return val;
-								}
-							})
-							.map((quentity: any, index) => (
-								<Alert icon='Inventory2' isLight color='warning' className='flex-nowrap'>
-						{item.name} stock quantity is less than {item.reorderlevel}. Manage your stock.
-					</Alert>
-							))}
+							{quantityDifference
+								.filter((val: any) => {
+									if (val.quantity_difference < item.reorderlevel) {
+										return val;
+									}
+								})
+								.map((quentity: any, index) => (
+									<Alert
+										icon='Inventory2'
+										isLight
+										color='warning'
+										className='flex-nowrap'>
+										{item.name} stock quantity is less than {item.reorderlevel}.
+										Manage your stock.
+									</Alert>
+								))}
 						</>
 					))}
-					
 				</OffCanvasBody>
 			</OffCanvas>
 		</HeaderRight>
