@@ -29,65 +29,7 @@ export const summaryPageTopMenu = {
 		subMenu: null,
 	},
 };
-export const hrmPagesMenu = {
-	dashboard: {
-		id: 'dashboard',
-		text: 'Dashboard',
-		path: 'hrm/dashboard',
-		icon: 'Dashboard',
-		subMenu: null,
-	},
-	employee: {
-		id: 'employee',
-		text: 'Manage Employee',
-		path: 'hrm/manageemployees',
-		icon: 'ManageAccounts',
 
-	},
-};
-export const developerPagesMenu = {
-	dashboard: {
-		id: 'dashboard',
-		text: 'Dashboard',
-		path: 'developer/dashboard',
-		icon: 'Dashboard',
-		subMenu: null,
-	},
-	singlePages: {
-		id: 'singlePages',
-		text: 'task',
-		path: 'single-pages',
-		icon: 'Article',
-		
-	},
-
-	skills: {
-		id: 'skills',
-		text: 'Skills',
-		path: 'single-pages',
-		icon: 'ImportExport',
-		subMenu: {
-
-			skills: {
-				id: 'softSkills',
-				text: 'Improve Soft Skills',
-				path: 'developer/skills/improveSkills',
-				icon: 'AddTask',
-				subMenu: null,
-			},
-			viewSkills: {
-				id: 'leadertask',
-				text: 'View Skills',
-				path: 'developer/skills/viewSkills',
-				icon: 'ViewList',
-				subMenu: null,
-			},
-		},
-	},
-
-
-
-};
 export const addminPagesMenu = {
 	dashboard: {
 		id: 'dashboard',
@@ -96,88 +38,297 @@ export const addminPagesMenu = {
 		icon: 'Dashboard',
 		subMenu: null,
 	},
-	User: {
-		id: 'User',
-		text: 'User',
-		path: 'admin/User',
-		icon: 'People',
 
+	category: {
+		id: 'category',
+		text: 'Category',
+		path: 'admin/category',
+		icon: 'Category',
+		subMenu: null,
 	},
-	Telescope: {
-		id: 't',
-		text: 'Telescope',
+	lot: {
+		id: 'lot',
+		text: 'Lot Management',
+		path: 'admin/lot-management',
+		icon: 'Ballot',
+		subMenu: null,
+	},
+	seller: {
+		id: 'lot',
+		text: 'Suppler Management',
+		path: 'admin/seller-management',
+		icon: 'SelectAll',
+		subMenu: null,
+	},
+	user: {
+		id: 'user',
+		text: 'User Management',
+		path: 'admin/user-management',
+		icon: 'SupervisedUserCircle',
+		subMenu: null,
+	},
+	action: {
+		id: 'user',
+		text: 'User Action ',
+		path: 'admin/user-action',
+		icon: 'SupervisedUserCircle',
+		subMenu: null,
+	},
+	
+	singlePages: {
+		id: 'singlePages',
+		text: 'Settings',
 		path: 'single-pages',
-		icon: 'Camera',
+		icon: 'Settings',
 		subMenu: {
-
-			task: {
-				id: 'table',
-				text: 'Telescope Table',
-				path: 'admin/Telescope',
-				icon: 'TableView',
-				subMenu: null,
+			boxedSingle: {
+				id: 'boxedSingle',
+				text: 'Account',
+				path: 'admin/setting/account',
+				icon: 'Groups',
 			},
-			leadertask: {
-				id: 'map',
-				text: 'Telescope Map',
-				path: 'admin/Telescope/#map',
-				icon: 'Map',
-				subMenu: null,
+			color: {
+				id: 'fluidSingle',
+				text: 'Color',
+				path: 'admin/setting/color',
+				icon: 'ColorLens',
+			},
+			fabric: {
+				id: 'fluidSingle',
+				text: 'fabric',
+				path: 'admin/setting/fabric-type',
+				icon: 'AppSettingsAlt',
+			},
+			gsm: {
+				id: 'fluidSingle',
+				text: 'GSM',
+				path: 'admin/setting/gsm',
+				icon: 'AlignVerticalCenter',
+			},
+			knet: {
+				id: 'fluidSingle',
+				text: 'Knit type',
+				path: 'admin/setting/knit-type',
+				icon: 'AirlineSeatLegroomExtra',
+			},
+			singlePages1: {
+				id: 'singlePages',
+				text: 'Recycle Bin',
+				path: 'single-pages',
+				icon: 'DeleteSweep',
+				subMenu: {
+					
+					
+					color: {
+						id: 'fluidSingle',
+						text: 'Color',
+						path: 'admin/setting/recycle-bin/color',
+						icon: 'ColorLens',
+					},
+					fabric: {
+						id: 'fluidSingle',
+						text: 'fabric',
+						path: 'admin/setting/recycle-bin/fabric',
+						icon: 'AppSettingsAlt',
+					},
+					gsm: {
+						id: 'fluidSingle',
+						text: 'GSM',
+						path: 'admin/setting/recycle-bin/gsm',
+						icon: 'AlignVerticalCenter',
+					},
+					knet: {
+						id: 'fluidSingle',
+						text: 'Knit type',
+						path: 'admin/setting/recycle-bin/knit-type',
+						icon: 'AirlineSeatLegroomExtra',
+					},
+				},
 			},
 		},
-
 	},
-	TelescopeQueue: {
-		id: 'TelescopeQueue',
-		text: 'Telescope Queue',
-		path: 'admin/TelescopeQueue',
-		icon: 'Queue',
-
-	},
-	Payments: {
-		id: 'Payments',
-		text: 'Payments',
-		path: 'admin/Payments',
-		icon: 'Payments',
-
-	},
+	
+	
 };
-export const projectPagesMenu = {
+
+
+
+
+
+export const stockkeeperPagesMenu = {
 	dashboard: {
 		id: 'dashboard',
 		text: 'Dashboard',
-		path: 'projectmanager/dashboard',
+		path: 'stock-keeper/dashboard',
 		icon: 'Dashboard',
 		subMenu: null,
 	},
-	Team: {
-		id: 'teams',
-		text: 'Teams',
-		path: 'projectmanager/team',
-		icon: 'People',
+	stock: {
+		id: 'stock',
+		text: 'Stock Management',
+		path: 'stock-keeper/stock-management',
+		icon: 'Article',
 		subMenu: null,
 	},
-	Project: {
-		id: 'project',
-		text: 'Project',
-		path: 'projectmanager/project',
-		icon: 'DonutSmall',
+	// stockout: {
+	// 	id: 'stock',
+	// 	text: 'Stock out Management',
+	// 	path: 'stock-keeper/stock-out-management',
+	// 	icon: 'Article',
+	// 	subMenu: null,
+	// },
+	stockout: {
+		id: 'stockout',
+		text: 'Transaction History',
+		path: 'stock-keeper/stock-out-management',
+		icon: 'CallMissedOutgoing',
 		subMenu: null,
 	},
-	Skills: {
-		id: 'skills',
-		text: 'Skills',
-		path: 'projectmanager/skills',
-		icon: 'People',
+	
+	item: {
+		id: 'item',
+		text: 'Lot Management',
+		path: 'stock-keeper/lot-management',
+		icon: 'AssignmentTurnedIn',
+		subMenu: null,
+	},
+	
+	
+	singlePages: {
+		id: 'singlePages',
+		text: 'Settings',
+		path: 'single-pages',
+		icon: 'Settings',
+		subMenu: {
+			category: {
+				id: 'category',
+				text: 'Category',
+				path: 'stock-keeper/category',
+				icon: 'Category',
+				subMenu: null,
+			},
+			QR: {
+				id: 'category',
+				text: 'QR Code',
+				path: 'stock-keeper/qr-code',
+				icon: 'QrCode',
+				subMenu: null,
+			},
+			
+		},
+	},
+	
+
+	
+	
+};
+
+export const supperaddminmenu = {
+	dashboard: {
+		id: 'dashboard',
+		text: 'Dashboard',
+		path: 'super-admin/dashboard',
+		icon: 'Dashboard',
+		subMenu: null,
+	},
+	user: {
+		id: 'seller',
+		text: 'User Management',
+		path: 'super-admin/user-management',
+		icon: 'Groups',
+		subMenu: null,
+	},
+	service: {
+		id: 'seller',
+		text: 'Service Management',
+		path: 'super-admin/service',
+		icon: 'Circle',
 		subMenu: null,
 	},
 };
+
+export const officemenu = {
+	// dashboard: {
+	// 	id: 'dashboard',
+	// 	text: 'Dashboard',
+	// 	path: 'production-coordinator/dashboard',
+	// 	icon: 'Dashboard',
+	// 	subMenu: null,
+	// },
+	seller: {
+		id: 'seller',
+		text: 'Job Management',
+		path: 'production-coordinator/job-management',
+		icon: 'Groups',
+		subMenu: null,
+	},
+};
+export const viewmenu = {
+	dashboard: {
+		id: 'dashboard',
+		text: 'Dashboard',
+		path: 'viewer/dashboard',
+		icon: 'Dashboard',
+		subMenu: null,
+	},
+	category: {
+		id: 'category',
+		text: 'Category',
+		path: 'viewer/category',
+		icon: 'Category',
+		subMenu: null,
+	},
+	seller: {
+		id: 'seller',
+		text: 'Job History',
+		path: 'viewer/job-view',
+		icon: 'Groups',
+		subMenu: null,
+	},
+	item: {
+		id: 'item',
+		text: 'Lot History',
+		path: 'viewer/lot-history',
+		icon: 'AssignmentTurnedIn',
+		subMenu: null,
+	},
+	stockout: {
+		id: 'restore',
+		text: 'suppliers',
+		path: 'viewer/supplier-history',
+		icon: 'SupervisedUserCircle',
+		subMenu: null,
+	},
+	transaction: {
+		id: 'stockout',
+		text: 'Transaction History',
+		path: 'viewer/transaction-history',
+		icon: 'CallMissedOutgoing',
+		subMenu: null,
+	},
+	user: {
+		id: 'user',
+		text: 'Users',
+		path: 'viewer/users',
+		icon: 'SupervisedUserCircle',
+		subMenu: null,
+	},
+	action: {
+		id: 'user',
+		text: 'User Action ',
+		path: 'viewer/user-action',
+		icon: 'SupervisedUserCircle',
+		subMenu: null,
+	},
+
+};
+
 
 export const logoutmenu = {
 	dashboard: {
 		id: 'logout',
 		text: 'Logout',
-		path: '/',
+		path: 'v',
 		icon: 'Logout',
 		subMenu: null,
 	},

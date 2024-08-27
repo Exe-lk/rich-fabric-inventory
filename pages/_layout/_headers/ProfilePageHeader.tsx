@@ -6,6 +6,7 @@ import CommonHeaderRight from './CommonHeaderRight';
 
 const ProfilePageHeader = () => {
 	return (
+		//update ui
 		<Header>
 			<HeaderLeft>
 				<div className='col d-flex align-items-center'>
