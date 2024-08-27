@@ -328,7 +328,7 @@ export const logoutmenu = {
 	dashboard: {
 		id: 'logout',
 		text: 'Logout',
-		path: 'v',
+		path: '/',
 		icon: 'Logout',
 		subMenu: null,
 	},
