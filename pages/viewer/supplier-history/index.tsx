@@ -13,8 +13,7 @@ import Input from '../../../components/bootstrap/forms/Input';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody, CardTitle } from '../../../components/bootstrap/Card';
-import SellerAddModal from '../../../components/custom/SellerAddModal';
-import SellerEditModal from '../../../components/custom/SellerEditModal';
+
 import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 import { firestore } from '../../../firebaseConfig';
 import Dropdown, { DropdownToggle, DropdownMenu } from '../../../components/bootstrap/Dropdown';
@@ -141,8 +140,7 @@ const Index: NextPage = () => {
 				</div>
 			</Page>
 			{/* Add Seller modal */}
-			<SellerAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
-			<SellerEditModal setIsOpen={setEditModalStatus} isOpen={editModalStatus} id={id} />
+
 		</PageWrapper>
 	);
 };
