@@ -13,15 +13,15 @@ import Input from '../../../components/bootstrap/forms/Input';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody, CardTitle } from '../../../components/bootstrap/Card';
-import SellerAddModal from '../../../components/custom/SellerAddModal';
-import SellerEditModal from '../../../components/custom/SellerEditModal';
+import CashierAddModal from '../../../components/custom/CashierAddModal';
+import CashierEditModal from '../../../components/custom/CashierEditModal';
 import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 import { firestore } from '../../../firebaseConfig';
 import Dropdown, { DropdownToggle, DropdownMenu } from '../../../components/bootstrap/Dropdown';
 import { getColorNameWithIndex } from '../../../common/data/enumColors';
 import { getFirstLetter } from '../../../helpers/helpers';
 import Swal from 'sweetalert2';
-import SellerDeleteModal from '../../../components/custom/SellerDeleteModal';
+import CashierDeleteModal from '../../../components/custom/CashierDeleteModal';
 // Define interfaces for Seller
 interface Seller {
 	cid: string;
@@ -122,7 +122,7 @@ const Index: NextPage = () => {
 						color='success'
 						isLight
 						onClick={() => setAddModalStatus(true)}>
-						Add Seller
+						Add Cashier
 					</Button>
 				</SubHeaderRight>
 			</SubHeader>
@@ -133,7 +133,7 @@ const Index: NextPage = () => {
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
 								<div className='flex-grow-1 text-center text-info'>
-									Manage Supplier
+									Manage Cashier
 								</div>
 								<Button
 									icon='UploadFile'
@@ -146,38 +146,22 @@ const Index: NextPage = () => {
 								<table className='table table-bordered border-primary table-modern table-hover'>
 									<thead>
 										<tr>
-											<th>Seller name</th>
-											<th>Company name</th>
-											<th>Company email</th>
+											<th>Cashier name</th>
+										
+											<th>E-mail</th>
 											<th>Phone number</th>
-											<th>Seller email</th>
-											<th>Product</th>
+											
 											<th></th>
 										</tr>
 									</thead>
 									<tbody>
 										<tr>
 											<td>malinka</td>
-											<td>ABC</td>
+											
 											<td>abc@gmail.com</td>
 											<td>0778965412</td>
-											<td>malinka@gmail.com</td>
-											<td>
-												<Dropdown>
-													<DropdownToggle hasIcon={false}>
-														<Button icon='List' color='primary'>
-															View Products
-														</Button>
-													</DropdownToggle>
-													<DropdownMenu
-														isAlignmentEnd
-														size='md'
-														className='ps-4'>
-														<div>abc</div>
-														<div>efg</div>
-													</DropdownMenu>
-												</Dropdown>
-											</td>
+											
+											
 											<td>
 												<Button
 													icon='Edit'
@@ -197,26 +181,11 @@ const Index: NextPage = () => {
 										</tr>
 										<tr>
 											<td>malinka</td>
-											<td>ABC</td>
+											
 											<td>abc@gmail.com</td>
 											<td>0778965412</td>
-											<td>malinka@gmail.com</td>
-											<td>
-												<Dropdown>
-													<DropdownToggle hasIcon={false}>
-														<Button icon='List' color='primary'>
-															View Products
-														</Button>
-													</DropdownToggle>
-													<DropdownMenu
-														isAlignmentEnd
-														size='md'
-														className='ps-4'>
-														<div>abc</div>
-														<div>efg</div>
-													</DropdownMenu>
-												</Dropdown>
-											</td>
+										
+											
 											<td>
 												<Button
 													icon='Edit'
@@ -248,9 +217,9 @@ const Index: NextPage = () => {
 				</div>
 			</Page>
 			{/* Add Seller modal */}
-			<SellerAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
-			<SellerEditModal setIsOpen={setEditModalStatus} isOpen={editModalStatus} id={id} />
-			<SellerDeleteModal setIsOpen={setDeleteModalStatus} isOpen={deleteModalStatus} id='' />
+			<CashierAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
+			<CashierEditModal setIsOpen={setEditModalStatus} isOpen={editModalStatus} id={id} />
+			<CashierDeleteModal setIsOpen={setDeleteModalStatus} isOpen={deleteModalStatus} id='' />
 		</PageWrapper>
 	);
 };

@@ -194,7 +194,7 @@ const Index: NextPage = () => {
 						color='success'
 						isLight
 						onClick={() => setAddModalStatus(true)}>
-						New User
+						New Coustomer
 					</Button>
 				</SubHeaderRight>
 			</SubHeader>
@@ -205,7 +205,7 @@ const Index: NextPage = () => {
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
 								<div className='flex-grow-1 text-center text-info'>
-									User Management
+								Coustomer Management
 								</div>
 							</CardTitle>
 							<CardBody isScrollable className='table-responsive'>
@@ -213,7 +213,7 @@ const Index: NextPage = () => {
 									<thead>
 										<tr>
 											<th>User</th>
-											<th>Position</th>
+											
 											<th>Email</th>
 											<th>Mobile number</th>
 											<th></th>
@@ -222,7 +222,7 @@ const Index: NextPage = () => {
 									<tbody>
 										<tr>
 											<td>Kalpa Chamathkara</td>
-											<td>Production Codinater</td>
+											
 											<td>kalpa@gmail.com</td>
 											<td>0772369745</td>
 											<td>
@@ -246,7 +246,7 @@ const Index: NextPage = () => {
 										</tr>
 										<tr>
 											<td>Ravidu Idamalgoda</td>
-											<td>Admin</td>
+										
 											<td>ravidu@gmail.com</td>
 											<td>0772369745</td>
 											<td>

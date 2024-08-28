@@ -69,7 +69,7 @@ const UserAddModal: FC<UserAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 		initialValues: {
 			image: '',
 			name: '',
-			position: '',
+		
 			email: '',
 			password: '',
 			mobile: '',
@@ -88,9 +88,7 @@ const UserAddModal: FC<UserAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 				pin_number?: string;
 				NIC?:string;
 			} = {};
-			if (!values.position) {
-				errors.position = 'Required';
-			}
+			
 			if (!values.name) {
 				errors.name = 'Required';
 			}
@@ -160,7 +158,7 @@ const UserAddModal: FC<UserAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 	return (
 		<Modal isOpen={isOpen} setIsOpen={setIsOpen} size='xl' titleId={id}>
 			<ModalHeader setIsOpen={setIsOpen} className='p-4'>
-				<ModalTitle id=''>{'New user'}</ModalTitle>
+				<ModalTitle id=''>{'New Coustomer'}</ModalTitle>
 			</ModalHeader>
 			<ModalBody className='px-4'>
 				<div className='row g-4'>
@@ -175,24 +173,7 @@ const UserAddModal: FC<UserAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<FormGroup id='position' label='Position' className='col-md-6'>
 					
-						<Select
-							ariaLabel='Default select example'
-						
-							onChange={formik.handleChange}
-							value={formik.values.position}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							isTouched={formik.touched.position}
-							invalidFeedback={formik.errors.position}>
-							{/* <Option value={'Admin'}>Admin</Option> */}
-							<Option value={'Stock keeper'}>Stock keeper</Option>
-							<Option value={'Data entry operator'}>Production Coordinator</Option>
-							{/* <Option value={'Accountant'}>Accountant</Option>
-							<Option value={'Cashier'}>Cashier</Option> */}
-						</Select>
-					</FormGroup>
 					<FormGroup id='email' label='Email' className='col-md-6'>
 						<Input
 							onChange={formik.handleChange}

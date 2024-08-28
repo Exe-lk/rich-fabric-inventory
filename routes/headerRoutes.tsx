@@ -1,7 +1,7 @@
 import React from 'react';
 import AdminHeader from '../pages/_layout/_headers/AdminHeader';
 import OfficeHeader from '../pages/_layout/_headers/OfficeHeader';
-import StockHeader from '../pages/_layout/_headers/StockHeader';
+import CashierHeader from '../pages/_layout/_headers/CashierHeader';
 import ViewHeader from '../pages/_layout/_headers/ViewHeader';
 
 const headers = [
@@ -15,8 +15,8 @@ const headers = [
 	},
 
 	{
-		path: `/stock-keeper/*`,
-		element: <StockHeader />,
+		path: `/cashier/*`,
+		element: <CashierHeader />,
 	},
 	{
 		path: `/viewer/*`,
