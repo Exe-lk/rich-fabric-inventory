@@ -56,12 +56,12 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 				<table className='table table-bordered border-primary table-modern table-hover'>
 					<thead>
 						<tr>
-							<th>Seller name</th>
-							<th>Company name</th>
-							<th>Company email</th>
+							<th> Name</th>
+						
+							<th> E-mail</th>
 							<th>Phone number</th>
 
-							<th>Product</th>
+							
 							<th>
 								<Button
 									icon='Delete'
@@ -79,23 +79,11 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					<tbody>
 						<tr>
 							<td>malinka</td>
-							<td>ABC</td>
+							
 							<td>abc@gmail.com</td>
 							<td>0778965412</td>
 
-							<td>
-								<Dropdown>
-									<DropdownToggle hasIcon={false}>
-										<Button icon='List' color='primary'>
-											View Products
-										</Button>
-									</DropdownToggle>
-									<DropdownMenu isAlignmentEnd size='md' className='ps-4'>
-										<div>abc</div>
-										<div>efg</div>
-									</DropdownMenu>
-								</Dropdown>
-							</td>
+							
 							<td>
 								<Button icon='Restore' tag='a' color='info'>
 									{' '}

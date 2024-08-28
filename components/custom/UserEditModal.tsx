@@ -115,7 +115,7 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen }) => {
         initialValues: {
 			image:"",
             name: '',
-            position: '',
+           
             email: '',
             password: '',
             mobile: '',
@@ -125,7 +125,7 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen }) => {
 		validate: (values) => {
 			const errors: {
 				cid?: string;
-                position?: string;
+               
 				image?: string;
 				name?: string;
 				email?: string;
@@ -134,9 +134,7 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen }) => {
                 pin_number?: string;
 				NIC?:string;
 			} = {};
-            if (!user.position) {
-				errors.position = 'Required';
-			}
+           
 			if (!user.NIC) {
 				errors.NIC = 'Required';
 			}
@@ -195,7 +193,7 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen }) => {
     return (
 		<Modal isOpen={isOpen} setIsOpen={setIsOpen} size='xl' titleId={id}>
 			<ModalHeader setIsOpen={setIsOpen} className='p-4'>
-				<ModalTitle id="">{'Edit Stock'}</ModalTitle>
+				<ModalTitle id="">{'Edit Coustomer'}</ModalTitle>
 			</ModalHeader>
 			<ModalBody className='px-4'>
 				<div className='row g-4'>
@@ -210,24 +208,7 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<FormGroup id='position' label='Position'onChange={formik.handleChange} className='col-md-6'>
 					
-					<Select
-						ariaLabel='Default select example'
-					
-						onChange={(e: any) => { user.position = e.target.value }}
-						value={user?.position}
-						onBlur={formik.handleBlur}
-						isValid={formik.isValid}
-						isTouched={formik.touched.position}
-						invalidFeedback={formik.errors.position}>
-						{/* <Option value={'Admin'}>Admin</Option> */}
-						<Option value={'Stock keeper'}>Stock keeper</Option>
-						<Option value={'Data entry operator'}>Production Coordinator</Option>
-						{/* <Option value={'Accountant'}>Accountant</Option> */}
-						{/* <Option value={'Cashier'}>Cashier</Option> */}
-					</Select>
-				</FormGroup>
                     <FormGroup id='email' label='Email' onChange={formik.handleChange} className='col-md-6'>
 						<Input
 							onChange={(e: any) => { user.email = e.target.value }}

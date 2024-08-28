@@ -55,25 +55,12 @@ export const addminPagesMenu = {
 	},
 	seller: {
 		id: 'lot',
-		text: 'Suppler Management',
-		path: 'admin/seller-management',
+		text: 'Cashier Management',
+		path: 'admin/cashier-management',
 		icon: 'SelectAll',
 		subMenu: null,
 	},
-	user: {
-		id: 'user',
-		text: 'User Management',
-		path: 'admin/user-management',
-		icon: 'SupervisedUserCircle',
-		subMenu: null,
-	},
-	action: {
-		id: 'user',
-		text: 'User Action ',
-		path: 'admin/user-action',
-		icon: 'SupervisedUserCircle',
-		subMenu: null,
-	},
+	
 	
 	singlePages: {
 		id: 'singlePages',
@@ -159,37 +146,44 @@ export const stockkeeperPagesMenu = {
 	dashboard: {
 		id: 'dashboard',
 		text: 'Dashboard',
-		path: 'stock-keeper/dashboard',
+		path: 'cashier/dashboard',
 		icon: 'Dashboard',
 		subMenu: null,
 	},
 	stock: {
 		id: 'stock',
 		text: 'Stock Management',
-		path: 'stock-keeper/stock-management',
+		path: 'cashier/stock-management',
 		icon: 'Article',
 		subMenu: null,
 	},
-	// stockout: {
-	// 	id: 'stock',
-	// 	text: 'Stock out Management',
-	// 	path: 'stock-keeper/stock-out-management',
-	// 	icon: 'Article',
-	// 	subMenu: null,
-	// },
+	category: {
+		id: 'category',
+		text: 'Category',
+		path: 'cashier/category',
+		icon: 'Category',
+		subMenu: null,
+	},
 	stockout: {
 		id: 'stockout',
 		text: 'Transaction History',
-		path: 'stock-keeper/stock-out-management',
+		path: 'cashier/transaction-management',
 		icon: 'CallMissedOutgoing',
 		subMenu: null,
 	},
 	
-	item: {
-		id: 'item',
+	lot: {
+		id: 'Lot',
 		text: 'Lot Management',
-		path: 'stock-keeper/lot-management',
+		path: 'cashier/lot-management',
 		icon: 'AssignmentTurnedIn',
+		subMenu: null,
+	},
+	Coustomer: {
+		id: 'lot',
+		text: 'Coustomer Management',
+		path: 'cashier/coustomer-management',
+		icon: 'PermIdentity',
 		subMenu: null,
 	},
 	
@@ -200,17 +194,11 @@ export const stockkeeperPagesMenu = {
 		path: 'single-pages',
 		icon: 'Settings',
 		subMenu: {
-			category: {
-				id: 'category',
-				text: 'Category',
-				path: 'stock-keeper/category',
-				icon: 'Category',
-				subMenu: null,
-			},
+			
 			QR: {
 				id: 'category',
 				text: 'QR Code',
-				path: 'stock-keeper/qr-code',
+				path: 'cashier/qr-code',
 				icon: 'QrCode',
 				subMenu: null,
 			},

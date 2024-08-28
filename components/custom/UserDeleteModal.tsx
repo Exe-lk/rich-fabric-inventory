@@ -57,7 +57,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					<thead>
 						<tr>
 							<th>User</th>
-							<th>Position</th>
+							
 							<th>Email</th>
 							<th>Mobile number</th>
 
@@ -78,7 +78,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					<tbody>
 						<tr>
 							<td>malinka</td>
-							<td>Admin</td>
+							
 							<td>abc@gmail.com</td>
 							<td>0778965412</td>
 
@@ -102,7 +102,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 						</tr>
 						<tr>
 							<td>thilina</td>
-							<td>atock keeper</td>
+							
 							<td>abc@gmail.com</td>
 							<td>0778965412</td>
 

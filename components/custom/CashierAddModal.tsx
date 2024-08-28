@@ -169,7 +169,7 @@ const SellerAddModal: FC<SellerAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 	return (
 		<Modal isOpen={isOpen} setIsOpen={setIsOpen} size='xl' titleId={id}>
 			<ModalHeader setIsOpen={setIsOpen} className='p-4'>
-				<ModalTitle id=''>{'New Seller'}</ModalTitle>
+				<ModalTitle id=''>{'New Cashier'}</ModalTitle>
 			</ModalHeader>
 			<ModalBody className='px-4'>
 				<div className='row g-4'>
@@ -206,98 +206,9 @@ const SellerAddModal: FC<SellerAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<FormGroup id='company_name' label='Company name' className='col-md-6'>
-						<Input
-							onChange={formik.handleChange}
-							value={formik.values.company_name}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							isTouched={formik.touched.company_name}
-							invalidFeedback={formik.errors.company_name}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-					<FormGroup id='company_email' label='company email' className='col-md-6'>
-						<Input
-							onChange={formik.handleChange}
-							value={formik.values.company_email}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							isTouched={formik.touched.company_email}
-							invalidFeedback={formik.errors.company_email}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-
-					{formik.values.product.map((product, index) => (
-						<FormGroup
-							key={index}
-							id={`product-${index}`}
-							label={`Product ${index + 1}`}
-							className='col-md-6'>
-							<div className='d-flex align-items-center'>
-								<Select
-									ariaLabel='Select Product'
-									value={product.category} // Use category value
-									onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
-										const newProducts = [...formik.values.product];
-										newProducts[index] = {
-											...newProducts[index],
-											category: event.target.value,
-										}; // Update category
-										formik.setFieldValue('product', newProducts);
-									}}>
-									<Option value='' disabled>
-										Select Product
-									</Option>
-									{categories.map((category) => (
-										<Option
-											key={category.categoryId}
-											value={category.categoryname}>
-											{category.categoryname}
-										</Option>
-									))}
-								</Select>
-								{product.category && ( // Show item dropdown only when category is selected
-									<Select
-										ariaLabel={`Select item for ${product.category}`} // Use selected category
-										value={product.name} // Use item name value
-										onChange={(event: React.ChangeEvent<HTMLSelectElement>) => {
-											const newProducts = [...formik.values.product];
-											newProducts[index] = {
-												...newProducts[index],
-												name: event.target.value,
-											}; // Update item name
-											formik.setFieldValue('product', newProducts);
-										}}>
-										<Option value='' disabled>
-											Select Item
-										</Option>
-										{items
-											.filter((item) => item.category === product.category) // Filter items based on selected category
-											.map((item) => (
-												<Option key={item.itemId} value={item.name}>
-													{item.name}
-												</Option>
-											))}
-									</Select>
-								)}
-								<button
-									type='button'
-									onClick={() => removeProductField(index)}
-									className='btn btn-outline-danger ms-2'>
-									<Icon icon='Delete' />
-								</button>
-							</div>
-						</FormGroup>
-					))}
-
+					
 					{/* Button to add new product input field */}
-					<div className='col-md-12'>
-						<Button color='info' onClick={addProductField}>
-							Add Product
-						</Button>
-					</div>
+					
 				</div>
 			</ModalBody>
 			<ModalFooter className='px-4 pb-4'>
