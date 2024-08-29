@@ -150,11 +150,18 @@ export const stockkeeperPagesMenu = {
 		icon: 'Dashboard',
 		subMenu: null,
 	},
-	stock: {
+	stockOut: {
 		id: 'stock',
-		text: 'Stock Management',
-		path: 'cashier/stock-management',
+		text: 'Stock Out ',
+		path: 'cashier/stock-out-management',
 		icon: 'Article',
+		subMenu: null,
+	},
+	stockIn: {
+		id: 'Lot',
+		text: ' Stock In',
+		path: 'cashier/stock-in-management',
+		icon: 'AssignmentTurnedIn',
 		subMenu: null,
 	},
 	category: {
@@ -172,13 +179,7 @@ export const stockkeeperPagesMenu = {
 		subMenu: null,
 	},
 	
-	lot: {
-		id: 'Lot',
-		text: 'Lot Management',
-		path: 'cashier/lot-management',
-		icon: 'AssignmentTurnedIn',
-		subMenu: null,
-	},
+	
 	Coustomer: {
 		id: 'lot',
 		text: 'Coustomer Management',

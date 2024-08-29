@@ -21,7 +21,9 @@ import Input from '../../../components/bootstrap/forms/Input';
 import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
 import Carousel from '../../../components/bootstrap/Carousel';
 import CarouselSlide from '../../../components/bootstrap/CarouselSlide';
-
+import FormGroup from '../../../components/bootstrap/forms/FormGroup';
+import { useFormik } from 'formik';
+import { number } from 'prop-types';
 
 function index() {
 	const [toggleRightPanel, setToggleRightPanel] = useState(false);
@@ -34,12 +36,19 @@ function index() {
 	const [casher, setCasher] = useState<any>({});
 	const [payment, setPayment] = useState(true);
 	const [activeComponent, setActiveComponent] = useState<'additem' | 'edit'>('additem');
+	const [selectedOption, setSelectedOption] = useState<string>('');
+	const [userName, setUserName] = useState<string>(''); // State for name input
+	const [contactNumber, setContactNumber] = useState<string>(''); // State for contact number input
+	const [location, setLocation] = useState<string>(''); // State for location input
 	const currentDate = new Date().toLocaleDateString('en-CA');
 	const currentTime = new Date().toLocaleTimeString('en-GB', {
 		hour: '2-digit',
 		minute: '2-digit',
 	});
 
+	const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setSelectedOption(event.target.value);
+	};
 
 	const addbill = async () => {
 		if (
@@ -112,7 +121,7 @@ function index() {
 								.then(() => {
 									Swal.fire(
 										'Added!',
-										
+
 										'bill has been add successfully.',
 										'success',
 									);
@@ -149,7 +158,7 @@ function index() {
 		} else if (event.ctrlKey && event.key.toLowerCase() === 'p') {
 			addbill();
 			event.preventDefault(); // Prevent default browser behavior
-		}else if (event.key === 'Shift') {
+		} else if (event.key === 'Shift') {
 			// Check if the focus is on the input fields
 			if (
 				document.activeElement === customerNameInputRef.current ||
@@ -202,48 +211,71 @@ function index() {
 			setCasher(jsonObject);
 		}
 	}, []);
+
+	const formik = useFormik({
+		initialValues: {
+			width: '',
+			quantity: '',
+			packtype: '',
+			remark: '',
+			name: '',
+			email: '',
+			mobile: '',
+			vehiclenumber: '',
+			status: true,
+		},
+		validate: (values) => {
+			const errors: {
+				width?: string;
+				quantity?: string;
+				packtype?: string;
+				remark?: string;
+			} = {};
+			if (!values.width) {
+				errors.width = 'Required';
+			}
+			if (!values.quantity) {
+				errors.quantity = 'Required';
+			}
+			if (!values.packtype) {
+				errors.packtype = 'Required';
+			}
+			if (!values.remark) {
+				errors.remark = 'Required';
+			}
+			return errors;
+		},
+		onSubmit: async (values) => {
+			try {
+			} catch (error) {
+				console.error('Error during handleUpload: ', error);
+				alert('An error occurred during file upload. Please try again later.');
+			}
+		},
+	});
+
 	// Define TypeScript interfaces for Category and Item
-interface Category {
-	cid: string;
-	categoryname: string;
-}
+	interface Category {
+		cid: string;
+		categoryname: string;
+	}
 	const cdata = [
 		{ status: true, categoryname: 'Main', cid: '0bc5HUELspDzvrUdt5u6' },
 
-
 		{ status: true, categoryname: 'Embroider', cid: 'LKcV57ThRnHtE9bxBHMb' },
-
-
-		{ status: true, categoryname: 'Painting', cid: 'La1K7XLguIsFPZN19vp4' },
-
-
-		{ categoryname: 'clothes', cid: 'NowdRVU0K7hDZiMRkksn', status: true },
-
-
-		{ categoryname: 'other', status: true, cid: 'irufyXKsbSNPk3z8ziC8' },
-
-
-	]
+	];
 	const [category, setCategory] = useState<Category[]>(cdata);
 	return (
 		<PageWrapper className=''>
 			<div>
-		
 				<div className='mt-5'>
-							<Button
-								className='btn btn-outline-warning '
-								>
-								All
-							</Button>
-							{category.map((category, index) => (
-								<Button
-									key={index}
-									className='btn btn-outline-warning'
-									>
-									{category.categoryname}
-								</Button>
-							))}
-						</div>
+					<Button className='btn btn-outline-warning '>All</Button>
+					{category.map((category, index) => (
+						<Button key={index} className='btn btn-outline-warning'>
+							{category.categoryname}
+						</Button>
+					))}
+				</div>
 			</div>
 			<div className='row'>
 				<div className='col-4  mb-sm-0'>
@@ -252,7 +284,6 @@ interface Category {
 						setOrderedItems={setOrderedItems}
 						isActive={activeComponent === 'additem'}
 						setActiveComponent={setActiveComponent}
-						
 					/>{' '}
 				</div>
 				<div className='col-4 '>
@@ -264,10 +295,132 @@ interface Category {
 					/>{' '}
 				</div>
 				<div className='col-4 mt-4 '>
-					
 					<Card stretch className=' p-4' style={{ height: '75vh' }}>
 						<CardBody isScrollable>
+							<FormGroup id='membershipDate' className='col-md-12'>
+								<ChecksGroup isInline>
+									<Checks
+										type='radio'
+										id='customer'
+										label='Customer'
+										name='type'
+										value='Customer'
+										onChange={handleOptionChange}
+										checked={selectedOption}
+									/>
+									<Checks
+										type='radio'
+										id='colour'
+										label='Dye Plant'
+										name='type'
+										value='Colour'
+										onChange={handleOptionChange}
+										checked={selectedOption}
+									/>
+								</ChecksGroup>
+							</FormGroup>
+
+							<div className='row g-4 mt-1'>
+								<FormGroup id='width' label='Width' className='col-md-12'>
+									<Input
+										onChange={formik.handleChange}
+										value={formik.values.width}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										isTouched={formik.touched.width}
+										invalidFeedback={formik.errors.width}
+										validFeedback='Looks good!'
+									/>
+								</FormGroup>
+								<FormGroup id='quantity' label='Quantity' className='col-md-12'>
+									<Input
+										onChange={formik.handleChange}
+										value={formik.values.quantity}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										isTouched={formik.touched.quantity}
+										invalidFeedback={formik.errors.quantity}
+										validFeedback='Looks good!'
+									/>
+								</FormGroup>
+								<FormGroup id='packtype' label='Pack Type' className='col-md-12'>
+									<Input
+										onChange={formik.handleChange}
+										value={formik.values.packtype}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										isTouched={formik.touched.packtype}
+										invalidFeedback={formik.errors.packtype}
+										validFeedback='Looks good!'
+									/>
+								</FormGroup>
+								<FormGroup id='remark' label='Remark' className='col-md-12'>
+									<Input
+										onChange={formik.handleChange}
+										value={formik.values.remark}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										isTouched={formik.touched.remark}
+										invalidFeedback={formik.errors.remark}
+										validFeedback='Looks good!'
+									/>
+								</FormGroup>
 							
+
+							{selectedOption === 'Colour' && (
+								<div>
+									<FormGroup id='vehiclenumber' label='Vehicle Number' className='col-md-12'>
+									<Input
+										onChange={formik.handleChange}
+										value={formik.values.vehiclenumber}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										isTouched={formik.touched.vehiclenumber}
+										invalidFeedback={formik.errors.vehiclenumber}
+										validFeedback='Looks good!'
+									/>
+									</FormGroup>
+								</div>
+							)}
+
+							{selectedOption === 'Customer' && (
+								<div>
+								<FormGroup id='name' label='Coustomer Name' className='col-md-12'>
+								<Input
+									onChange={formik.handleChange}
+									value={formik.values.name}
+									onBlur={formik.handleBlur}
+									isValid={formik.isValid}
+									isTouched={formik.touched.name}
+									invalidFeedback={formik.errors.name}
+									validFeedback='Looks good!'
+								/>
+								</FormGroup>
+								<FormGroup id='email' label='E-mail' className='col-md-12'>
+								<Input
+									onChange={formik.handleChange}
+									value={formik.values.email}
+									onBlur={formik.handleBlur}
+									isValid={formik.isValid}
+									isTouched={formik.touched.email}
+									invalidFeedback={formik.errors.email}
+									validFeedback='Looks good!'
+								/>
+								</FormGroup>
+								<FormGroup id='mobile' label='Contact No.' className='col-md-12'>
+								<Input
+									onChange={formik.handleChange}
+									value={formik.values.mobile}
+									onBlur={formik.handleBlur}
+									isValid={formik.isValid}
+									isTouched={formik.touched.mobile}
+									invalidFeedback={formik.errors.mobile}
+									validFeedback='Looks good!'
+								/>
+								</FormGroup>
+							</div>
+							)}
+							</div>
 							<Button
 								className='btn btn-success w-100 mt-3 fs-4 p-3 mb-3'
 								onClick={addbill}>
