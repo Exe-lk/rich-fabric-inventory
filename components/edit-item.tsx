@@ -153,52 +153,7 @@ const Index: React.FC<KeyboardProps>  = ({ orderedItems, setOrderedItems, isActi
 									</span>
 								</div>
 							</div>
-							<div>
-							<FormGroup id='membershipDate' className='col-md-12'>
-							
-							<ChecksGroup isInline
-							// isValid={formik.isValid}
-							// isTouched={}
-							// invalidFeedback={formik.errors.type}
-							>
-
-								<Checks
-									type='radio'
-									key={"full-time"}
-									id={"full-time"}
-									label={"Return"}
-									name='type'
-									value={"full-time"}
-								// onChange={formik.handleChange}
-								checked={"full-time"}
-
-								/>
-								<Checks
-									type='radio'
-									key={"full-time"}
-									id={"full-time"}
-									label={"Restore"}
-									name='type'
-									value={"full-time"}
-								// onChange={formik.handleChange}
-								// checked={formik.values.type}
-
-								/>
-								<Checks
-								
-									type='radio'
-									key={"part-time"}
-									id={"part-time"}
-									label={"stock out"}
-									name='type'
-									value={"part-time"}
-								// onChange={formik.handleChange}
-								// checked={formik.values.type}
-
-								/>
-							</ChecksGroup>
-						</FormGroup>
-							</div>
+						
 						</Card>
 					))}
 				</CardBody>

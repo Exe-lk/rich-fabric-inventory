@@ -38,7 +38,6 @@ interface KeyboardProps {
 	setOrderedItems: React.Dispatch<React.SetStateAction<Item[]>>;
 	isActive: boolean;
 	setActiveComponent: React.Dispatch<React.SetStateAction<'additem' | 'edit'>>;
-
 }
 
 const Index: React.FC<KeyboardProps> = ({
@@ -46,48 +45,40 @@ const Index: React.FC<KeyboardProps> = ({
 	setOrderedItems,
 	isActive,
 	setActiveComponent,
-
 }) => {
-
 	const cdata = [
 		{ status: true, categoryname: 'Main', cid: '0bc5HUELspDzvrUdt5u6' },
 
-
 		{ status: true, categoryname: 'Embroider', cid: 'LKcV57ThRnHtE9bxBHMb' },
-
 
 		{ status: true, categoryname: 'Painting', cid: 'La1K7XLguIsFPZN19vp4' },
 
-
 		{ categoryname: 'clothes', cid: 'NowdRVU0K7hDZiMRkksn', status: true },
 
-
 		{ categoryname: 'other', status: true, cid: 'irufyXKsbSNPk3z8ziC8' },
-
-
-	]
+	];
 	const idata = [
 		{
 			price: 1000,
-			cid: "12356",
+			cid: '12356',
 			status: true,
-			image: "",
+			image: '',
 			quentity: 0,
-			name: "button",
-			category: "clothes",
-			reorderlevel: "1500"
+			name: 'button',
+			category: 'clothes',
+			reorderlevel: '1500',
 		},
 		{
-			category: "clothes",
+			category: 'clothes',
 			status: false,
 			quentity: 0,
-			image: "",
-			cid: "12358",
+			image: '',
+			cid: '12358',
 			reorderlevel: 3,
-			name: "fabric",
-			price: 10
-		}
-	]
+			name: 'fabric',
+			price: 10,
+		},
+	];
 	// Custom hook to manage dark mode
 	const { darkModeStatus } = useDarkMode();
 
@@ -98,8 +89,8 @@ const Index: React.FC<KeyboardProps> = ({
 	const [input, setInput] = useState<string>('');
 	const keyboard = useRef<any>(null);
 	const [showPopup, setShowPopup] = useState<boolean>(false);
-	const [popupInput, setPopupInput] = useState<any>("");
-	const [popupInput1, setPopupInput1] = useState<any>("");
+	const [popupInput, setPopupInput] = useState<any>('');
+	const [popupInput1, setPopupInput1] = useState<any>('');
 	const [selectedItem, setSelectedItem] = useState<Item | null>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const popupInputRef = useRef<HTMLInputElement>(null);
@@ -186,7 +177,7 @@ const Index: React.FC<KeyboardProps> = ({
 	// Handle OK button click in the popup
 	const handlePopupOk = async () => {
 		if (popupInput <= 0) {
-			return
+			return;
 		}
 		if (selectedItem) {
 			console.log(popupInput);
@@ -202,7 +193,7 @@ const Index: React.FC<KeyboardProps> = ({
 					return [...prevItems, updatedItem];
 				}
 			});
-			setPopupInput("");
+			setPopupInput('');
 			console.log('Selected item data:', orderedItems);
 		}
 		setShowPopup(false);
@@ -291,9 +282,8 @@ const Index: React.FC<KeyboardProps> = ({
 					</Button>
 				))}
 			</div> */}
-		
-			<div>
 
+			<div>
 				{/* <Carousel
 					isHoverPause
 					isRide
@@ -345,16 +335,6 @@ const Index: React.FC<KeyboardProps> = ({
 					</CarouselSlide>
 
 				</Carousel> */}
-
-
-
-
-
-
-
-
-
-
 			</div>
 			<div>
 				<Card className='mt-4' style={{ height: '40vh' }}>
@@ -495,9 +475,11 @@ const Index: React.FC<KeyboardProps> = ({
 			{showPopup && (
 				<div
 					className='position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-black bg-opacity-50'
-					style={{ zIndex: 1050, }}>
-					<div className='p-4 rounded-4  ' style={{ zIndex: 1051, width:600,backgroundColor:"#1D1F27" }}>
-						<h4 className='mb-4'>Enter a Quantity</h4>
+					style={{ zIndex: 1050 }}>
+					<div
+						className='p-4 rounded-4  '
+						style={{ zIndex: 1051, width: 600, backgroundColor: '#1D1F27' }}>
+						<h4 className='mb-4'>Enter a Quantity(Kg)</h4>
 						<Input
 							type='number'
 							value={popupInput}
@@ -508,64 +490,8 @@ const Index: React.FC<KeyboardProps> = ({
 							className='form-control mb-4 p-2'
 							ref={popupInputRef}
 						/>
-						<h6 className='mb-4'>Job ID</h6>
-						<Input
-							type='number'
-							value={popupInput1}
-							onChange={(e: any) => {
-								setPopupInput1(e.target.value);
-							}}
-							min={1}
-							className='form-control mb-4 p-2'
-							ref={popupInputRef}
-						/>
 
-						<FormGroup id='membershipDate' className='col-md-6'>
-							<Label htmlFor='ChecksGroup'>Type</Label>
-							<ChecksGroup isInline
-							// isValid={formik.isValid}
-							// isTouched={formik.touched.type}
-							// invalidFeedback={formik.errors.type}
-							>
-
-								<Checks
-									type='radio'
-									key={"full-time"}
-									id={"full-time"}
-									label={"Return"}
-									name='type'
-									value={"full-time"}
-								// onChange={formik.handleChange}
-								// checked={formik.values.type}
-
-								/>
-								<Checks
-									type='radio'
-									key={"full-time"}
-									id={"full-time"}
-									label={"Restore"}
-									name='type'
-									value={"full-time"}
-								// onChange={formik.handleChange}
-								// checked={formik.values.type}
-
-								/>
-								<Checks
-
-									type='radio'
-									key={"part-time"}
-									id={"part-time"}
-									label={"stock out"}
-									name='type'
-									value={"part-time"}
-								// onChange={formik.handleChange}
-								// checked={formik.values.type}
-
-								/>
-							</ChecksGroup>
-						</FormGroup>
-
-						<div className='d-flex justify-content-end' >
+						<div className='d-flex justify-content-end'>
 							<button onClick={handlePopupCancel} className='btn btn-danger me-2'>
 								Cancel
 							</button>

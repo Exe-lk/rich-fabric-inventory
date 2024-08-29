@@ -13,6 +13,7 @@ import Swal from 'sweetalert2';
 import Select from '../bootstrap/forms/Select';
 import Option from '../bootstrap/Option';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import Checks, { ChecksGroup } from '../bootstrap/forms/Checks';
 
 interface ItemAddModalProps {
 	id: string;
@@ -39,6 +40,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 	const [isAddingNewFabric, setIsAddingNewFabric] = useState(false);
 	const [isAddingNewGSM, setIsAddingNewGSM] = useState(false);
 	const [isAddingNewKnitType, setIsAddingNewKnitType] = useState(false); //
+	const [selectedOption, setSelectedOption] = useState<string>('');
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
@@ -102,6 +104,10 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 			status: true,
 			category: '',
 			subcategory: '',
+			stockOutId:'',
+			FinishType:'',
+			PackType:'',
+			Remarks:''
 		},
 		validate: (values) => {
 			const errors: Record<string, string> = {};
@@ -151,22 +157,6 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 		},
 	});
 
-	const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-		const selectedCategory = e.target.value;
-		formik.handleChange(e);
-
-		const selectedCategoryData = category.find((cat) => cat.categoryname === selectedCategory);
-		if (selectedCategoryData) {
-			const options = selectedCategoryData.subcategory.map((subcat) => ({
-				value: subcat,
-				label: subcat,
-			}));
-			setSubcategories(options);
-		} else {
-			setSubcategories([]);
-		}
-	};
-
 	const handleResetForm = () => {
 		formik.resetForm();
 		setSelectedImage(null);
@@ -175,56 +165,94 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 		setIsAddingNewGSM(false);
 		setIsAddingNewKnitType(false);
 	};
+	const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+		setSelectedOption(event.target.value);
+	};
 
 	return (
 		<Modal isOpen={isOpen} setIsOpen={setIsOpen} size='xl' titleId={id}>
 			<ModalHeader setIsOpen={setIsOpen} className='p-4'>
-				<ModalTitle id=''>{'New LOT'}</ModalTitle>
+				<ModalTitle id=''>{'Edit Stock'}</ModalTitle>
 			</ModalHeader>
 			<ModalBody className='px-4'>
 				<div className='row g-4'>
-					<FormGroup
-						id='category'
-						label='Category'
-						onChange={formik.handleChange}
-						className='col-md-6'>
-						<Select
-							ariaLabel='Default select example'
-							placeholder='Open this select category'
-							onChange={formik.handleChange}
-							value={formik.values.category}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							isTouched={formik.touched.category}
-							invalidFeedback={formik.errors.category}
-							validFeedback='Looks good!'>
-							<Option value={'dd'}>abc</Option>
-							<Option value={'dd'}>efg</Option>
-							<Option value={'dd'}>xyz</Option>
-							{category.map((item, index) => (
-								<Option value={item.categoryname}>{item.categoryname}</Option>
-							))}
-						</Select>
+					<FormGroup id='membershipDate' className='col-md-12'>
+						<ChecksGroup isInline>
+							<Checks
+								type='radio'
+								id='grayFabric'
+								label='Gray Fabric'
+								name='type'
+								value='grayFabric'
+								onChange={handleOptionChange}
+								checked={selectedOption}
+							/>
+							<Checks
+								type='radio'
+								id='colour'
+								label='Dye Plant'
+								name='type'
+								value='Colour'
+								onChange={handleOptionChange}
+								checked={selectedOption}
+							/>
+						</ChecksGroup>
 					</FormGroup>
-					<FormGroup id='subcategory' label='Sub Category' className='col-md-6'>
-						<Select
-							ariaLabel='Default select example'
-							placeholder='Open this select sub category'
-							onChange={formik.handleChange}
-							value={formik.values.subcategory}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							isTouched={formik.touched.subcategory}
-							invalidFeedback={formik.errors.subcategory}
-							validFeedback='Looks good!'>
-							<Option value={'dd'}>abc</Option>
-							<Option value={'dd'}>efg</Option>
-							<Option value={'dd'}>xyz</Option>
-							{category.map((item, index) => (
-								<Option value={item.categoryname}>{item.categoryname}</Option>
-							))}
-						</Select>
-					</FormGroup>
+
+					{selectedOption === 'Colour' && (
+						<>
+							<FormGroup id='stockOutId' label='Stock Out ID' className='col-md-6'>
+								<Input
+									onChange={formik.handleChange}
+									value={formik.values.stockOutId}
+									onBlur={formik.handleBlur}
+									isValid={formik.isValid}
+									isTouched={formik.touched.stockOutId}
+									invalidFeedback={formik.errors.stockOutId}
+									validFeedback='Looks good!'
+								/>
+							</FormGroup>
+
+							<FormGroup id='color' label='Color' className='col-md-6'>
+								{!isAddingNewColor ? (
+									<Select
+										ariaLabel='Default select example'
+										placeholder='Open this select color'
+										onChange={(e: any) => {
+											if (e.target.value === 'Add new') {
+												setIsAddingNewColor(true); // Switch to input field
+											} else {
+												formik.handleChange(e);
+											}
+										}}
+										value={formik.values.color}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										isTouched={formik.touched.color}
+										invalidFeedback={formik.errors.color}
+										validFeedback='Looks good!'>
+										<Option value='Green'>Green</Option>
+										<Option value='Red'>Red</Option>
+										<Option value='Blue'>Blue</Option>
+										<Option value='Add new'>Add new</Option>
+									</Select>
+								) : (
+									<Input
+										type='text'
+										placeholder='Enter new color'
+										onChange={formik.handleChange}
+										value={formik.values.color}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										isTouched={formik.touched.color}
+										invalidFeedback={formik.errors.color}
+										validFeedback='Looks good!'
+									/>
+								)}
+							</FormGroup>
+						</>
+					)}
+
 					<FormGroup id='code' label='Code' className='col-md-6'>
 						<Input
 							onChange={formik.handleChange}
@@ -250,7 +278,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 					</FormGroup>
 					<FormGroup id='description' label='Description' className='col-md-6'>
 						<Input
-							type='number'
+							
 							onChange={formik.handleChange}
 							value={formik.values.description}
 							onBlur={formik.handleBlur}
@@ -260,88 +288,13 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<FormGroup id='color' label='Color' className='col-md-6'>
-						{!isAddingNewColor ? (
-							<Select
-								ariaLabel='Default select example'
-								placeholder='Open this select color'
-								onChange={(e: any) => {
-									if (e.target.value === 'Add new') {
-										setIsAddingNewColor(true); // Switch to input field
-									} else {
-										formik.handleChange(e);
-									}
-								}}
-								value={formik.values.color}
-								onBlur={formik.handleBlur}
-								isValid={formik.isValid}
-								isTouched={formik.touched.color}
-								invalidFeedback={formik.errors.color}
-								validFeedback='Looks good!'>
-								<Option value='Green'>Green</Option>
-								<Option value='Red'>Red</Option>
-								<Option value='Blue'>Blue</Option>
-								<Option value='Add new'>Add new</Option>
-							</Select>
-						) : (
-							<Input
-								type='text'
-								placeholder='Enter new color'
-								onChange={formik.handleChange}
-								value={formik.values.color}
-								onBlur={formik.handleBlur}
-								isValid={formik.isValid}
-								isTouched={formik.touched.color}
-								invalidFeedback={formik.errors.color}
-								validFeedback='Looks good!'
-							/>
-						)}
-					</FormGroup>
-					<FormGroup id='GRN_number' label='GRN Number' className='col-md-6'>
-						<Input
-							type='number'
-							onChange={formik.handleChange}
-							value={formik.values.GRN_number}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							isTouched={formik.touched.GRN_number}
-							invalidFeedback={formik.errors.GRN_number}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-					<FormGroup id='GRA_number' label='supplier Name' className='col-md-6'>
-						<Select
-							ariaLabel='Default select example'
-							placeholder='Open this select knit type'
-							onChange={formik.handleChange}
-							value={formik.values.gsm}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							isTouched={formik.touched.gsm}
-							invalidFeedback={formik.errors.gsm}
-							validFeedback='Looks good!'>
-							<Option value={'dd'}>abc</Option>
-							<Option value={'dd'}>efg</Option>
-							<Option value={'dd'}>ijk</Option>
-						</Select>
-					</FormGroup>
-					<FormGroup id='GRA_number' label='Order Details' className='col-md-6'>
-						<Input
-							type='text'
-							onChange={formik.handleChange}
-							// value={formik.values.GRA_number}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							isTouched={formik.touched.GRA_number}
-							invalidFeedback={formik.errors.GRA_number}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
+					
+
 					<FormGroup id='GRA_number' label='UOM' className='col-md-6'>
 						<Input
 							type='number'
 							onChange={formik.handleChange}
-							// value={formik.values.GRA_number}
+							value={formik.values.GRA_number}
 							onBlur={formik.handleBlur}
 							isValid={formik.isValid}
 							isTouched={formik.touched.GRA_number}
@@ -349,7 +302,6 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<p>Fabric</p>
 					<FormGroup id='fabric_type' label='Fabric Type' className='col-md-6'>
 						{isAddingNewFabric ? (
 							<Input
@@ -452,54 +404,39 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							</Select>
 						)}
 					</FormGroup>
-
-					<FormGroup id='GRA_number' label='Job ID' className='col-md-6'>
-						<Input
-							type='text'
-							onChange={formik.handleChange}
-							// value={formik.values.GRA_number}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							isTouched={formik.touched.GRA_number}
-							invalidFeedback={formik.errors.GRA_number}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-
-					<FormGroup id='GRA_number' label='Bales' className='col-md-6'>
+					<FormGroup id='FinishType' label='Finish Type' className='col-md-6'>
 						<Input
 							type='number'
 							onChange={formik.handleChange}
-							// value={formik.values.GRA_number}
+							value={formik.values.FinishType}
 							onBlur={formik.handleBlur}
 							isValid={formik.isValid}
-							isTouched={formik.touched.GRA_number}
-							invalidFeedback={formik.errors.GRA_number}
+							isTouched={formik.touched.FinishType}
+							invalidFeedback={formik.errors.FinishType}
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<p>Thread</p>
-					<FormGroup id='GRA_number' label='Yrds per cone' className='col-md-6'>
+					<FormGroup id='PackType' label='PackType' className='col-md-6'>
 						<Input
 							type='number'
 							onChange={formik.handleChange}
-							// value={formik.values.GRA_number}
+							value={formik.values.PackType}
 							onBlur={formik.handleBlur}
 							isValid={formik.isValid}
-							isTouched={formik.touched.GRA_number}
-							invalidFeedback={formik.errors.GRA_number}
+							isTouched={formik.touched.PackType}
+							invalidFeedback={formik.errors.PackType}
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<FormGroup id='GRA_number' label='Qty' className='col-md-6'>
+					<FormGroup id='remark' label='Remark' className='col-md-6'>
 						<Input
 							type='number'
 							onChange={formik.handleChange}
-							// value={formik.values.GRA_number}
+							value={formik.values.Remarks}
 							onBlur={formik.handleBlur}
 							isValid={formik.isValid}
-							isTouched={formik.touched.GRA_number}
-							invalidFeedback={formik.errors.GRA_number}
+							isTouched={formik.touched.Remarks}
+							invalidFeedback={formik.errors.Remarks}
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
@@ -508,8 +445,8 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 			<ModalFooter className='px-4 pb-4'>
 				{/* Save button to submit the form */}
 				<Button color='warning' onClick={handleResetForm}>
-          Reset
-        </Button>
+					Reset
+				</Button>
 				<Button color='info' onClick={formik.handleSubmit}>
 					Save
 				</Button>

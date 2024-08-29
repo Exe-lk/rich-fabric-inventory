@@ -178,7 +178,7 @@ const Index: NextPage = () => {
 						color='success'
 						isLight
 						onClick={() => setAddModalStatus(true)}>
-						New Lot
+						New Stock
 					</Button>
 				</SubHeaderRight>
 			</SubHeader>
@@ -188,7 +188,7 @@ const Index: NextPage = () => {
 						{/* Table for displaying customer data */}
 						<Card stretch>
 						<CardTitle className='d-flex justify-content-between align-items-center m-4'>
-								<div className='flex-grow-1 text-center text-info '>Manage Lot</div>
+								<div className='flex-grow-1 text-center text-info '>Stock In</div>
 								<Button
 									icon='UploadFile'
 									color='warning'
