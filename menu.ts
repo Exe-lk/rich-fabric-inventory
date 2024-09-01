@@ -236,22 +236,7 @@ export const supperaddminmenu = {
 	},
 };
 
-export const officemenu = {
-	// dashboard: {
-	// 	id: 'dashboard',
-	// 	text: 'Dashboard',
-	// 	path: 'production-coordinator/dashboard',
-	// 	icon: 'Dashboard',
-	// 	subMenu: null,
-	// },
-	seller: {
-		id: 'seller',
-		text: 'Job Management',
-		path: 'production-coordinator/job-management',
-		icon: 'Groups',
-		subMenu: null,
-	},
-};
+
 export const viewmenu = {
 	dashboard: {
 		id: 'dashboard',
@@ -267,13 +252,7 @@ export const viewmenu = {
 		icon: 'Category',
 		subMenu: null,
 	},
-	seller: {
-		id: 'seller',
-		text: 'Job History',
-		path: 'viewer/job-view',
-		icon: 'Groups',
-		subMenu: null,
-	},
+
 	item: {
 		id: 'item',
 		text: 'Lot History',
