@@ -137,11 +137,10 @@ const Index: NextPage = () => {
 									</thead>
 									<tbody>
 										<tr>
-											<td>Main</td>
+											<td>Gray Fabric</td>
 											<td>
-												<p>abc</p>
-												<p>abc</p>
-												<p>abc</p>
+												<p>Polyester</p>
+												<p>Poplin</p>
 											</td>
 											<td>
 												<Button
@@ -161,11 +160,10 @@ const Index: NextPage = () => {
 											</td>
 										</tr>
 										<tr>
-											<td>Embroider</td>
+											<td>Dyed Fabric</td>
 											<td>
-												<p>abc</p>
-												<p>abc</p>
-												<p>abc</p>
+												<p>Polyester</p>
+												<p>Poplin</p>
 											</td>
 											<td>
 												<Button
@@ -184,44 +182,6 @@ const Index: NextPage = () => {
 												</Button>
 											</td>
 										</tr>
-										{category
-											.filter((values) => {
-												if (searchTerm == '') {
-													return values;
-												} else if (
-													values.categoryname
-														.toLowerCase()
-														.includes(searchTerm.toLowerCase())
-												) {
-													return values;
-												}
-											})
-											.map((category, index) => (
-												<tr key={category.cid}>
-													<td>{category.categoryname}</td>
-													<td>
-														<Button
-															icon='Edit'
-															tag='a'
-															color='info'
-															onClick={() => (
-																setEditModalStatus(true),
-																setId(category.cid)
-															)}>
-															Edit
-														</Button>
-														<Button
-															className='m-2'
-															icon='Delete'
-															color='warning'
-															onClick={() =>
-																handleClickDelete(category)
-															}>
-															Delete
-														</Button>
-													</td>
-												</tr>
-											))}
 									</tbody>
 								</table>
 								<Button
