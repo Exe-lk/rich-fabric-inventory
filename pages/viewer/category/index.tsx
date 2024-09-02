@@ -141,11 +141,11 @@ const Index: NextPage = () => {
 											</td>
 										</tr>
 										<tr>
-											<td>ColorCuff</td>
+											<td>collar cuff</td>
 											<td>
-												<p>abc</p>
-												<p>abc</p>
-												<p>abc</p>
+												<p>Spread collar</p>
+												<p>Regular Collar</p>
+												<p>Button Collar</p>
 											</td>
 										</tr>
 									</tbody>
