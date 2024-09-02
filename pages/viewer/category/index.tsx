@@ -102,7 +102,7 @@ const Index: NextPage = () => {
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
 								<div className='flex-grow-1 text-center text-info'>
-									Manage Category
+									Categories
 								</div>
 								<Button
 									icon='UploadFile'
@@ -123,15 +123,25 @@ const Index: NextPage = () => {
 									</thead>
 									<tbody>
 										<tr>
-											<td>Main</td>
+											<td>Gray Fabric</td>
 											<td>
-												<p>abc</p>
-												<p>abc</p>
-												<p>abc</p>
+												<p>polyester</p>
+												<p>Linen</p>
+												<p>Silk</p>
+												<p>Velvet</p>
 											</td>
 										</tr>
 										<tr>
-											<td>Embroider</td>
+											<td>Dye Fabric</td>
+											<td>
+												<p>polyester</p>
+												<p>Linen</p>
+												<p>Silk</p>
+												<p>Velvet</p>
+											</td>
+										</tr>
+										<tr>
+											<td>ColorCuff</td>
 											<td>
 												<p>abc</p>
 												<p>abc</p>

@@ -385,7 +385,7 @@ function index() {
 
 							{selectedOption === 'Customer' && (
 								<div>
-								<FormGroup id='name' label='Coustomer Name' className='col-md-12'>
+								<FormGroup id='name' label='Customer Name' className='col-md-12'>
 								<Input
 									onChange={formik.handleChange}
 									value={formik.values.name}

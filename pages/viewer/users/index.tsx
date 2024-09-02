@@ -83,7 +83,7 @@ const Index: NextPage = () => {
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
 								<div className='flex-grow-1 text-center text-info'>
-									User Management
+									User Details
 								</div>
 							</CardTitle>
 							<CardBody isScrollable className='table-responsive'>
