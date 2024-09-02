@@ -264,7 +264,7 @@ const Index: NextPage = () => {
 										</tr>
 										<tr>
 											<td>15385</td>
-											<td>Colorcuff</td>
+											<td>collar cuff</td>
 											<td>abc</td>
 											<td>Maheemani</td>
 											<td>abc</td>

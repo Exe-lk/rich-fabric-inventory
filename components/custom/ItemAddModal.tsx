@@ -201,7 +201,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							<Checks
 								type='radio'
 								id='colour'
-								label='colorcuff'
+								label='collar cuff'
 								name='type'
 								value='Colour'
 								onChange={handleOptionChange}
