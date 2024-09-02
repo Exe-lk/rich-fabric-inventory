@@ -140,7 +140,9 @@ const Index: NextPage = () => {
 											<td>Gray Fabric</td>
 											<td>
 												<p>Polyester</p>
-												<p>Poplin</p>
+												<p>Linen</p>
+												<p>Silk</p>
+												<p>Velvet</p>
 											</td>
 											<td>
 												<Button
@@ -160,10 +162,36 @@ const Index: NextPage = () => {
 											</td>
 										</tr>
 										<tr>
-											<td>Dyed Fabric</td>
+											<td>Dye Fabric</td>
 											<td>
 												<p>Polyester</p>
-												<p>Poplin</p>
+												<p>Linen</p>
+												<p>Silk</p>
+												<p>Velvet</p>
+											</td>
+											<td>
+												<Button
+													icon='Edit'
+													tag='a'
+													color='info'
+													onClick={() => setEditModalStatus(true)}>
+													Edit
+												</Button>
+												<Button
+													className='m-2'
+													icon='Delete'
+													color='danger'
+													onClick={() => handleClickDelete(category)}>
+													Delete
+												</Button>
+											</td>
+										</tr>
+										<tr>
+										<td>ColorCuff</td>
+											<td>
+												<p>abc</p>
+												<p>abc</p>
+												<p>abc</p>
 											</td>
 											<td>
 												<Button

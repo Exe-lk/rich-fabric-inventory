@@ -180,7 +180,7 @@ const Index: NextPage = () => {
 						color='success'
 						isLight
 						onClick={() => setAddModalStatus(true)}>
-						New Lot
+						New Stock
 					</Button>
 				</SubHeaderRight>
 			</SubHeader>
@@ -190,7 +190,7 @@ const Index: NextPage = () => {
 						{/* Table for displaying customer data */}
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
-								<div className='flex-grow-1 text-center text-info '>Manage Lot</div>
+								<div className='flex-grow-1 text-center text-info '>Manage Stock</div>
 								<Button
 									icon='UploadFile'
 									color='warning'
@@ -218,9 +218,9 @@ const Index: NextPage = () => {
 									<tbody>
 										<tr>
 											<td>15368</td>
-											<td>Main</td>
-											<td>Fabric</td>
-											<td>abc</td>
+											<td>Gray Fabric</td>
+											<td>Linen</td>
+											<td>Gayanthi</td>
 											<td>abc</td>
 											<td>320</td>
 											<td>
@@ -242,9 +242,33 @@ const Index: NextPage = () => {
 										</tr>
 										<tr>
 											<td>15385</td>
-											<td>Main</td>
-											<td>Fabric</td>
+											<td>Dye Fabric</td>
+											<td>Polyester</td>
+											<td>Achintha</td>
 											<td>abc</td>
+											<td>320</td>
+											<td>
+												<Button
+													icon='Edit'
+													tag='a'
+													color='info'
+													onClick={() => setEditModalStatus(true)}>
+													Edit
+												</Button>
+												<Button
+													className='m-2'
+													icon='Delete'
+													color='danger'
+													onClick={() => handleClickDelete(item)}>
+													Delete
+												</Button>
+											</td>
+										</tr>
+										<tr>
+											<td>15385</td>
+											<td>Colorcuff</td>
+											<td>abc</td>
+											<td>Maheemani</td>
 											<td>abc</td>
 											<td>320</td>
 											<td>

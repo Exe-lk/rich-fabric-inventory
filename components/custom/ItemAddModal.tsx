@@ -107,7 +107,8 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 			stockOutId:'',
 			FinishType:'',
 			PackType:'',
-			Remarks:''
+			Remarks:'',
+			supplier:''
 		},
 		validate: (values) => {
 			const errors: Record<string, string> = {};
@@ -120,6 +121,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 			if (!values.knit_type) errors.knit_type = 'Required';
 			if (!values.GRA_number) errors.GRA_number = 'Required';
 			if (!values.GRN_number) errors.GRN_number = 'Required';
+			if (!values.supplier) errors.supplier = 'Required';
 			return errors;
 		},
 		onSubmit: async (values) => {
@@ -191,6 +193,15 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 								type='radio'
 								id='colour'
 								label='Dye Plant'
+								name='type'
+								value='Colour'
+								onChange={handleOptionChange}
+								checked={selectedOption}
+							/>
+							<Checks
+								type='radio'
+								id='colour'
+								label='colorcuff'
 								name='type'
 								value='Colour'
 								onChange={handleOptionChange}
@@ -437,6 +448,17 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							isValid={formik.isValid}
 							isTouched={formik.touched.Remarks}
 							invalidFeedback={formik.errors.Remarks}
+							validFeedback='Looks good!'
+						/>
+					</FormGroup>
+					<FormGroup id='supplier' label='Supplier' className='col-md-6'>
+						<Input
+							onChange={formik.handleChange}
+							value={formik.values.supplier}
+							onBlur={formik.handleBlur}
+							isValid={formik.isValid}
+							isTouched={formik.touched.supplier}
+							invalidFeedback={formik.errors.supplier}
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>

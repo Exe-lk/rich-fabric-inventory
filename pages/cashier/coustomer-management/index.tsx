@@ -194,7 +194,7 @@ const Index: NextPage = () => {
 						color='success'
 						isLight
 						onClick={() => setAddModalStatus(true)}>
-						New Coustomer
+						New Customer
 					</Button>
 				</SubHeaderRight>
 			</SubHeader>
@@ -205,7 +205,7 @@ const Index: NextPage = () => {
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
 								<div className='flex-grow-1 text-center text-info'>
-								Coustomer Management
+								Customer Management
 								</div>
 							</CardTitle>
 							<CardBody isScrollable className='table-responsive'>

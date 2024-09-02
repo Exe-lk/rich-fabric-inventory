@@ -48,7 +48,7 @@ export const addminPagesMenu = {
 	},
 	lot: {
 		id: 'lot',
-		text: 'Lot Management',
+		text: 'Stock Management',
 		path: 'admin/lot-management',
 		icon: 'Ballot',
 		subMenu: null,
@@ -182,7 +182,7 @@ export const stockkeeperPagesMenu = {
 	
 	Coustomer: {
 		id: 'lot',
-		text: 'Coustomer Management',
+		text: 'Customer Management',
 		path: 'cashier/coustomer-management',
 		icon: 'PermIdentity',
 		subMenu: null,
