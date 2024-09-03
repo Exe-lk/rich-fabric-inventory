@@ -71,7 +71,7 @@ function index() {
 			try {
 				const result = await Swal.fire({
 					title: 'Are you sure?',
-					text: 'You will not be able to recover this status!',
+					text: 'You will not be able to recover this!',
 					// text: id,
 					icon: 'warning',
 					showCancelButton: true,
@@ -216,6 +216,7 @@ function index() {
 		initialValues: {
 			width: '',
 			quantity: '',
+			price: '',
 			packtype: '',
 			remark: '',
 			name: '',
@@ -228,6 +229,7 @@ function index() {
 			const errors: {
 				width?: string;
 				quantity?: string;
+				price?: string;
 				packtype?: string;
 				remark?: string;
 			} = {};
@@ -242,6 +244,9 @@ function index() {
 			}
 			if (!values.remark) {
 				errors.remark = 'Required';
+			}
+			if (!values.price) {
+				errors.price = 'Required';
 			}
 			return errors;
 		},
@@ -340,6 +345,17 @@ function index() {
 										isValid={formik.isValid}
 										isTouched={formik.touched.quantity}
 										invalidFeedback={formik.errors.quantity}
+										validFeedback='Looks good!'
+									/>
+								</FormGroup>
+								<FormGroup id='price' label='Price' className='col-md-12'>
+									<Input
+										onChange={formik.handleChange}
+										value={formik.values.price}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										isTouched={formik.touched.price}
+										invalidFeedback={formik.errors.price}
 										validFeedback='Looks good!'
 									/>
 								</FormGroup>

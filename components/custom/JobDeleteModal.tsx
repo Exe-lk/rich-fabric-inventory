@@ -44,7 +44,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 		  }
 		} catch (error) {
 		  console.error('Error deleting document: ', error);
-		  Swal.fire('Error', 'Failed to delete category.', 'error');
+		  Swal.fire('Error', 'Failed to delete this.', 'error');
 		}
 	  };
 	return (
@@ -75,7 +75,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					<tbody>
 						<tr>
 							<td>12658</td>
-							<td>ABC</td>
+							<td>Geethan</td>
 							<td>500Kg fabric stock</td>
 					
 							<td>

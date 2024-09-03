@@ -98,7 +98,7 @@ const Index: NextPage = () => {
 											<th>Sub Category</th>
 											<th>Supplier</th>
 											<th>Type</th>
-											<th>Quentity</th>
+											<th>Quantity</th>
 
 											{/* <th><Button icon='PersonAdd' color='primary' isLight onClick={() => setAddModalStatus(true)}>
                         New Item
@@ -111,7 +111,7 @@ const Index: NextPage = () => {
 											<td>15368</td>
 											<td>Main</td>
 											<td>Fabric</td>
-											<td>abc</td>
+											<td>Achintha</td>
 											<td>abc</td>
 											<td>320</td>
 										</tr>
@@ -119,7 +119,7 @@ const Index: NextPage = () => {
 											<td>15385</td>
 											<td>Main</td>
 											<td>Fabric</td>
-											<td>abc</td>
+											<td>Gayanthi</td>
 											<td>abc</td>
 											<td>320</td>
 										</tr>

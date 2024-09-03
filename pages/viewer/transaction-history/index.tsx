@@ -135,10 +135,10 @@ const Index: NextPage = () => {
 											<th>Code</th>
 											<th>Date</th>
 											<th>Type</th>
-											<th>Quentity</th>
+											<th>Quantity</th>
 											<th>Location</th>
 											<th>Category</th>
-											<th>Sub cCategory</th>
+											<th>Sub Category</th>
 										</tr>
 									</thead>
 
@@ -149,8 +149,8 @@ const Index: NextPage = () => {
 											<td className='text-warning'>Return</td>
 											<td className='text-warning'>260</td>
 											<td className='text-warning'>Garment</td>
-											<td className='text-warning'>abc</td>
-											<td className='text-warning'>efd</td>
+											<td className='text-warning'>gray fabric</td>
+											<td className='text-warning'>velvat</td>
 
 											{/* <td>
 												<Button
@@ -175,8 +175,8 @@ const Index: NextPage = () => {
 											<td className='text-success'>outgoing</td>
 											<td className='text-success'>260</td>
 											<td className='text-success'>Garment</td>
-											<td className='text-success'>abc</td>
-											<td className='text-success'>efd</td>
+											<td className='text-success'>Dye Fabric</td>
+											<td className='text-success'>silk</td>
 											{/* <td> */}
 											{/* <Button
 													icon='Edit'

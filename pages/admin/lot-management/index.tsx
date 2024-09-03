@@ -103,7 +103,7 @@ const Index: NextPage = () => {
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete employee.', 'error');
+			Swal.fire('Error', 'Failed to delete this.', 'error');
 		}
 	};
 	// Return the JSX for rendering the page
@@ -207,7 +207,7 @@ const Index: NextPage = () => {
 											<th>Sub Category</th>
 											<th>Supplier</th>
 											<th>Type</th>
-											<th>Quentity</th>
+											<th>Quantity</th>
 											<th></th>
 											{/* <th><Button icon='PersonAdd' color='primary' isLight onClick={() => setAddModalStatus(true)}>
                         New Item

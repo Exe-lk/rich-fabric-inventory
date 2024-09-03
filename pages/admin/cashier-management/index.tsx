@@ -84,7 +84,7 @@ const Index: NextPage = () => {
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete seller.', 'error');
+			Swal.fire('Error', 'Failed to delete this.', 'error');
 		}
 	};
 
@@ -105,7 +105,7 @@ const Index: NextPage = () => {
 						id='searchInput'
 						type='search'
 						className='border-0 shadow-none bg-transparent'
-						placeholder='Search stock...'
+						placeholder='Search...'
 						onChange={(event: any) => {
 							setSearchTerm(event.target.value);
 						}}
