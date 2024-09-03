@@ -101,7 +101,7 @@ const Index: NextPage = () => {
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete employee.', 'error');
+			Swal.fire('Error', 'Failed to delete this.', 'error');
 		}
 	};
 	// Return the JSX for rendering the page
@@ -138,7 +138,35 @@ const Index: NextPage = () => {
 						<DropdownMenu isAlignmentEnd size='lg'>
 							<div className='container py-2'>
 								<div className='row g-3'>
-									<FormGroup label='Category type' className='col-12'>
+									<FormGroup label='Dye fabric' className='col-12'>
+										<ChecksGroup>
+											{category.map((category, index) => (
+												<Checks
+													key={category.categoryname}
+													id={category.categoryname}
+													label={category.categoryname}
+													name={category.categoryname}
+													value={category.categoryname}
+													checked={selectedCategories.includes(
+														category.categoryname,
+													)}
+													onChange={(event: any) => {
+														const { checked, value } = event.target;
+														setSelectedCategories(
+															(prevCategories) =>
+																checked
+																	? [...prevCategories, value] // Add category if checked
+																	: prevCategories.filter(
+																			(category) =>
+																				category !== value,
+																	  ), // Remove category if unchecked
+														);
+													}}
+												/>
+											))}
+										</ChecksGroup>
+									</FormGroup>
+									<FormGroup label='Gray fabric' className='col-12'>
 										<ChecksGroup>
 											{category.map((category, index) => (
 												<Checks
@@ -205,7 +233,7 @@ const Index: NextPage = () => {
 											<th>Sub Category</th>
 											<th>Supplier</th>
 											<th>Type</th>
-											<th>Quentity</th>
+											<th>Quantity</th>
 											<th></th>
 											{/* <th><Button icon='PersonAdd' color='primary' isLight onClick={() => setAddModalStatus(true)}>
                         New Item

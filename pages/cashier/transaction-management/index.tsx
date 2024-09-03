@@ -103,7 +103,7 @@ const Index: NextPage = () => {
 											<th>Quentity</th>
 											<th>Location</th>
 											<th>Category</th>
-											<th>Sub cCategory</th>
+											<th>Sub Category</th>
 										</tr>
 									</thead>
 
@@ -114,8 +114,8 @@ const Index: NextPage = () => {
 											<td className='text-warning'>Return</td>
 											<td className='text-warning'>260</td>
 											<td className='text-warning'>Garment</td>
-											<td className='text-warning'>abc</td>
-											<td className='text-warning'>efd</td>
+											<td className='text-warning'>Dye fabric</td>
+											<td className='text-warning'>silk</td>
 
 											{/* <td>
 												<Button
@@ -140,7 +140,7 @@ const Index: NextPage = () => {
 											<td className='text-success'>outgoing</td>
 											<td className='text-success'>260</td>
 											<td className='text-success'>Garment</td>
-											<td className='text-success'>abc</td>
+											<td className='text-success'>Gray fabric</td>
 											<td className='text-success'>efd</td>
 											{/* <td> */}
 											{/* <Button

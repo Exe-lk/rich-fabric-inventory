@@ -43,13 +43,13 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 		  }
 		} catch (error) {
 		  console.error('Error deleting document: ', error);
-		  Swal.fire('Error', 'Failed to delete category.', 'error');
+		  Swal.fire('Error', 'Failed to delete this.', 'error');
 		}
 	  };
 	return (
 		<Modal isOpen={isOpen} setIsOpen={setIsOpen} size='xl' titleId={id}>
 			<ModalHeader setIsOpen={setIsOpen} className='p-4'>
-				<ModalTitle id=''>{'New Category'}</ModalTitle>
+				<ModalTitle id=''>{'Recycle Bin'}</ModalTitle>
 			</ModalHeader>
 			<ModalBody className='px-4'>
 				<table className='table table-bordered border-primary table-modern table-hover text-center'>
@@ -68,7 +68,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					</thead>
 					<tbody>
 						<tr>
-							<td>ABC</td>
+							<td>Gray fabric</td>
 							<td>
 								<Button icon='Restore' tag='a' color='info'>
 									Restore
@@ -79,7 +79,18 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 							</td>
 						</tr>
 						<tr>
-							<td>ABC</td>
+							<td>Dye fabric</td>
+							<td>
+								<Button icon='Restore' tag='a' color='info'>
+									Restore
+								</Button>
+								<Button className='m-2' icon='Delete' color='danger' onClick={handleClickDelete}>
+									Delete
+								</Button>
+							</td>
+						</tr>
+						<tr>
+							<td>Collar Cuff</td>
 							<td>
 								<Button icon='Restore' tag='a' color='info'>
 									Restore

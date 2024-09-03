@@ -47,7 +47,7 @@ const Index: NextPage = () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'You will not be able to recover this category!',
+				text: 'You will not be able to recover this!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -67,7 +67,7 @@ const Index: NextPage = () => {
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete category.', 'error');
+			Swal.fire('Error', 'Failed to delete this.', 'error');
 		}
 	};
 
@@ -122,7 +122,7 @@ const Index: NextPage = () => {
 									</thead>
 									<tbody>
 										<tr>
-											<td>abc</td>
+											<td>Dye Fabric</td>
 											<td>
 												<Button
 													icon='Edit'
@@ -141,7 +141,7 @@ const Index: NextPage = () => {
 											</td>
 										</tr>
 										<tr>
-											<td>xyz</td>
+											<td>Gray Fabric</td>
 											<td>
 												<Button
 													icon='Edit'

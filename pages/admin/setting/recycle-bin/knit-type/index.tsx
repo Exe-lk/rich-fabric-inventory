@@ -55,7 +55,7 @@ const Index: NextPage = () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				// text: 'You will not be able to recover this category!',
+				// text: 'You will not be able to recover this!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -86,7 +86,7 @@ const Index: NextPage = () => {
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete category.', 'error');
+			Swal.fire('Error', 'Failed to delete this.', 'error');
 		}
 	};
 	const handleClickDelete = async () => {
@@ -113,7 +113,7 @@ const Index: NextPage = () => {
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete category.', 'error');
+			Swal.fire('Error', 'Failed to delete this.', 'error');
 		}
 	};
 	const handleDeleteAll = async () => {
@@ -134,7 +134,7 @@ const Index: NextPage = () => {
 					batch.delete(docRef);
 				});
 				await batch.commit();
-				Swal.fire('Deleted!', 'All categories have been deleted.', 'success');
+				Swal.fire('Deleted!', 'All things have been deleted.', 'success');
 				setStatus(!status);
 			}
 		} catch (error) {
@@ -219,7 +219,7 @@ const Index: NextPage = () => {
 									</thead>
 									<tbody>
 										<tr>
-											<td>Efd</td>
+											<td>square</td>
 											<td>
 												<Button
 													icon='Restore'
@@ -238,7 +238,7 @@ const Index: NextPage = () => {
 											</td>
 										</tr>
 										<tr>
-											<td>Abc</td>
+											<td>rectangle</td>
 											<td>
 												<Button
 													icon='Restore'

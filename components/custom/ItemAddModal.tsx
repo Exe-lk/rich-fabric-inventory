@@ -407,7 +407,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 								isTouched={formik.touched.knit_type}
 								invalidFeedback={formik.errors.knit_type}
 								validFeedback='Looks good!'>
-								<Option value=''>Select Knit Type</Option>
+								{/* <Option value=''>Select Knit Type</Option> */}
 								<Option value='60'>60</Option>
 								<Option value='70'>70</Option>
 								<Option value='80'>80</Option>

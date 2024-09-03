@@ -57,7 +57,7 @@ const Index: NextPage = () => {
 						id='searchInput'
 						type='search'
 						className='border-0 shadow-none bg-transparent'
-						placeholder='Search stock...'
+						placeholder='Search...'
 						onChange={(event: any) => {
 							setSearchTerm(event.target.value);
 						}}
@@ -94,7 +94,7 @@ const Index: NextPage = () => {
 									<tbody>
 										<tr>
 											<td>malinka</td>
-											<td>ABC</td>
+											<td>Rich Fabric</td>
 											<td>abc@gmail.com</td>
 											<td>0778965412</td>
 											<td>malinka@gmail.com</td>
@@ -106,8 +106,8 @@ const Index: NextPage = () => {
 														</Button>
 													</DropdownToggle>
 													<DropdownMenu isAlignmentEnd size='md'>
-														<div>abc</div>
-														<div>efg</div>
+														<div>Gray fabric</div>
+														<div>Dye fabric</div>
 													</DropdownMenu>
 												</Dropdown>
 											</td>
@@ -126,8 +126,8 @@ const Index: NextPage = () => {
 														</Button>
 													</DropdownToggle>
 													<DropdownMenu isAlignmentEnd size='md'>
-														<div>abc</div>
-														<div>efg</div>
+														<div>Gray fabric</div>
+														<div>Dye fabric</div>
 													</DropdownMenu>
 												</Dropdown>
 											</td>
