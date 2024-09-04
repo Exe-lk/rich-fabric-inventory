@@ -265,9 +265,15 @@ function index() {
 		categoryname: string;
 	}
 	const cdata = [
-		{ status: true, categoryname: 'Main', cid: '0bc5HUELspDzvrUdt5u6' },
+		{ status: true, categoryname: 'Gray Fabric', cid: '0bc5HUELspDzvrUdt5u6' },
 
-		{ status: true, categoryname: 'Embroider', cid: 'LKcV57ThRnHtE9bxBHMb' },
+		{ status: true, categoryname: 'Finished Fabric', cid: 'LKcV57ThRnHtE9bxBHMb' },
+
+		{ status: true, categoryname: 'Gray Collar Cuff', cid: '0bc5HUELspDzvrUdt5u6' },
+
+		{ status: true, categoryname: 'Finished Collar Cuff', cid: '0bc5HUELspDzvrUdt5u6' },
+		
+		{ status: true, categoryname: 'Yarn', cid: 'LKcV57ThRnHtE9bxBHMb' },
 	];
 	const [category, setCategory] = useState<Category[]>(cdata);
 	return (
@@ -386,6 +392,17 @@ function index() {
 							{selectedOption === 'Colour' && (
 								<div>
 									<FormGroup id='vehiclenumber' label='Vehicle Number' className='col-md-12'>
+									<Input
+										onChange={formik.handleChange}
+										value={formik.values.vehiclenumber}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										isTouched={formik.touched.vehiclenumber}
+										invalidFeedback={formik.errors.vehiclenumber}
+										validFeedback='Looks good!'
+									/>
+									</FormGroup>
+									<FormGroup id='vehiclenumber' label='Gate Pass Number' className='col-md-12'>
 									<Input
 										onChange={formik.handleChange}
 										value={formik.values.vehiclenumber}

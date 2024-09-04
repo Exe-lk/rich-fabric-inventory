@@ -108,7 +108,11 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 			FinishType:'',
 			PackType:'',
 			Remarks:'',
-			supplier:''
+			supplier:'',
+			yarn_type:'',
+			collor_cuff_type:'',
+			suppl_gatepass_no:'',
+			suppl_invoice_no:''
 		},
 		validate: (values) => {
 			const errors: Record<string, string> = {};
@@ -192,7 +196,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							<Checks
 								type='radio'
 								id='colour'
-								label='Dye Plant'
+								label='Finish Fabric'
 								name='type'
 								value='Colour'
 								onChange={handleOptionChange}
@@ -200,10 +204,28 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							/>
 							<Checks
 								type='radio'
-								id='colour'
-								label='collar cuff'
+								id='graycollor'
+								label='Gray collor cuff'
 								name='type'
-								value='Colour'
+								value='graycollor'
+								onChange={handleOptionChange}
+								checked={selectedOption}
+							/>
+							<Checks
+								type='radio'
+								id='colourcollor'
+								label='Finish collor cuff'
+								name='type'
+								value='colourcollor'
+								onChange={handleOptionChange}
+								checked={selectedOption}
+							/>
+							<Checks
+								type='radio'
+								id='yarn'
+								label='Yarn'
+								name='type'
+								value='yarn'
 								onChange={handleOptionChange}
 								checked={selectedOption}
 							/>
@@ -458,6 +480,28 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							onBlur={formik.handleBlur}
 							isValid={formik.isValid}
 							isTouched={formik.touched.supplier}
+							invalidFeedback={formik.errors.supplier}
+							validFeedback='Looks good!'
+						/>
+					</FormGroup>
+					<FormGroup id='supplier' label='supplier gate pass no' className='col-md-6'>
+						<Input
+							onChange={formik.handleChange}
+							value={formik.values.suppl_gatepass_no}
+							onBlur={formik.handleBlur}
+							isValid={formik.isValid}
+							isTouched={formik.touched.suppl_gatepass_no}
+							invalidFeedback={formik.errors.suppl_gatepass_no}
+							validFeedback='Looks good!'
+						/>
+					</FormGroup>
+					<FormGroup id='supplier' label='supplier invoice no' className='col-md-6'>
+						<Input
+							onChange={formik.handleChange}
+							value={formik.values.suppl_invoice_no}
+							onBlur={formik.handleBlur}
+							isValid={formik.isValid}
+							isTouched={formik.touched.suppl_invoice_no}
 							invalidFeedback={formik.errors.supplier}
 							validFeedback='Looks good!'
 						/>
