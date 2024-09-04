@@ -18,6 +18,9 @@ import StockEditModal from '../../../components/custom/ItemEditModal';
 import { doc, deleteDoc, collection, getDocs, updateDoc, query, where } from 'firebase/firestore';
 import { firestore } from '../../../firebaseConfig';
 import Swal from 'sweetalert2';
+import Dropdown, { DropdownMenu, DropdownToggle } from '../../../components/bootstrap/Dropdown';
+import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
+import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 
 // Define interfaces for data objects
 interface Item {
@@ -51,6 +54,11 @@ const Index: NextPage = () => {
 	const [status, setStatus] = useState(true);
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [quantityDifference, setQuantityDifference] = useState([]);
+	const position = [
+		{ position: 'Return' },
+		{ position: 'Outgoing' },
+		
+	];
 
 	// Return the JSX for rendering the page
 	return (
@@ -74,6 +82,60 @@ const Index: NextPage = () => {
 						value={searchTerm}
 					/>
 				</SubHeaderLeft>
+				<SubHeaderRight>
+					<Dropdown>
+						<DropdownToggle hasIcon={false}>
+							<Button
+								icon='FilterAlt'
+								color='dark'
+								isLight
+								className='btn-only-icon position-relative'></Button>
+						</DropdownToggle>
+						<DropdownMenu isAlignmentEnd size='lg'>
+							<div className='container py-2'>
+								<div className='row g-3'>
+									<FormGroup label='Supplier type' className='col-12'>
+										<ChecksGroup>
+											{position.map((category, index) => (
+												<Checks
+													key={category.position}
+													id={category.position}
+													label={category.position}
+													name={category.position}
+													value={category.position}
+													checked={selectedCategories.includes(
+														category.position,
+													)}
+													onChange={(event: any) => {
+														const { checked, value } = event.target;
+														setSelectedCategories(
+															(prevCategories) =>
+																checked
+																	? [...prevCategories, value] // Add category if checked
+																	: prevCategories.filter(
+																			(category) =>
+																				category !== value,
+																	  ), // Remove category if unchecked
+														);
+													}}
+												/>
+											))}
+										</ChecksGroup>
+									</FormGroup>
+								</div>
+							</div>
+						</DropdownMenu>
+					</Dropdown>
+
+					<SubheaderSeparator />
+					<Button
+						icon='PersonAdd'
+						color='success'
+						isLight
+						onClick={() => setAddModalStatus(true)}>
+						New Supplier
+					</Button>
+				</SubHeaderRight>
 			</SubHeader>
 			<Page>
 				<div className='row h-100'>
@@ -109,18 +171,18 @@ const Index: NextPage = () => {
 									<tbody>
 										<tr>
 											<td>15368</td>
-											<td>Main</td>
-											<td>Fabric</td>
+											<td>Gray Fabric</td>
+											<td>Silk</td>
 											<td>Achintha</td>
-											<td>abc</td>
+											<td>Stock Out</td>
 											<td>320</td>
 										</tr>
 										<tr>
 											<td>15385</td>
-											<td>Main</td>
-											<td>Fabric</td>
+											<td>Finish Fabric</td>
+											<td>Poplin</td>
 											<td>Gayanthi</td>
-											<td>abc</td>
+											<td>Stock In</td>
 											<td>320</td>
 										</tr>
 									</tbody>
