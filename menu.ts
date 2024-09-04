@@ -187,6 +187,15 @@ export const stockkeeperPagesMenu = {
 		icon: 'PermIdentity',
 		subMenu: null,
 	},
+
+
+	Supplier: {
+		id: 'lot',
+		text: 'Supplier Management',
+		path: 'cashier/supplier',
+		icon: 'PermIdentity',
+		subMenu: null,
+	},
 	
 	
 	singlePages: {

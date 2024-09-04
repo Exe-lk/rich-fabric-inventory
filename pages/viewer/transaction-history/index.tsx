@@ -53,6 +53,11 @@ const Index: NextPage = () => {
 	const [status, setStatus] = useState(true);
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 	const [quantityDifference, setQuantityDifference] = useState([]);
+	const position = [
+		{ position: 'Return' },
+		{ position: 'Out going' },
+		
+	];
 
 	// Return the JSX for rendering the page
 	return (
