@@ -24,7 +24,7 @@ const Index: NextPage = () => {
 						{/* Card for displaying QR code */}
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
-								<div className='flex-grow-1 text-center text-info'>QR Code</div>
+								<div className='flex-grow-1 text-center text-info'>Scan to Login</div>
 							</CardTitle>
 
 							<CardBody isScrollable className='table-responsive'>
@@ -34,6 +34,19 @@ const Index: NextPage = () => {
 									<img src={Qr}/>
 
 								</div>
+
+								<p>How it works:<br/>
+
+Open your mobile device's camera or a QR code scanner app.<br/>
+Point the camera at the QR code on this page.<br/>
+Once the code is recognized, you’ll be redirected to the login page where your identity is automatically confirmed.<br/>
+For any issues, please ensure:<br/><br/>
+
+Your device's camera is functioning properly.<br/>
+You have a stable internet connection.<br/>
+This feature adds an extra layer of security and convenience by eliminating the need for manual input. Happy working!<br/>
+
+</p>
 							</CardBody>
 						</Card>
 					</div>
