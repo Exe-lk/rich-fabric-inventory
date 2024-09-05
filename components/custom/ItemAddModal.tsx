@@ -104,15 +104,15 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 			status: true,
 			category: '',
 			subcategory: '',
-			stockOutId:'',
-			FinishType:'',
-			PackType:'',
-			Remarks:'',
-			supplier:'',
-			yarn_type:'',
-			collor_cuff_type:'',
-			suppl_gatepass_no:'',
-			suppl_invoice_no:''
+			stockOutId: '',
+			FinishType: '',
+			PackType: '',
+			Remarks: '',
+			supplier: '',
+			yarn_type: '',
+			collor_cuff_type: '',
+			suppl_gatepass_no: '',
+			suppl_invoice_no: '',
 		},
 		validate: (values) => {
 			const errors: Record<string, string> = {};
@@ -311,7 +311,6 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 					</FormGroup>
 					<FormGroup id='description' label='Description' className='col-md-6'>
 						<Input
-							
 							onChange={formik.handleChange}
 							value={formik.values.description}
 							onBlur={formik.handleBlur}
@@ -321,7 +320,6 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					
 
 					<FormGroup id='GRA_number' label='UOM' className='col-md-6'>
 						<Input
@@ -335,10 +333,13 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<FormGroup id='fabric_type' label='Fabric Type' className='col-md-6'>
+
+					{selectedOption === 'graycollor' || selectedOption === 'colourcollor' ? (
+						<>
+							<FormGroup id='fabric_type' label='Collor Cuff Type' className='col-md-6'>
 						{isAddingNewFabric ? (
 							<Input
-								placeholder='Add new fabric type'
+								placeholder='Add new collor cuff type'
 								onChange={(e: any) =>
 									formik.setFieldValue('fabric_type', e.target.value)
 								}
@@ -347,6 +348,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 						) : (
 							<Select
 								ariaLabel='Fabric type select'
+								placeholder='Select collor cuff Type'
 								onChange={(e: any) => {
 									if (e.target.value === 'Add new') {
 										setIsAddingNewFabric(true);
@@ -355,14 +357,48 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 									}
 								}}
 								value={formik.values.fabric_type}>
-								<Option value=''>Select Fabric Type</Option>
+								
 								<Option value='Add new'>Add New</Option>
-								{/* Existing fabric type options can be dynamically loaded here */}
-								<Option value='Cotton'>Cotton</Option>
-								<Option value='Polyester'>Polyester</Option>
+								
+								<Option value='Cotton'>Plain</Option>
+								<Option value='Polyester'>Tiffin</Option>
+								<Option value='Cotton'>Embosed</Option>
 							</Select>
 						)}
 					</FormGroup>
+						</>
+					) : (
+						<>
+							<FormGroup id='fabric_type' label='Fabric Type' className='col-md-6'>
+								{isAddingNewFabric ? (
+									<Input
+										placeholder='Add new fabric type'
+										onChange={(e: any) =>
+											formik.setFieldValue('fabric_type', e.target.value)
+										}
+										value={formik.values.fabric_type}
+									/>
+								) : (
+									<Select
+										ariaLabel='Fabric type select'
+										onChange={(e: any) => {
+											if (e.target.value === 'Add new') {
+												setIsAddingNewFabric(true);
+											} else {
+												formik.handleChange(e);
+											}
+										}}
+										value={formik.values.fabric_type}>
+										<Option value=''>Select Fabric Type</Option>
+										<Option value='Add new'>Add New</Option>
+										{/* Existing fabric type options can be dynamically loaded here */}
+										<Option value='Cotton'>Cotton</Option>
+										<Option value='Polyester'>Polyester</Option>
+									</Select>
+								)}
+							</FormGroup>
+						</>
+					)}
 
 					<FormGroup id='gsm' label='GSM' className='col-md-6'>
 						{isAddingNewGSM ? (
@@ -437,7 +473,10 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							</Select>
 						)}
 					</FormGroup>
-					<FormGroup id='FinishType' label='Finish Type' className='col-md-6'>
+					<FormGroup
+						id='FinishType'
+						label='Number of rolls or bales'
+						className='col-md-6'>
 						<Input
 							type='number'
 							onChange={formik.handleChange}
@@ -473,7 +512,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<FormGroup id='supplier' label='Supplier' className='col-md-6'>
+					<FormGroup id='supplier' label='Supplier/Coustomer' className='col-md-6'>
 						<Input
 							onChange={formik.handleChange}
 							value={formik.values.supplier}
