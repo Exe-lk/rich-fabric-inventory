@@ -60,7 +60,20 @@ export const addminPagesMenu = {
 		icon: 'SelectAll',
 		subMenu: null,
 	},
-	
+	employee: {
+		id: 'lot',
+		text: 'Employee Management',
+		path: 'admin/employ-management',
+		icon: 'Group',
+		subMenu: null,
+	},
+	stockout: {
+		id: 'stockout',
+		text: 'Transaction Report',
+		path: 'admin/transaction-management',
+		icon: 'CallMissedOutgoing',
+		subMenu: null,
+	},
 	
 	singlePages: {
 		id: 'singlePages',
@@ -173,7 +186,7 @@ export const stockkeeperPagesMenu = {
 	},
 	stockout: {
 		id: 'stockout',
-		text: 'Transaction History',
+		text: 'Transaction Report',
 		path: 'cashier/transaction-management',
 		icon: 'CallMissedOutgoing',
 		subMenu: null,

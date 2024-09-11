@@ -332,28 +332,8 @@ function index() {
 							</FormGroup>
 
 							<div className='row g-4 mt-1'>
-								<FormGroup id='width' label='Width' className='col-md-12'>
-									<Input
-										onChange={formik.handleChange}
-										value={formik.values.width}
-										onBlur={formik.handleBlur}
-										isValid={formik.isValid}
-										isTouched={formik.touched.width}
-										invalidFeedback={formik.errors.width}
-										validFeedback='Looks good!'
-									/>
-								</FormGroup>
-								<FormGroup id='quantity' label='Quantity' className='col-md-12'>
-									<Input
-										onChange={formik.handleChange}
-										value={formik.values.quantity}
-										onBlur={formik.handleBlur}
-										isValid={formik.isValid}
-										isTouched={formik.touched.quantity}
-										invalidFeedback={formik.errors.quantity}
-										validFeedback='Looks good!'
-									/>
-								</FormGroup>
+								
+								
 								<FormGroup id='price' label='Price' className='col-md-12'>
 									<Input
 										onChange={formik.handleChange}
@@ -365,28 +345,7 @@ function index() {
 										validFeedback='Looks good!'
 									/>
 								</FormGroup>
-								<FormGroup id='packtype' label='Pack Type' className='col-md-12'>
-									<Input
-										onChange={formik.handleChange}
-										value={formik.values.packtype}
-										onBlur={formik.handleBlur}
-										isValid={formik.isValid}
-										isTouched={formik.touched.packtype}
-										invalidFeedback={formik.errors.packtype}
-										validFeedback='Looks good!'
-									/>
-								</FormGroup>
-								<FormGroup id='remark' label='Remark' className='col-md-12'>
-									<Input
-										onChange={formik.handleChange}
-										value={formik.values.remark}
-										onBlur={formik.handleBlur}
-										isValid={formik.isValid}
-										isTouched={formik.touched.remark}
-										invalidFeedback={formik.errors.remark}
-										validFeedback='Looks good!'
-									/>
-								</FormGroup>
+								
 							
 
 							{selectedOption === 'Colour' && (
@@ -429,17 +388,7 @@ function index() {
 									validFeedback='Looks good!'
 								/>
 								</FormGroup>
-								<FormGroup id='email' label='E-mail' className='col-md-12'>
-								<Input
-									onChange={formik.handleChange}
-									value={formik.values.email}
-									onBlur={formik.handleBlur}
-									isValid={formik.isValid}
-									isTouched={formik.touched.email}
-									invalidFeedback={formik.errors.email}
-									validFeedback='Looks good!'
-								/>
-								</FormGroup>
+								
 								<FormGroup id='mobile' label='Contact No.' className='col-md-12'>
 								<Input
 									onChange={formik.handleChange}

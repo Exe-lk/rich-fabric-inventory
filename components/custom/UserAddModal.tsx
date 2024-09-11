@@ -207,7 +207,7 @@ const UserAddModal: FC<UserAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<FormGroup id='pin_number' label='PIN number' className='col-md-6'>
+					<FormGroup id='pin_number' label='VAT number' className='col-md-6'>
 						<Input
 							onChange={formik.handleChange}
 							value={formik.values.pin_number}

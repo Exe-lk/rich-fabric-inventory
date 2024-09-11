@@ -242,7 +242,7 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
                         />
 					</FormGroup>
-					<FormGroup id='pin_number' label='PIN number' onChange={formik.handleChange} className='col-md-6'>
+					<FormGroup id='pin_number' label='VAT number' onChange={formik.handleChange} className='col-md-6'>
 						<Input
 							onChange={(e: any) => { user.pin_number = e.target.value }}
 							value={user?.pin_number}
