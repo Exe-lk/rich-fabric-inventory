@@ -23,9 +23,9 @@ interface StockAddModalProps {
 }
 interface Stock {
 	cid: string;
-	quentity: string;
+	quantity: string;
     item_id: string;
-	currentquentity: string;
+	currentquantity: string;
 	stockHistory: { stockout: string; date: string }[];
 }
 
@@ -85,14 +85,14 @@ const StockAddModal: FC<StockAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 				}
 		
 				// Calculate new quantity by subtracting stockout value
-				const newQuantity = parseInt(stock.quentity) - parseInt(values.stockout);
+				const newQuantity = parseInt(stock.quantity) - parseInt(values.stockout);
 				 // Update the stock history array with new stock out value and date
 				 const newStockHistory = [...stock.stockHistory, { stockout: values.stockout, date: values.date.toISOString() }];
                 
 		
 				// Update the Firestore document with the new quantity
 				await updateDoc(doc(firestore, 'stock', stock.cid), {
-					quentity: newQuantity.toString(),
+					quantity: newQuantity.toString(),
 					stockHistory: newStockHistory,
 				});
 		

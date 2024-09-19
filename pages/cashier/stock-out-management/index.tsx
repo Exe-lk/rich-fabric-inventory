@@ -56,15 +56,15 @@ function index() {
 				orderedItems.reduce(
 					(total: any, item: any) =>
 						total +
-						item.quentity * item.price +
-						((total + item.quentity * item.price) / 100) * 10,
+						item.quantity * item.price +
+						((total + item.quantity * item.price) / 100) * 10,
 					0.0,
 				) &&
 			orderedItems.reduce(
 				(total: any, item: any) =>
 					total +
-					item.quentity * item.price +
-					((total + item.quentity * item.price) / 100) * 10,
+					item.quantity * item.price +
+					((total + item.quantity * item.price) / 100) * 10,
 				0.0,
 			) > 1
 		) {
@@ -84,8 +84,8 @@ function index() {
 					const amount = orderedItems.reduce(
 						(total: any, item: any) =>
 							total +
-							item.quentity * item.price +
-							((total + item.quentity * item.price) / 100) * 10,
+							item.quantity * item.price +
+							((total + item.quantity * item.price) / 100) * 10,
 						0.0,
 					);
 					const currentDate = new Date();

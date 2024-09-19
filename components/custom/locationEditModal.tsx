@@ -28,7 +28,7 @@ interface Stock {
 	buy_price: number;
 	item_id: string;
 	location: string;
-	quentity: string;
+	quantity: string;
 	status: string;
 	sublocation: string
 	exp: string
@@ -40,7 +40,7 @@ const CustomerEditModal: FC<ICustomerEditModalProps> = ({ id, isOpen, setIsOpen 
 		buy_price: 0,
 		item_id: "",
 		location: "",
-		quentity: "",
+		quantity: "",
 		status: "",
 		sublocation: "",
 		exp: ""
@@ -81,7 +81,7 @@ const CustomerEditModal: FC<ICustomerEditModalProps> = ({ id, isOpen, setIsOpen 
 			sublocation: "",
 			exp: '',
 			buy_price: '',
-			quentity: '',
+			quantity: '',
 			status: "",
 		},
 		validate: (values) => {
@@ -91,7 +91,7 @@ const CustomerEditModal: FC<ICustomerEditModalProps> = ({ id, isOpen, setIsOpen 
 				sublocation?: string;
 				exp?: string;
 				buy_price?: string;
-				quentity?: string;
+				quantity?: string;
 				status?: string
 
 			} = {};
@@ -108,8 +108,8 @@ const CustomerEditModal: FC<ICustomerEditModalProps> = ({ id, isOpen, setIsOpen 
 			if (!stock.location) {
 				errors.location = 'Required';
 			}
-			if (!stock.quentity) {
-				errors.quentity = 'Required';
+			if (!stock.quantity) {
+				errors.quantity = 'Required';
 			}
 			if (!stock.status) {
 				errors.status = 'Required';

@@ -24,7 +24,7 @@ interface Item {
 	image: string;
 	name: string;
 	price: number;
-	quentity: number;
+	quantity: number;
 	reorderlevel: number;
 }
 interface KeyboardProps {
@@ -46,7 +46,7 @@ const Index: React.FC<KeyboardProps>  = ({ orderedItems, setOrderedItems, isActi
 	const handleQuantityChange = (index: number, newQuantity: number) => {
 		setOrderedItems((prevItems: any) =>
 			prevItems.map((item: any, i: number) =>
-				i === index ? { ...item, quentity: newQuantity } : item,
+				i === index ? { ...item, quantity: newQuantity } : item,
 			),
 		);
 	};
@@ -131,7 +131,7 @@ const Index: React.FC<KeyboardProps>  = ({ orderedItems, setOrderedItems, isActi
 									<div className='me-2'>
 										<Input
 											type='number'
-											value={order.quentity}
+											value={order.quantity}
 											onChange={(e: any) =>
 												handleQuantityChange(
 													index,
@@ -142,7 +142,7 @@ const Index: React.FC<KeyboardProps>  = ({ orderedItems, setOrderedItems, isActi
 										/>
 									</div>
 									{/* <div className='me-2'>
-										<strong>{priceFormat(order.quentity * order.price)}</strong>
+										<strong>{priceFormat(order.quantity * order.price)}</strong>
 									</div> */}
 								</div>
 								<div className='todo-extras'>

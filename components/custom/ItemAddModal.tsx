@@ -533,7 +533,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<FormGroup id='supplier' label='Supplier/Coustomer' className='col-md-6'>
+					<FormGroup id='supplier' label='Supplier/Customer' className='col-md-6'>
 						<Input
 							onChange={formik.handleChange}
 							value={formik.values.supplier}

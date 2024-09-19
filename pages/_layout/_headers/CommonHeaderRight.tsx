@@ -42,7 +42,7 @@ interface Item {
 	image: string;
 	name: string;
 	price: number;
-	quentity: number;
+	quantity: number;
 	reorderlevel: number;
 }
 const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterChildren }) => {
@@ -119,7 +119,7 @@ const CommonHeaderRight: FC<ICommonHeaderRightProps> = ({ beforeChildren, afterC
 										return val;
 									}
 								})
-								.map((quentity: any, index) => (
+								.map((quantity: any, index) => (
 									<Alert
 										icon='Inventory2'
 										isLight
