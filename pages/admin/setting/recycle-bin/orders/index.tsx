@@ -40,7 +40,7 @@ interface Stock {
 	buy_price: number;
 	item_id: string;
 	location: string;
-	quentity: string;
+	quantity: string;
 	status: string;
 	sublocation: string;
 	exp: string;
@@ -303,7 +303,7 @@ const Index: NextPage = () => {
 													<td>{stock.location}</td>
 													<td>{stock.sublocation}</td>
 													<td>{stock.exp}</td>
-													<td>{stock.quentity}</td>
+													<td>{stock.quantity}</td>
 													<td>{stock.status}</td>
 													<td>
 														<Button

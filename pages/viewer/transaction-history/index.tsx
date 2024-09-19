@@ -28,7 +28,7 @@ interface Item {
 	image: string;
 	name: string;
 	price: number;
-	quentity: number;
+	quantity: number;
 	reorderlevel: number;
 }
 interface Category {
@@ -36,7 +36,7 @@ interface Category {
 	categoryname: string;
 }
 interface stock {
-	quentity: number;
+	quantity: number;
 	item_id: string;
 }
 const Index: NextPage = () => {

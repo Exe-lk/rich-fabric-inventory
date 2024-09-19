@@ -28,7 +28,7 @@ interface Item {
 	image: string;
 	name: string;
 	price: number;
-	quentity: number;
+	quantity: number;
 	reorderlevel: number;
 }
 
@@ -63,7 +63,7 @@ const Index: React.FC<KeyboardProps> = ({
 			cid: '12356',
 			status: true,
 			image: '',
-			quentity: 0,
+			quantity: 0,
 			name: 'button',
 			category: 'clothes',
 			reorderlevel: '1500',
@@ -71,7 +71,7 @@ const Index: React.FC<KeyboardProps> = ({
 		{
 			category: 'clothes',
 			status: false,
-			quentity: 0,
+			quantity: 0,
 			image: '',
 			cid: '12358',
 			reorderlevel: 3,
@@ -181,7 +181,7 @@ const Index: React.FC<KeyboardProps> = ({
 		}
 		if (selectedItem) {
 			console.log(popupInput);
-			const updatedItem = { ...selectedItem, quentity: Number(popupInput) };
+			const updatedItem = { ...selectedItem, quantity: Number(popupInput) };
 			console.log(updatedItem);
 			await setOrderedItems((prevItems: any) => {
 				const itemIndex = prevItems.findIndex((item: any) => item.cid === updatedItem.cid);
