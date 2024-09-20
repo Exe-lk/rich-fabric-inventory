@@ -13,6 +13,12 @@ import Swal from 'sweetalert2';
 import useDarkMode from '../../hooks/useDarkMode';
 import Dropdown, { DropdownMenu, DropdownToggle } from '../bootstrap/Dropdown';
 
+import {
+	useDeleteUserMutation,
+	useGetUsersQuery,
+	useGetDeleteUsersQuery,
+	useUpdateUserMutation,
+} from '../../redux/slices/userManagementApiSlice';
 interface CategoryEditModalProps {
 	id: string;
 	isOpen: boolean;
@@ -20,7 +26,12 @@ interface CategoryEditModalProps {
 }
 
 const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }) => {
-	const handleClickDelete = async () => {
+	
+	const { data: user, error, isLoading } = useGetDeleteUsersQuery(undefined);
+	const [updateuser] = useUpdateUserMutation();
+	const [deleteuser] = useDeleteUserMutation();
+	const { refetch } = useGetDeleteUsersQuery(undefined)
+	const handleClickDelete = async (user:any) => {
 		try {
 			const { value: inputText } = await Swal.fire({
 				title: 'Are you sure?',
@@ -40,11 +51,106 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 
 			if (inputText === 'DELETE') {
 				// Perform delete action here
+				await deleteuser(user.id).unwrap();
+				Swal.fire('Deleted!', 'The user has been deleted.', 'success');
+
 				console.log('Delete confirmed');
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete user.', 'error');
+		}
+	};
+	const handleClickRestore = async (user: any) => {
+		try {
+			const result = await Swal.fire({
+				title: 'Are you sure?',
+
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, Restore it!',
+			});
+			if (result.isConfirmed) {
+				const values = await {
+					...user,
+					status: true,
+				};
+
+				await updateuser(values);
+
+				Swal.fire('Restored!', 'The user has been restored.', 'success');
+			}
+		} catch (error) {
+			console.error('Error deleting document: ', error);
+			Swal.fire('Error', 'Failed to delete category.', 'error');
+		}
+	};
+
+	const handleDeleteAll = async () => {
+		try {
+			const { value: inputText } = await Swal.fire({
+				title: 'Are you sure?',
+				text: 'Please type "DELETE ALL" to confirm deleting all Suppliers',
+				input: 'text',
+				icon: 'warning',
+				inputValidator: (value) => {
+					if (value !== 'DELETE ALL') {
+						return 'You need to type "DELETE ALL" to confirm!';
+					}
+				},
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, delete all!',
+			});
+
+			if (inputText === 'DELETE ALL') {
+				for (const users of user) {
+					await deleteuser(users.id).unwrap();
+				}
+				Swal.fire('Deleted!', 'All users have been deleted.', 'success');
+
+				// Refetch categories after deletion
+				refetch();
+			}
+		} catch (error) {
+			console.error('Error deleting all categories:', error);
+			Swal.fire('Error', 'Failed to delete all suppliers.', 'error');
+		}
+	};
+
+	// Handle restore all categories
+	const handleRestoreAll = async () => {
+		try {
+			const result = await Swal.fire({
+				title: 'Are you sure?',
+				text: 'This will restore all suppliers.',
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, restore all!',
+			});
+
+			if (result.isConfirmed) {
+				for (const users of user) {
+					const values = {
+						...users,
+						status: true, // Assuming restoring means setting status to true
+						
+					};
+					await updateuser(values).unwrap();
+				}
+				Swal.fire('Restored!', 'All categories have been restored.', 'success');
+
+				// Refetch categories after restoring
+				refetch();
+			}
+		} catch (error) {
+			console.error('Error restoring all categories:', error);
+			Swal.fire('Error', 'Failed to restore all categories.', 'error');
 		}
 	};
 	return (
@@ -57,73 +163,66 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					<thead>
 						<tr>
 							<th>User</th>
-							
+							<th>Position</th>
 							<th>Email</th>
 							<th>Mobile number</th>
 
 							<th>
-								<Button
+							<Button
 									icon='Delete'
-									onClick={handleClickDelete}
-									color='primary'
+									onClick={handleDeleteAll}
+									color='danger'
 									isLight>
 									Delete All
 								</Button>
-								<Button icon='Restore' className='ms-3' color='primary'>
+								<Button
+									icon='Restore'
+									className='ms-3'
+									onClick={handleRestoreAll}
+									color='primary'>
 									Restore All
 								</Button>
 							</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr>
-							<td>malinka</td>
-							
-							<td>abc@gmail.com</td>
-							<td>0778965412</td>
+					{isLoading && (
+							<tr>
+								<td>Loading...</td>
+							</tr>
+						)}
+						{error && (
+							<tr>
+								<td>Error fetching categories.</td>
+							</tr>
+						)}
+						{user &&
+							user.map((user: any) => (
+								<tr key={user.id}>
+									<td>{user.name}</td>
+									<td>{user.role}</td>
+									<td>{user.email}</td>
+									<td>{user.mobile}</td>
 
-							<td>
-								<Button icon='Restore' tag='a' color='info'>
-									{' '}
-									Restore
-								</Button>
-								<Button
-									className='m-2'
-									icon='Delete'
-									color='danger'
-									onClick={handleClickDelete}
-									// onClick={() =>
-									// 	handleClickDelete(stock.cid)
-									// }
-								>
-									Delete
-								</Button>
-							</td>
-						</tr>
-						<tr>
-							<td>thilina</td>
-							
-							<td>abc@gmail.com</td>
-							<td>0778965412</td>
+									<td>
+										<Button
+											icon='Restore'
+											tag='a'
+											color='info'
+											onClick={() => handleClickRestore(user)}>
+											Restore
+										</Button>
 
-							<td>
-								<Button icon='Restore' tag='a' color='info'>
-									{' '}
-									Restore
-								</Button>
-								<Button
-									className='m-2'
-									icon='Delete'
-									color='danger'
-									onClick={handleClickDelete}
-									// onClick={() =>
-									// 	handleClickDelete(stock.cid)
-									// }
-								>
-									Delete
-								</Button>
-							</td>
-						</tr>
+										<Button
+											className='m-2'
+											icon='Delete'
+											color='danger'
+											onClick={() => handleClickDelete(user)}>
+											Delete
+										</Button>
+									</td>
+								</tr>
+							))}
 					</tbody>
 				</table>
 			</ModalBody>

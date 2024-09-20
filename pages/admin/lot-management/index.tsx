@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
-import Head from 'next/head';
-import useDarkMode from '../../../hooks/useDarkMode';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import SubHeader, {
 	SubHeaderLeft,
@@ -15,55 +13,24 @@ import Page from '../../../layout/Page/Page';
 import Card, { CardBody, CardTitle } from '../../../components/bootstrap/Card';
 import StockAddModal from '../../../components/custom/ItemAddModal';
 import StockEditModal from '../../../components/custom/ItemEditModal';
-import { doc, deleteDoc, collection, getDocs, updateDoc, query, where } from 'firebase/firestore';
-import { firestore } from '../../../firebaseConfig';
-import Dropdown, { DropdownToggle, DropdownMenu } from '../../../components/bootstrap/Dropdown';
-import { getColorNameWithIndex } from '../../../common/data/enumColors';
-import { getFirstLetter } from '../../../helpers/helpers';
 import Swal from 'sweetalert2';
-import FormGroup from '../../../components/bootstrap/forms/FormGroup';
-import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
-import showNotification from '../../../components/extras/showNotification';
 import StockDeleteModal from '../../../components/custom/ItemDeleteModal';
+import { useUpdateLotMutation, useGetLotsQuery } from '../../../redux/slices/lotAPISlice';
 
-// Define interfaces for data objects
-interface Item {
-	cid: string;
-	category: number;
-	image: string;
-	name: string;
-	price: number;
-	quantity: number;
-	reorderlevel: number;
-}
-interface Category {
-	cid: string;
-	categoryname: string;
-}
-interface stock {
-	quantity: number;
-	item_id: string;
-}
 const Index: NextPage = () => {
-	const { darkModeStatus } = useDarkMode(); // Dark mode
 	const [searchTerm, setSearchTerm] = useState(''); // State for search term
 	const [addModalStatus, setAddModalStatus] = useState<boolean>(false); // State for add modal status
 	const [editModalStatus, setEditModalStatus] = useState<boolean>(false); // State for edit modal status
-	const [item, setItem] = useState<Item[]>([]); // State for stock data
-	const [category, setcategory] = useState<Category[]>([]);
-	const [orderData, setOrdersData] = useState([]);
-	const [stockData, setStockData] = useState([]);
 	const [deleteModalStatus, setDeleteModalStatus] = useState<boolean>(false);
-
 	const [id, setId] = useState<string>(''); // State for current stock item ID
 	const [id1, setId1] = useState<string>('12356'); // State for new item ID
-	const [status, setStatus] = useState(true);
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-	const [quantityDifference, setQuantityDifference] = useState([]);
+	const { data: lot, error, isLoading } = useGetLotsQuery(undefined);
+	const [updatelot] = useUpdateLotMutation();
 
 	// Function to handle deletion of an item
 	const handleClickDelete = async (item: any) => {
 		try {
+			
 			const result = await Swal.fire({
 				title: 'Are you sure?',
 
@@ -75,26 +42,12 @@ const Index: NextPage = () => {
 			});
 			if (result.isConfirmed) {
 				try {
-					item.status = false;
-					const docRef = doc(firestore, 'item', item.cid);
-					// Update the data
-					updateDoc(docRef, item)
-						.then(() => {
-							Swal.fire('Deleted!', 'item has been deleted.', 'success');
-							if (status) {
-								// Toggle status to trigger data refetch
-								setStatus(false);
-							} else {
-								setStatus(true);
-							}
-						})
-						.catch((error) => {
-							console.error('Error adding document: ', error);
+					const values = await {
+						...item,status:false
+					};
+					await updatelot(values);
 
-							alert(
-								'An error occurred while adding the document. Please try again later.',
-							);
-						});
+					Swal.fire('Deleted!', 'The category has been deleted.', 'success');
 				} catch (error) {
 					console.error('Error during handleUpload: ', error);
 					Swal.close;
@@ -103,7 +56,7 @@ const Index: NextPage = () => {
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete employee.', 'error');
 		}
 	};
 	// Return the JSX for rendering the page
@@ -129,7 +82,7 @@ const Index: NextPage = () => {
 					/>
 				</SubHeaderLeft>
 				<SubHeaderRight>
-					<Dropdown>
+					{/* <Dropdown>
 						<DropdownToggle hasIcon={false}>
 							<Button
 								icon='FilterAlt'
@@ -171,7 +124,7 @@ const Index: NextPage = () => {
 								</div>
 							</div>
 						</DropdownMenu>
-					</Dropdown>
+					</Dropdown> */}
 					<SubheaderSeparator />
 
 					{/* Button to open  New Item modal */}
@@ -180,7 +133,7 @@ const Index: NextPage = () => {
 						color='success'
 						isLight
 						onClick={() => setAddModalStatus(true)}>
-						New Stock
+						New Lot
 					</Button>
 				</SubHeaderRight>
 			</SubHeader>
@@ -190,7 +143,7 @@ const Index: NextPage = () => {
 						{/* Table for displaying customer data */}
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
-								<div className='flex-grow-1 text-center text-info '>Manage Stock</div>
+								<div className='flex-grow-1 text-center text-info '>Manage Lot</div>
 								<Button
 									icon='UploadFile'
 									color='warning'
@@ -202,12 +155,12 @@ const Index: NextPage = () => {
 								<table className='table table-bordered border-primary table-modern table-hover'>
 									<thead>
 										<tr>
-											<th>Code</th>
-											<th>Category</th>
-											<th>Sub Category</th>
-											<th>Supplier</th>
+											<th>GRN number</th>
+											<th>description</th>
+											<th>UOM</th>
+											<th>PackType</th>
+											<th>Remark</th>
 											<th>Type</th>
-											<th>Quantity</th>
 											<th></th>
 											{/* <th><Button icon='PersonAdd' color='primary' isLight onClick={() => setAddModalStatus(true)}>
                         New Item
@@ -216,78 +169,56 @@ const Index: NextPage = () => {
 									</thead>
 
 									<tbody>
-										<tr>
-											<td>15368</td>
-											<td>Gray Fabric</td>
-											<td>Linen</td>
-											<td>Gayanthi</td>
-											<td>abc</td>
-											<td>320</td>
-											<td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete(item)}>
-													Delete
-												</Button>
-											</td>
-										</tr>
-										<tr>
-											<td>15385</td>
-											<td>Dye Fabric</td>
-											<td>Polyester</td>
-											<td>Achintha</td>
-											<td>abc</td>
-											<td>320</td>
-											<td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete(item)}>
-													Delete
-												</Button>
-											</td>
-										</tr>
-										<tr>
-											<td>15385</td>
-											<td>collar cuff</td>
-											<td>abc</td>
-											<td>Maheemani</td>
-											<td>abc</td>
-											<td>320</td>
-											<td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete(item)}>
-													Delete
-												</Button>
-											</td>
-										</tr>
+										{isLoading && (
+											<tr>
+												<td>Loading...</td>
+											</tr>
+										)}
+										{error && (
+											<tr>
+												<td>Error fetching categories.</td>
+											</tr>
+										)}
+										{lot &&
+											lot
+												.filter((lot: any) =>
+													searchTerm
+														? lot.code
+																.toLowerCase()
+																.includes(searchTerm.toLowerCase())
+														: true,
+												)
+												.map((lot: any) => (
+													<tr key={lot.id}>
+														<td>{lot.code}</td>
+														<td>{lot.description}</td>
+														<td>{lot.uom}</td>
+														<td>{lot.PackType}</td>
+														<td>{lot.remark}</td>
+														<td>{lot.type}</td>
+
+														<td>
+															<Button
+																icon='Edit'
+																color='info'
+																onClick={() => (
+																	setEditModalStatus(true),
+																	setId(lot.id)
+																)}>
+																Edit
+															</Button>
+															<Button
+																className='m-2'
+																icon='Delete'
+																color='danger'
+																onClick={() =>
+																	handleClickDelete(lot)
+																}>
+																Delete
+															</Button>
+														</td>
+													</tr>
+												))}
 									</tbody>
 								</table>
 								<Button

@@ -11,89 +11,60 @@ import Button from '../bootstrap/Button';
 import { collection,query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
 import { firestore, storage } from '../../firebaseConfig';
 import Swal from 'sweetalert2';
-
+import {
+	useUpdateKnitTypeMutation,
+	useGetKnitTypesQuery,
+} from '../../redux/slices/knitTypeApiSlice';
 // Define the props for the CategoryEditModal component
 interface CategoryEditModalProps {
 	id: string;
 	isOpen: boolean;
 	setIsOpen(...args: unknown[]): unknown;
 }
-interface Category{
-	cid: string;
-	categoryname: string;
-	status:boolean
-}
+
 // CategoryEditModal component definition
 const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }) => {
-	const data: Category = {
-		cid: "",
-		categoryname: "",
-		status:true
-	}
-	const [stock, setStock] = useState<Category>(data);
-    //fetch data from database
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const dataCollection = collection(firestore, 'category');
-				const q = query(dataCollection, where('__name__', '==', id));
-				const querySnapshot = await getDocs(q);
-				const firebaseData: any = querySnapshot.docs.map((doc) => {
-					const data = doc.data() as Category;
-					return {
-						...data,
-						cid: doc.id,
-					};
-				});
-				await setStock(firebaseData[0])
-                console.log('Firebase Data:', stock);
-			} catch (error) {
-				console.error('Error fetching data: ', error);
-			}
-		};
-        fetchData();
-	}, [id]);
-    // Initialize formik for form management
+	// Initialize formik for form management
+	const { data: knit } = useGetKnitTypesQuery(undefined);
+	const [updateknit, { isLoading }] = useUpdateKnitTypeMutation();
+
+	const KnitToEdit = knit?.find((knit: any) => knit.id === id);
+
+
 	const formik = useFormik({
 		initialValues: {
-			categoryname: '',
+			id:  KnitToEdit?.id,
+			name:  KnitToEdit?.name || '',
 		},
+		enableReinitialize: true,
 		validate: (values) => {
 			const errors: {
-				categoryname?: string;
+				name?: string;
 			} = {};
-			if (!stock.categoryname) {
-				errors.categoryname = 'Required';
+			if (!values.name) {
+				errors.name = 'Required';
 			}
 			return errors;
 		},
 		onSubmit: async (values) => {
 			try {
-                let data: any = stock
-				const docRef = doc(firestore, "category", id);
-				// Update the data
-				updateDoc(docRef, data).then(() => {
-                   setIsOpen(false);
-					showNotification(
-						<span className='d-flex align-items-center'>
-							<Icon icon='Info' size='lg' className='me-1' />
-							<span>Successfully Added</span>
-						</span>,
-						'category has been added successfully',
-					);
-					Swal.fire('Added!', 'category has been add successfully.', 'success');
-				}).catch((error) => {
-					console.error('Error adding document: ', error);
-					alert('An error occurred while adding the document. Please try again later.');
+				Swal.fire({
+					title: 'Processing...',
+					html: 'Please wait while the data is being processed.<br><div class="spinner-border" role="status"></div>',
+					allowOutsideClick: false,
+					showCancelButton: false,
+					showConfirmButton: false,
 				});
+				await updateknit(values).unwrap();
+
+				Swal.fire('Added!', 'Color has been update successfully.', 'success');
+				formik.resetForm();
 			} catch (error) {
 				console.error('Error during handleUpload: ', error);
 				alert('An error occurred during file upload. Please try again later.');
 			}
-
 		},
 	});
-
 	return (
 		<Modal isOpen={isOpen} setIsOpen={setIsOpen} size='xl' titleId={id}>
 			<ModalHeader setIsOpen={setIsOpen} className='p-4'>
@@ -101,14 +72,13 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 			</ModalHeader>
 			<ModalBody className='px-4'>
 				<div className='row g-4'>
-					<FormGroup id='categoryname' label='Knit type' onChange={formik.handleChange} className='col-md-6'>
+				<FormGroup id='name' label='Knit Type' className='col-md-6'>
 						<Input
-							onChange={(e: any) => { stock.categoryname = e.target.value }}
-							value={stock?.categoryname}
+							onChange={formik.handleChange}
+							value={formik.values.name}
 							onBlur={formik.handleBlur}
 							isValid={formik.isValid}
-							isTouched={formik.touched.categoryname}
-							invalidFeedback={formik.errors.categoryname}
+						
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>

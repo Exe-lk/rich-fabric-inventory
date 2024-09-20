@@ -1,9 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react';
-import type { NextPage } from 'next';
+// pages/index.tsx
+import React, { useState } from 'react';
+import { NextPage } from 'next';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import useDarkMode from '../../../hooks/useDarkMode';
 import Page from '../../../layout/Page/Page';
-import { firestore } from '../../../firebaseConfig';
+import { useGetCategoriesQuery } from '../../../redux/slices/categoryApiSlice'; // Import the RTK Query hook
 import SubHeader, {
 	SubHeaderLeft,
 	SubHeaderRight,
@@ -11,37 +12,31 @@ import SubHeader, {
 } from '../../../layout/SubHeader/SubHeader';
 import Icon from '../../../components/icon/Icon';
 import Input from '../../../components/bootstrap/forms/Input';
-import Dropdown, { DropdownMenu, DropdownToggle } from '../../../components/bootstrap/Dropdown';
 import Button from '../../../components/bootstrap/Button';
 import Card, { CardBody, CardTitle } from '../../../components/bootstrap/Card';
-import { collection, deleteDoc, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 import CategoryAddModal from '../../../components/custom/CategoryAddModal';
 import CategoryDeleteModal from '../../../components/custom/CategoryDeleteModal';
 import CategoryEditModal from '../../../components/custom/CategoryEditModal';
 import Swal from 'sweetalert2';
-// Define the interface for category data
-interface Category {
-	cid: string;
-	categoryname: string;
-	status: boolean;
-}
+import { useUpdateCategoryMutation } from '../../../redux/slices/categoryApiSlice';
 // Define the functional component for the index page
 const Index: NextPage = () => {
-	const { darkModeStatus } = useDarkMode(); // Dark mode
-	const [searchTerm, setSearchTerm] = useState(''); // State for search term
-	const [addModalStatus, setAddModalStatus] = useState<boolean>(false); // State for add modal status
-	const [deleteModalStatus, setDeleteModalStatus] = useState<boolean>(false);
-	const [editModalStatus, setEditModalStatus] = useState<boolean>(false); // State for edit modal status
-	const [category, setcategory] = useState<Category[]>([]); // State for category data
-	const [id, setId] = useState<string>(''); // State for current category ID
-	const [status, setStatus] = useState(true); // State for managing data fetching status
-	
-	// Function to handle deletion of a category
+	const { darkModeStatus } = useDarkMode();
+	const [searchTerm, setSearchTerm] = useState('');
+	const [addModalStatus, setAddModalStatus] = useState(false);
+	const [deleteModalStatus, setDeleteModalStatus] = useState(false);
+	const [editModalStatus, setEditModalStatus] = useState(false);
+	const [id, setId] = useState<string>('');
+
+	// Fetch categories using RTK Query from the custom API
+	const { data: categories, error, isLoading } = useGetCategoriesQuery(undefined);
+	const [updateCategory] = useUpdateCategoryMutation();
+
 	const handleClickDelete = async (category: any) => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'You will not be able to recover this!',
+				// text: 'You will not be able to recover this category!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -49,38 +44,28 @@ const Index: NextPage = () => {
 				confirmButtonText: 'Yes, delete it!',
 			});
 			if (result.isConfirmed) {
-				category.status = false;
-				let data: any = category;
-				const docRef = doc(firestore, 'category', category.cid);
+				const values = await {
+					id: category.id,
+					name: category.name,
+					status: false,
+					subcategory: category.subcategory,
+				};
 
-				updateDoc(docRef, data)
-					.then(() => {
-						if (status) {
-							setStatus(false);
-						} else {
-							setStatus(true);
-						}
+				await updateCategory(values);
 
-						Swal.fire('Delete!', 'category has been delete successfully.', 'success');
-					})
-					.catch((error) => {
-						console.error('Error adding document: ', error);
-						alert(
-							'An error occurred while adding the document. Please try again later.',
-						);
-					});
+				Swal.fire('Deleted!', 'The category has been deleted.', 'success');
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete category.', 'error');
 		}
 	};
+
 	// JSX for rendering the page
 	return (
 		<PageWrapper>
 			<SubHeader>
 				<SubHeaderLeft>
-					{/* Search input */}
 					<label
 						className='border-0 bg-transparent cursor-pointer me-0'
 						htmlFor='searchInput'>
@@ -91,15 +76,12 @@ const Index: NextPage = () => {
 						type='search'
 						className='border-0 shadow-none bg-transparent'
 						placeholder='Search...'
-						onChange={(event: any) => {
-							setSearchTerm(event.target.value);
-						}}
+						onChange={(event: any) => setSearchTerm(event.target.value)}
 						value={searchTerm}
 					/>
 				</SubHeaderLeft>
 				<SubHeaderRight>
 					<SubheaderSeparator />
-					{/* Button to open New category */}
 					<Button
 						icon='AddCircleOutline'
 						color='success'
@@ -112,10 +94,11 @@ const Index: NextPage = () => {
 			<Page>
 				<div className='row h-100'>
 					<div className='col-12'>
-						{/* Table for displaying customer data */}
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
-								<div className='flex-grow-1 text-center text-info'>Manage Category</div>
+								<div className='flex-grow-1 text-center text-info'>
+									Manage Category
+								</div>
 								<Button
 									icon='UploadFile'
 									color='warning'
@@ -125,7 +108,6 @@ const Index: NextPage = () => {
 							</CardTitle>
 
 							<CardBody isScrollable className='table-responsive'>
-								{/* <table className='table table-modern table-hover'> */}
 								<table className='table table-modern table-bordered border-primary table-hover text-center'>
 									<thead>
 										<tr>
@@ -135,100 +117,81 @@ const Index: NextPage = () => {
 										</tr>
 									</thead>
 									<tbody>
-										<tr>
-											<td>Gray Fabric</td>
-											<td>
-												<p>polyester</p>
-												<p>Linen</p>
-												<p>Silk</p>
-												<p>Velvet</p>
-											</td>
-											<td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete(category)}>
-													Delete
-												</Button>
-											</td>
-										</tr>
-										<tr>
-											<td>Dye Fabric</td>
-											<td>
-												<p>polyester</p>
-												<p>Linen</p>
-												<p>Silk</p>
-												<p>Velvet</p>
-											</td>
-											<td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete(category)}>
-													Delete
-												</Button>
-											</td>
-										</tr>
-										<tr>
-										<td>collar cuff</td>
-											<td>
-												<p>Club collar</p>
-												<p>Button collar</p>
-												<p>Spread collar</p>
-											</td>
-											<td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete(category)}>
-													Delete
-												</Button>
-											</td>
-										</tr>
+										{isLoading && (
+											<tr>
+												<td>Loading...</td>
+											</tr>
+										)}
+										{error && (
+											<tr>
+												<td>Error fetching categories.</td>
+											</tr>
+										)}
+										{categories &&
+											categories
+												.filter((category: any) =>
+													searchTerm
+														? category.name
+																.toLowerCase()
+																.includes(searchTerm.toLowerCase())
+														: true,
+												)
+												.map((category: any) => (
+													<tr key={category.cid}>
+														<td>{category.name}</td>
+														<td>
+															<ul>
+																{category.subcategory?.map(
+																	(sub: any, index: any) => (
+																		<p>{sub}</p>
+																	),
+																)}
+															</ul>
+														</td>
+														<td>
+															<Button
+																icon='Edit'
+																color='info'
+																onClick={() =>(
+																	setEditModalStatus(true),
+																	setId(category.id))
+																}>
+																Edit
+															</Button>
+															<Button
+																className='m-2'
+																icon='Delete'
+																color='danger'
+																onClick={() =>
+																	handleClickDelete(category)
+																}>
+																Delete
+															</Button>
+														</td>
+													</tr>
+												))}
 									</tbody>
 								</table>
-								<Button icon='Delete' className='mb-5'
-								onClick={() => (
-									setDeleteModalStatus(true)
-									
-								)}>
-								Recycle Bin</Button> 
-								
+								<Button
+									icon='Delete'
+									className='mb-5'
+									onClick={() => setDeleteModalStatus(true)}>
+									Recycle Bin
+								</Button>
 							</CardBody>
 						</Card>
-						
-			
 					</div>
 				</div>
 			</Page>
 			<CategoryAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
-			<CategoryDeleteModal setIsOpen={setDeleteModalStatus} isOpen={deleteModalStatus} id='' />
+			<CategoryDeleteModal
+				setIsOpen={setDeleteModalStatus}
+				isOpen={deleteModalStatus}
+				id=''
+			/>
 			<CategoryEditModal setIsOpen={setEditModalStatus} isOpen={editModalStatus} id={id} />
 		</PageWrapper>
 	);
 };
+
 export default Index;

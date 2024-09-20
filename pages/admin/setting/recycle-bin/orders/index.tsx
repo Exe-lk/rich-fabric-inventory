@@ -40,7 +40,7 @@ interface Stock {
 	buy_price: number;
 	item_id: string;
 	location: string;
-	quantity: string;
+	quentity: string;
 	status: string;
 	sublocation: string;
 	exp: string;
@@ -58,7 +58,7 @@ const Index: NextPage = () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'You will not be able to recover this!',
+				text: 'You will not be able to recover this stock!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -86,7 +86,7 @@ const Index: NextPage = () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				// text: 'You will not be able to recover this!',
+				// text: 'You will not be able to recover this stock!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -189,7 +189,7 @@ const Index: NextPage = () => {
 						id='searchInput'
 						type='search'
 						className='border-0 shadow-none bg-transparent'
-						placeholder='Search...'
+						placeholder='Search stock...'
 						onChange={(event: any) => {
 							setSearchTerm(event.target.value);
 						}}
@@ -303,7 +303,7 @@ const Index: NextPage = () => {
 													<td>{stock.location}</td>
 													<td>{stock.sublocation}</td>
 													<td>{stock.exp}</td>
-													<td>{stock.quantity}</td>
+													<td>{stock.quentity}</td>
 													<td>{stock.status}</td>
 													<td>
 														<Button

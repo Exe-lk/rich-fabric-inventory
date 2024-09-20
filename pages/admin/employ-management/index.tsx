@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
-import Head from 'next/head';
 import useDarkMode from '../../../hooks/useDarkMode';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import SubHeader, {
@@ -13,41 +12,57 @@ import Input from '../../../components/bootstrap/forms/Input';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody, CardTitle } from '../../../components/bootstrap/Card';
-import CashierAddModal from '../../../components/custom/CashierAddModal';
-import CashierEditModal from '../../../components/custom/CashierEditModal';
-import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
+import UserAddModal from '../../../components/custom/UserAddModal';
+import UserEditModal from '../../../components/custom/UserEditModal';
+import { doc, deleteDoc, collection, getDocs, updateDoc, query, where } from 'firebase/firestore';
 import { firestore } from '../../../firebaseConfig';
 import Dropdown, { DropdownToggle, DropdownMenu } from '../../../components/bootstrap/Dropdown';
 import { getColorNameWithIndex } from '../../../common/data/enumColors';
 import { getFirstLetter } from '../../../helpers/helpers';
 import Swal from 'sweetalert2';
-import CashierDeleteModal from '../../../components/custom/CashierDeleteModal';
-// Define interfaces for Seller
-interface Seller {
+import FormGroup from '../../../components/bootstrap/forms/FormGroup';
+import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
+import SellerDeleteModal from '../../../components/custom/UserDeleteModal';
+import { useGetUsersQuery,useUpdateUserMutation } from '../../../redux/slices/userManagementApiSlice';
+
+interface User {
 	cid: string;
+	image: string;
 	name: string;
-	phone: string;
+	position: string;
 	email: string;
-	company_name: string;
-	company_email: string;
-	product: { category: string; name: string }[];
+	password: string;
+	mobile: number;
+	pin_number: number;
 	status: boolean;
 }
-const Index: NextPage = () => {
-	const { darkModeStatus } = useDarkMode(); // Dark mode
-	const [searchTerm, setSearchTerm] = useState('');
-	const [addModalStatus, setAddModalStatus] = useState<boolean>(false); // State to control the visibility of the Add Seller modal
-	const [editModalStatus, setEditModalStatus] = useState<boolean>(false); // State to control the visibility of the Edit Seller modal
-	const [seller, setStock] = useState<Seller[]>([]); // State to store the seller data fetched from Firestore
-	const [id, setId] = useState<string>(''); // State to store the ID of the seller being edited
-	const [status, setStatus] = useState(true);
-	const [deleteModalStatus, setDeleteModalStatus] = useState<boolean>(false);
 
-	const handleClickDelete = async (item: any) => {
+const Index: NextPage = () => {
+	// Dark mode
+	const { darkModeStatus } = useDarkMode();
+	const [searchTerm, setSearchTerm] = useState('');
+	const [addModalStatus, setAddModalStatus] = useState<boolean>(false);
+	const [editModalStatus, setEditModalStatus] = useState<boolean>(false);
+	const [deleteModalStatus, setDeleteModalStatus] = useState<boolean>(false);
+	const [user, setuser] = useState<User[]>([]);
+	const [id, setId] = useState<string>('');
+	const [status, setStatus] = useState(true);
+	const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+	const role = [
+		{ role: 'bill keeper' },
+		{ role: 'accessosry stock keeper' },
+		{ role: 'display stock keeper' },
+		{ role: 'cashier' },
+	];
+	const { data: users, error, isLoading, refetch } = useGetUsersQuery(undefined);
+	const [updateuser] = useUpdateUserMutation();
+	//delete user
+	// Update the user's status to false instead of deleting
+	const handleClickDelete = async (user: any) => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-
+				text: 'You will not be able to recover this user!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -56,46 +71,34 @@ const Index: NextPage = () => {
 			});
 			if (result.isConfirmed) {
 				try {
-					item.status = false;
-					const docRef = doc(firestore, 'seller', item.cid);
-					// Update the data
-					updateDoc(docRef, item)
-						.then(() => {
-							Swal.fire('Deleted!', 'seller has been deleted.', 'success');
-							if (status) {
-								// Toggle status to trigger data refetch
-								setStatus(false);
-							} else {
-								setStatus(true);
-							}
-						})
-						.catch((error) => {
-							console.error('Error adding document: ', error);
-
-							alert(
-								'An error occurred while adding the document. Please try again later.',
-							);
-						});
+					// Set the user's status to false (soft delete)
+					const values = await {
+						...user,status:false
+					};
+					await updateuser(values);
+					// Refresh the list after deletion
+					Swal.fire('Deleted!', 'User has been deleted.', 'success');
+					 // This will refresh the list of users to reflect the changes
 				} catch (error) {
-					console.error('Error during deleting: ', error);
-					Swal.close;
-					alert('An error occurred during file upload. Please try again later.');
+					console.error('Error during handleDelete: ', error);
+					Swal.fire(
+						'Error',
+						'An error occurred during deletion. Please try again later.',
+						'error',
+					);
 				}
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete user.', 'error');
 		}
 	};
 
 	return (
 		<PageWrapper>
-			<Head>
-				<></>
-			</Head>
 			<SubHeader>
 				<SubHeaderLeft>
-					{/* Search input */}
+					{/* Search input  */}
 					<label
 						className='border-0 bg-transparent cursor-pointer me-0'
 						htmlFor='searchInput'>
@@ -106,6 +109,7 @@ const Index: NextPage = () => {
 						type='search'
 						className='border-0 shadow-none bg-transparent'
 						placeholder='Search...'
+						// onChange={formik.handleChange}
 						onChange={(event: any) => {
 							setSearchTerm(event.target.value);
 						}}
@@ -113,96 +117,135 @@ const Index: NextPage = () => {
 					/>
 				</SubHeaderLeft>
 				<SubHeaderRight>
-					{/* Dropdown for filter options */}
+					<Dropdown>
+						<DropdownToggle hasIcon={false}>
+							<Button
+								icon='FilterAlt'
+								color='dark'
+								isLight
+								className='btn-only-icon position-relative'></Button>
+						</DropdownToggle>
+						<DropdownMenu isAlignmentEnd size='lg'>
+							<div className='container py-2'>
+								<div className='row g-3'>
+									<FormGroup label='User type' className='col-12'>
+										<ChecksGroup>
+											{role.map((user, index) => (
+												<Checks
+													key={user.role}
+													id={user.role}
+													label={user.role}
+													name={user.role}
+													value={user.role}
+													checked={selectedUsers.includes(user.role)}
+													onChange={(event: any) => {
+														const { checked, value } = event.target;
+														setSelectedUsers(
+															(prevUsers) =>
+																checked
+																	? [...prevUsers, value] // Add category if checked
+																	: prevUsers.filter(
+																			(user) =>
+																				user !== value,
+																	  ), // Remove category if unchecked
+														);
+													}}
+												/>
+											))}
+										</ChecksGroup>
+									</FormGroup>
+								</div>
+							</div>
+						</DropdownMenu>
+					</Dropdown>
 
 					<SubheaderSeparator />
-					{/* Button to open the Add Seller modal */}
 					<Button
-						icon='AddCircleOutline'
+						icon='PersonAdd'
 						color='success'
 						isLight
 						onClick={() => setAddModalStatus(true)}>
-						Add Employee
+						New Employee
 					</Button>
 				</SubHeaderRight>
 			</SubHeader>
 			<Page>
 				<div className='row h-100'>
 					<div className='col-12'>
-						{/* Table for displaying customer data */}
+						{/* Table for displaying user data */}
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
 								<div className='flex-grow-1 text-center text-info'>
-									Manage Employee
+									Employee Management
 								</div>
-								<Button
-									icon='UploadFile'
-									color='warning'
-									onClick={() => setAddModalStatus(true)}>
-									Export
-								</Button>
 							</CardTitle>
 							<CardBody isScrollable className='table-responsive'>
 								<table className='table table-bordered border-primary table-modern table-hover'>
 									<thead>
 										<tr>
-											<th>Name</th>
-										
-											<th>E-mail</th>
-											<th>Phone number</th>
-											
+											<th>User</th>
+											<th>Email</th>
+											<th>Mobile number</th>
+											<th>NIC</th>
+											<th>Role</th>
 											<th></th>
 										</tr>
 									</thead>
 									<tbody>
-										<tr>
-											<td>malinka</td>
-											
-											<td>abc@gmail.com</td>
-											<td>0778965412</td>
-											
-											
-											<td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete(seller)}>
-													Delete
-												</Button>
-											</td>
-										</tr>
-										<tr>
-											<td>malinka</td>
-											
-											<td>abc@gmail.com</td>
-											<td>0778965412</td>
-										
-											
-											<td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete(seller)}>
-													Delete
-												</Button>
-											</td>
-										</tr>
+										{isLoading && (
+											<tr>
+												<td>Loading...</td>
+											</tr>
+										)}
+										{error && (
+											<tr>
+												<td>Error fetching users.</td>
+											</tr>
+										)}
+										{users &&
+											users
+												.filter((user: any) => user.status === true) // Only show users where status is true
+												.filter((user: any) =>
+													searchTerm
+														? user.nic
+																.toLowerCase()
+																.includes(searchTerm.toLowerCase())
+														: true,
+												)
+												.filter((user: any) =>
+													selectedUsers.length > 0
+														? selectedUsers.includes(user.role)
+														: true,
+												)
+												.map((user: any) => (
+													<tr key={user.id}>
+														<td>{user.name}</td>
+														<td>{user.email}</td>
+														<td>{user.mobile}</td>
+														<td>{user.nic}</td>
+														<td>{user.role}</td>
+														<td>
+															<Button
+																icon='Edit'
+																color='info'
+																onClick={() => {
+																	setEditModalStatus(true);
+																	setId(user.id);
+																}}>
+																Edit
+															</Button>
+															<Button
+																className='m-2'
+																icon='Delete'
+																color='danger'
+																onClick={() =>
+																	handleClickDelete(user)
+																}>
+																Delete
+															</Button>
+														</td>
+													</tr>
+												))}
 									</tbody>
 								</table>
 								<Button
@@ -216,10 +259,15 @@ const Index: NextPage = () => {
 					</div>
 				</div>
 			</Page>
-			{/* Add Seller modal */}
-			<CashierAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
-			<CashierEditModal setIsOpen={setEditModalStatus} isOpen={editModalStatus} id={id} />
-			<CashierDeleteModal setIsOpen={setDeleteModalStatus} isOpen={deleteModalStatus} id='' />
+			<UserAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
+			<UserEditModal
+				setIsOpen={setEditModalStatus}
+				isOpen={editModalStatus}
+				id={id}
+				refetch={refetch} // Pass refetch function here
+			/>
+
+			<SellerDeleteModal setIsOpen={setDeleteModalStatus} isOpen={deleteModalStatus} id='' />
 		</PageWrapper>
 	);
 };

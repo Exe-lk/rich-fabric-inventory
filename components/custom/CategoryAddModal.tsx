@@ -2,14 +2,13 @@ import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { useFormik } from 'formik';
 import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../bootstrap/Modal';
-import showNotification from '../extras/showNotification';
 import Icon from '../icon/Icon';
 import FormGroup from '../bootstrap/forms/FormGroup';
 import Input from '../bootstrap/forms/Input';
 import Button from '../bootstrap/Button';
-import { collection, addDoc } from 'firebase/firestore';
-import { firestore } from '../../firebaseConfig';
 import Swal from 'sweetalert2';
+import { useAddCategoryMutation } from '../../redux/slices/categoryApiSlice';
+import { useGetCategoriesQuery } from '../../redux/slices/categoryApiSlice'; // Import the query
 
 interface CategoryEditModalProps {
 	id: string;
@@ -18,10 +17,12 @@ interface CategoryEditModalProps {
 }
 
 const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }) => {
+	const [addCategory, { isLoading }] = useAddCategoryMutation();
+	const { refetch } = useGetCategoriesQuery(undefined); // Refetch the categories after adding a new one
+
 	const formik = useFormik({
 		initialValues: {
 			categoryname: '',
-			status: true,
 			subcategory: [''],
 		},
 		validate: (values) => {
@@ -32,35 +33,41 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 			if (!values.categoryname) {
 				errors.categoryname = 'Required';
 			}
-			if (values.subcategory) {
-				errors.subcategory = 'Required';
-			}
+
 			return errors;
 		},
 		onSubmit: async (values) => {
 			try {
-				console.log(values);
-				values.status = true;
-				const collectionRef = collection(firestore, 'category');
-				addDoc(collectionRef, values)
-					.then(() => {
-						showNotification(
-							<span className='d-flex align-items-center'>
-								<Icon icon='Info' size='lg' className='me-1' />
-								<span>Successfully Added</span>
-							</span>,
-							'category has been added successfully',
-						);
-						Swal.fire('Added!', 'Category has been added successfully.', 'success');
-						formik.resetForm();
-						setIsOpen(false);
-					})
-					.catch((error) => {
-						console.error('Error adding document: ', error);
-						alert(
-							'An error occurred while adding the document. Please try again later.',
-						);
+				// Show a processing modal
+				const process = Swal.fire({
+					title: 'Processing...',
+					html: 'Please wait while the data is being processed.<br><div class="spinner-border" role="status"></div>',
+					allowOutsideClick: false,
+					showCancelButton: false,
+					showConfirmButton: false,
+				});
+				
+				try {
+					// Add the new category
+					const response: any = await addCategory(values).unwrap();
+					console.log(response);
+
+					// Refetch categories to update the list
+					refetch();
+
+					// Success feedback
+					await Swal.fire({
+						icon: 'success',
+						title: 'Category Created Successfully',
 					});
+					setIsOpen(false); // Close the modal after successful addition
+				} catch (error) {
+					await Swal.fire({
+						icon: 'error',
+						title: 'Error',
+						text: 'Failed to add the category. Please try again.',
+					});
+				}
 			} catch (error) {
 				console.error('Error during handleUpload: ', error);
 				alert('An error occurred during file upload. Please try again later.');
@@ -68,6 +75,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 		},
 	});
 
+	// Functions to handle adding/removing subcategories
 	const addSubcategoryField = () => {
 		formik.setValues({
 			...formik.values,

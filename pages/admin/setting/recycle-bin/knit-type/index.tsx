@@ -11,85 +11,24 @@ import SubHeader, {
 } from '../../../../../layout/SubHeader/SubHeader';
 import Icon from '../../../../../components/icon/Icon';
 import Input from '../../../../../components/bootstrap/forms/Input';
-import Dropdown, {
-	DropdownMenu,
-	DropdownToggle,
-} from '../../../../../components/bootstrap/Dropdown';
 import Button from '../../../../../components/bootstrap/Button';
 import Card, { CardBody } from '../../../../../components/bootstrap/Card';
-import {
-	collection,
-	deleteDoc,
-	doc,
-	getDocs,
-	query,
-	updateDoc,
-	where,
-	writeBatch,
-} from 'firebase/firestore';
-import CategoryAddModal from '../../../../../components/custom/CategoryAddModal';
-import CategoryEditModal from '../../../../../components/custom/CategoryEditModal';
 import Swal from 'sweetalert2';
-// Define the interface for category data
-interface Category {
-	cid: string;
-	categoryname: string;
-	status: boolean;
-}
+import {
+	useDeleteKnitTypeMutation,
+	useGetDeletedKnitTypesQuery,
+	useUpdateKnitTypeMutation,
+} from '../../../../../redux/slices/knitTypeApiSlice';
 // Define the functional component for the index page
 const Index: NextPage = () => {
 	const { darkModeStatus } = useDarkMode(); // Dark mode
 	const [searchTerm, setSearchTerm] = useState(''); // State for search term
-	const [addModalStatus, setAddModalStatus] = useState<boolean>(false); // State for add modal status
-	const [editModalStatus, setEditModalStatus] = useState<boolean>(false); // State for edit modal status
-	const [category, setcategory] = useState<Category[]>([]); // State for category data
-	const [id, setId] = useState<string>(''); // State for current category ID
-	const [status, setStatus] = useState(true); // State for managing data fetching status
+	const { data: data, error, isLoading } = useGetDeletedKnitTypesQuery(undefined);
+	const [updatedata] = useUpdateKnitTypeMutation();
+	const [deletedata] = useDeleteKnitTypeMutation();
+	const { refetch } = useGetDeletedKnitTypesQuery(undefined);
 
-	const customOptions = {
-		width: 3,
-		color: '#FF0000',
-	};
-	// Function to handle deletion of a category
-	const handleClickRestore = async (category: any) => {
-		try {
-			const result = await Swal.fire({
-				title: 'Are you sure?',
-				// text: 'You will not be able to recover this!',
-				icon: 'warning',
-				showCancelButton: true,
-				confirmButtonColor: '#3085d6',
-				cancelButtonColor: '#d33',
-				confirmButtonText: 'Yes, restore it!',
-			});
-			if (result.isConfirmed) {
-				category.status = true;
-				let data: any = category;
-				const docRef = doc(firestore, 'category', category.cid);
-
-				updateDoc(docRef, data)
-					.then(() => {
-						if (status) {
-							setStatus(false);
-						} else {
-							setStatus(true);
-						}
-
-						Swal.fire('Restore!', 'category has been restore successfully.', 'success');
-					})
-					.catch((error) => {
-						console.error('Error adding document: ', error);
-						alert(
-							'An error occurred while adding the document. Please try again later.',
-						);
-					});
-			}
-		} catch (error) {
-			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
-		}
-	};
-	const handleClickDelete = async () => {
+	const handleClickDelete = async (data: any) => {
 		try {
 			const { value: inputText } = await Swal.fire({
 				title: 'Are you sure?',
@@ -108,68 +47,109 @@ const Index: NextPage = () => {
 			});
 
 			if (inputText === 'DELETE') {
+				await deletedata(data.id).unwrap();
+				Swal.fire('Deleted!', 'The data has been deleted.', 'success');
+
 				// Perform delete action here
 				console.log('Delete confirmed');
+				refetch();
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete data.', 'error');
 		}
 	};
-	const handleDeleteAll = async () => {
+	const handleClickRestore = async (data: any) => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'You will not be able to recover these categories!',
+
 				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, Restore it!',
+			});
+			if (result.isConfirmed) {
+				const values = await {
+					...data,
+					status: true,
+				};
+
+				await updatedata(values);
+
+				Swal.fire('Restory!', 'The data has been restored.', 'success');
+			}
+		} catch (error) {
+			console.error('Error deleting document: ', error);
+			Swal.fire('Error', 'Failed to delete data.', 'error');
+		}
+	};
+
+	const handleDeleteAll = async () => {
+		try {
+			const { value: inputText } = await Swal.fire({
+				title: 'Are you sure?',
+				text: 'Please type "DELETE ALL" to confirm deleting all Suppliers',
+				input: 'text',
+				icon: 'warning',
+				inputValidator: (value) => {
+					if (value !== 'DELETE ALL') {
+						return 'You need to type "DELETE ALL" to confirm!';
+					}
+				},
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
 				cancelButtonColor: '#d33',
 				confirmButtonText: 'Yes, delete all!',
 			});
-			if (result.isConfirmed) {
-				const batch = writeBatch(firestore);
-				category.forEach((cat) => {
-					const docRef = doc(firestore, 'category', cat.cid);
-					batch.delete(docRef);
-				});
-				await batch.commit();
-				Swal.fire('Deleted!', 'All things have been deleted.', 'success');
-				setStatus(!status);
+
+			if (inputText === 'DELETE ALL') {
+				for (const datas of data) {
+					await deletedata(datas.id).unwrap();
+				}
+				Swal.fire('Deleted!', 'All data have been deleted.', 'success');
+
+				// Refetch categories after deletion
+				refetch();
 			}
 		} catch (error) {
-			console.error('Error deleting all documents: ', error);
-			Swal.fire('Error', 'Failed to delete all categories.', 'error');
+			console.error('Error deleting all categories:', error);
+			Swal.fire('Error', 'Failed to delete all data.', 'error');
 		}
 	};
 
-	// Function to handle restoration of all categories
+	// Handle restore all categories
 	const handleRestoreAll = async () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
+				text: 'This will restore all suppliers.',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
 				cancelButtonColor: '#d33',
 				confirmButtonText: 'Yes, restore all!',
 			});
+
 			if (result.isConfirmed) {
-				const batch = writeBatch(firestore);
-				category.forEach((cat) => {
-					const docRef = doc(firestore, 'category', cat.cid);
-					batch.update(docRef, { status: true });
-				});
-				await batch.commit();
-				Swal.fire('Restored!', 'All categories have been restored.', 'success');
-				setStatus(!status);
+				for (const datas of data) {
+					const values = {
+						...datas,
+						status: true, // Assuming restoring means setting status to true
+					};
+					await updatedata(values).unwrap();
+				}
+				Swal.fire('Restored!', 'All data have been restored.', 'success');
+
+				// Refetch categories after restoring
+				refetch();
 			}
 		} catch (error) {
-			console.error('Error restoring all documents: ', error);
-			Swal.fire('Error', 'Failed to restore all categories.', 'error');
+			console.error('Error restoring all categories:', error);
+			Swal.fire('Error', 'Failed to restore all data.', 'error');
 		}
 	};
-
 	// JSX for rendering the page
 	return (
 		<PageWrapper>
@@ -195,10 +175,14 @@ const Index: NextPage = () => {
 				<SubHeaderRight>
 					<SubheaderSeparator />
 					{/* Button to open New category */}
-					<Button icon='Delete' color='primary' isLight onClick={handleDeleteAll}>
+					<Button icon='Delete' onClick={handleDeleteAll} color='danger' isLight>
 						Delete All
 					</Button>
-					<Button icon='Restore' color='primary' onClick={handleRestoreAll}>
+					<Button
+						icon='Restore'
+						className='ms-3'
+						onClick={handleRestoreAll}
+						color='primary'>
 						Restore All
 					</Button>
 				</SubHeaderRight>
@@ -218,44 +202,42 @@ const Index: NextPage = () => {
 										</tr>
 									</thead>
 									<tbody>
-										<tr>
-											<td>square</td>
-											<td>
-												<Button
-													icon='Restore'
-													tag='a'
-													color='info'
-													onClick={() => handleClickRestore(category)}>
-													Restore
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete()}>
-													Delete
-												</Button>
-											</td>
-										</tr>
-										<tr>
-											<td>rectangle</td>
-											<td>
-												<Button
-													icon='Restore'
-													tag='a'
-													color='info'
-													onClick={() => handleClickRestore(category)}>
-													Restore
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete()}>
-													Delete
-												</Button>
-											</td>
-										</tr>
+									{isLoading && (
+											<tr>
+												<td>Loading...</td>
+											</tr>
+										)}
+										{error && (
+											<tr>
+												<td>Error fetching categories.</td>
+											</tr>
+										)}
+										{data &&
+											data.map((data: any) => (
+												<tr key={data.id}>
+													<td>{data.name}</td>
+
+													<td>
+														<Button
+															icon='Restore'
+															tag='a'
+															color='info'
+															onClick={() =>
+																handleClickRestore(data)
+															}>
+															Restore
+														</Button>
+
+														<Button
+															className='m-2'
+															icon='Delete'
+															color='danger'
+															onClick={() => handleClickDelete(data)}>
+															Delete
+														</Button>
+													</td>
+												</tr>
+											))}
 									</tbody>
 								</table>
 							</CardBody>
@@ -263,8 +245,6 @@ const Index: NextPage = () => {
 					</div>
 				</div>
 			</Page>
-			<CategoryAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
-			<CategoryEditModal setIsOpen={setEditModalStatus} isOpen={editModalStatus} id={id} />
 		</PageWrapper>
 	);
 };

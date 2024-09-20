@@ -17,7 +17,8 @@ import Wrapper from '../layout/Wrapper/Wrapper';
 import App from '../layout/App/App';
 import AsideRoutes from '../layout/Aside/AsideRoutes';
 import { ToastCloseButton } from '../components/bootstrap/Toasts';
-
+import store from '../redux/store';
+import { Provider } from 'react-redux';
 const MyApp = ({ Component, pageProps }: AppProps) => {
 	getOS();
 
@@ -38,6 +39,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
 	};
 
 	return (
+		<Provider store={store}>
 		<AuthContextProvider>
 			<ThemeContextProvider>
 				<ThemeProvider theme={theme}>
@@ -64,6 +66,7 @@ const MyApp = ({ Component, pageProps }: AppProps) => {
 				</ThemeProvider>
 			</ThemeContextProvider>
 		</AuthContextProvider>
+		</Provider>
 	);
 };
 

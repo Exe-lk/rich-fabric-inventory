@@ -14,40 +14,26 @@ import Input from '../../../../components/bootstrap/forms/Input';
 import Dropdown, { DropdownMenu, DropdownToggle } from '../../../../components/bootstrap/Dropdown';
 import Button from '../../../../components/bootstrap/Button';
 import Card, { CardBody, CardTitle } from '../../../../components/bootstrap/Card';
-import {
-	collection,
-	deleteDoc,
-	doc,
-	getDocs,
-	query,
-	updateDoc,
-	where,
-	writeBatch,
-} from 'firebase/firestore';
 import CategoryAddModal from '../../../../components/custom/ColourAddModal';
 import CategoryEditModal from '../../../../components/custom/ColourEditModal';
 import Swal from 'sweetalert2';
-// Define the interface for category data
-interface Category {
-	cid: string;
-	categoryname: string;
-	status: boolean;
-}
+import { useUpdateColorMutation, useGetColorsQuery } from '../../../../redux/slices/colorApiSlice';
+
 // Define the functional component for the index page
 const Index: NextPage = () => {
-	const { darkModeStatus } = useDarkMode(); // Dark mode
 	const [searchTerm, setSearchTerm] = useState(''); // State for search term
 	const [addModalStatus, setAddModalStatus] = useState<boolean>(false); // State for add modal status
 	const [editModalStatus, setEditModalStatus] = useState<boolean>(false); // State for edit modal status
-	const [category, setcategory] = useState<Category[]>([]); // State for category data
 	const [id, setId] = useState<string>(''); // State for current category ID
-	const [status, setStatus] = useState(true); // State for managing data fetching status
 
-	const handleClickDelete = async (id: string) => {
+	const { data: color, error, isLoading } = useGetColorsQuery(undefined);
+	const [updateColor] = useUpdateColorMutation();
+
+	const handleClickDelete = async (color: any) => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'You will not be able to recover this!',
+				text: 'You will not be able to recover this category!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -55,19 +41,23 @@ const Index: NextPage = () => {
 				confirmButtonText: 'Yes, delete it!',
 			});
 			if (result.isConfirmed) {
-				const docRef = doc(firestore, 'category', id);
-				await deleteDoc(docRef);
-				Swal.fire('Deleted!', 'category has been deleted.', 'success');
-				// Toggle status to trigger data re-fetch from Firestore
-				if (status) {
-					setStatus(false);
-				} else {
-					setStatus(true);
+				try {
+					const values = await {
+						...color,
+						status: false,
+					};
+					await updateColor(values);
+
+					Swal.fire('Deleted!', 'The Color has been deleted.', 'success');
+				} catch (error) {
+					console.error('Error during deleting: ', error);
+					Swal.close;
+					alert('An error occurred during file upload. Please try again later.');
 				}
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete category.', 'error');
 		}
 	};
 
@@ -116,49 +106,56 @@ const Index: NextPage = () => {
 								<table className='table table-bordered border-primary table-modern table-hover text-center'>
 									<thead>
 										<tr>
-											<th>Color name</th>
+											<th>Colour name</th>
 											<th></th>
 										</tr>
 									</thead>
 									<tbody>
-										<tr>
-											<td>Red</td>
-											<td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete('23')}>
-													Delete
-												</Button>
-											</td>
-										</tr>
-										<tr>
-											<td>Yellow</td>
-											<td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete('23')}>
-													Delete
-												</Button>
-											</td>
-										</tr>
+										{isLoading && (
+											<tr>
+												<td>Loading...</td>
+											</tr>
+										)}
+										{error && (
+											<tr>
+												<td>Error fetching categories.</td>
+											</tr>
+										)}
+										{color &&
+											color
+												.filter((color: any) =>
+													searchTerm
+														? color.name
+																.toLowerCase()
+																.includes(searchTerm.toLowerCase())
+														: true,
+												)
+												.map((color: any) => (
+													<tr key={color.id}>
+														<td>{color.name}</td>
+
+														<td>
+															<Button
+																icon='Edit'
+																color='info'
+																onClick={() => (
+																	setEditModalStatus(true),
+																	setId(color.id)
+																)}>
+																Edit
+															</Button>
+															<Button
+																className='m-2'
+																icon='Delete'
+																color='danger'
+																onClick={() =>
+																	handleClickDelete(color)
+																}>
+																Delete
+															</Button>
+														</td>
+													</tr>
+												))}
 									</tbody>
 								</table>
 							</CardBody>
