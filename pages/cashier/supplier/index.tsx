@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
+import Head from 'next/head';
 import useDarkMode from '../../../hooks/useDarkMode';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import SubHeader, {
@@ -12,76 +13,42 @@ import Input from '../../../components/bootstrap/forms/Input';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody, CardTitle } from '../../../components/bootstrap/Card';
-import UserAddModal from '../../../components/custom/UserAddModal';
-import UserEditModal from '../../../components/custom/UserEditModal';
-import { doc, deleteDoc, collection, getDocs, updateDoc, query, where } from 'firebase/firestore';
+import SellerAddModal from '../../../components/custom/SellerAddModal';
+import SellerEditModal from '../../../components/custom/SellerEditModal';
+import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 import { firestore } from '../../../firebaseConfig';
 import Dropdown, { DropdownToggle, DropdownMenu } from '../../../components/bootstrap/Dropdown';
-import { getColorNameWithIndex } from '../../../common/data/enumColors';
-import { getFirstLetter } from '../../../helpers/helpers';
 import Swal from 'sweetalert2';
-import FormGroup from '../../../components/bootstrap/forms/FormGroup';
-import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
-import SellerDeleteModal from '../../../components/custom/UserDeleteModal';
+import SellerDeleteModal from '../../../components/custom/SellerDeleteModal';
+import { useUpdateSupplierMutation, useGetSuppliersQuery } from '../../../redux/slices/supplierAPISlice';
 
-interface User {
+// Define interfaces for Seller
+interface Seller {
 	cid: string;
-	image: string;
 	name: string;
-	position: string;
+	phone: string;
 	email: string;
-	password: string;
-	mobile: number;
-	pin_number: number;
+	company_name: string;
+	company_email: string;
+	product: { category: string; name: string }[];
 	status: boolean;
 }
-
 const Index: NextPage = () => {
-	// Dark mode
-	const { darkModeStatus } = useDarkMode();
+	const { darkModeStatus } = useDarkMode(); // Dark mode
 	const [searchTerm, setSearchTerm] = useState('');
-	const [addModalStatus, setAddModalStatus] = useState<boolean>(false);
-	const [editModalStatus, setEditModalStatus] = useState<boolean>(false);
-	const [deleteModalStatus, setDeleteModalStatus] = useState<boolean>(false);
-	const [user, setuser] = useState<User[]>([]);
-	const [id, setId] = useState<string>('');
+	const [addModalStatus, setAddModalStatus] = useState<boolean>(false); // State to control the visibility of the Add Seller modal
+	const [editModalStatus, setEditModalStatus] = useState<boolean>(false); // State to control the visibility of the Edit Seller modal
+	const [seller, setStock] = useState<Seller[]>([]); // State to store the seller data fetched from Firestore
+	const [id, setId] = useState<string>(''); // State to store the ID of the seller being edited
 	const [status, setStatus] = useState(true);
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-	const position = [
-		{ position: 'Own' },
-		{ position: 'Other' },
-		// { position: 'Accountant' },
-		// { position: 'Cashier' },
-		// { position: 'Data entry operator' },
-	];
-	//get user data from database
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const dataCollection = collection(firestore, 'user');
-				const q = query(dataCollection, where('status', '==', true));
-				const querySnapshot = await getDocs(q);
-				const firebaseData = querySnapshot.docs.map((doc) => {
-					const data = doc.data() as User;
-					return {
-						...data,
-						cid: doc.id,
-					};
-				});
-				setuser(firebaseData);
-			} catch (error) {
-				console.error('Error fetching data: ', error);
-			}
-		};
-		fetchData();
-	}, [editModalStatus, addModalStatus, status]);
-
-	//delete user
-	const handleClickDelete = async (user: any) => {
+	const [deleteModalStatus, setDeleteModalStatus] = useState<boolean>(false);
+	const { data: supplier, error, isLoading } = useGetSuppliersQuery(undefined);
+	const [updatesupplier] = useUpdateSupplierMutation();
+	const handleClickDelete = async (item: any) => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				// text: 'You will not be able to recover this!',
+
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -90,42 +57,33 @@ const Index: NextPage = () => {
 			});
 			if (result.isConfirmed) {
 				try {
-					user.status = false;
-					const docRef = doc(firestore, 'user', user.cid);
-					// Update the data
-					updateDoc(docRef, user)
-						.then(() => {
-							// Show success message
+					const values = await {
+						...item,status:false
+					};
+					await updatesupplier(values);
 
-							if (status) {
-								setStatus(false);
-							} else {
-								setStatus(true);
-							}
-							Swal.fire('Deleted!', 'user has been deleted.', 'success');
-						})
-						.catch((error) => {
-							console.error('Error adding document: ', error);
-							alert(
-								'An error occurred while adding the document. Please try again later.',
-							);
-						});
+					Swal.fire('Deleted!', 'The supplier has been deleted.', 'success');
+				
 				} catch (error) {
-					console.error('Error during handleUpload: ', error);
+					console.error('Error during deleting: ', error);
+					Swal.close;
 					alert('An error occurred during file upload. Please try again later.');
 				}
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete seller.', 'error');
 		}
 	};
 
 	return (
 		<PageWrapper>
+			<Head>
+				<></>
+			</Head>
 			<SubHeader>
 				<SubHeaderLeft>
-					{/* Search input  */}
+					{/* Search input */}
 					<label
 						className='border-0 bg-transparent cursor-pointer me-0'
 						htmlFor='searchInput'>
@@ -135,8 +93,7 @@ const Index: NextPage = () => {
 						id='searchInput'
 						type='search'
 						className='border-0 shadow-none bg-transparent'
-						placeholder='Search...'
-						// onChange={formik.handleChange}
+						placeholder='Search Supplier...'
 						onChange={(event: any) => {
 							setSearchTerm(event.target.value);
 						}}
@@ -144,128 +101,100 @@ const Index: NextPage = () => {
 					/>
 				</SubHeaderLeft>
 				<SubHeaderRight>
-					<Dropdown>
-						<DropdownToggle hasIcon={false}>
-							<Button
-								icon='FilterAlt'
-								color='dark'
-								isLight
-								className='btn-only-icon position-relative'></Button>
-						</DropdownToggle>
-						<DropdownMenu isAlignmentEnd size='lg'>
-							<div className='container py-2'>
-								<div className='row g-3'>
-									<FormGroup label='Supplier type' className='col-12'>
-										<ChecksGroup>
-											{position.map((category, index) => (
-												<Checks
-													key={category.position}
-													id={category.position}
-													label={category.position}
-													name={category.position}
-													value={category.position}
-													checked={selectedCategories.includes(
-														category.position,
-													)}
-													onChange={(event: any) => {
-														const { checked, value } = event.target;
-														setSelectedCategories(
-															(prevCategories) =>
-																checked
-																	? [...prevCategories, value] // Add category if checked
-																	: prevCategories.filter(
-																			(category) =>
-																				category !== value,
-																	  ), // Remove category if unchecked
-														);
-													}}
-												/>
-											))}
-										</ChecksGroup>
-									</FormGroup>
-								</div>
-							</div>
-						</DropdownMenu>
-					</Dropdown>
+					{/* Dropdown for filter options */}
 
 					<SubheaderSeparator />
+					{/* Button to open the Add Seller modal */}
 					<Button
-						icon='PersonAdd'
+						icon='AddCircleOutline'
 						color='success'
 						isLight
 						onClick={() => setAddModalStatus(true)}>
-						New Supplier
+						Add Supplier
 					</Button>
 				</SubHeaderRight>
 			</SubHeader>
 			<Page>
 				<div className='row h-100'>
 					<div className='col-12'>
-						{/* Table for displaying user data */}
+						{/* Table for displaying customer data */}
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
 								<div className='flex-grow-1 text-center text-info'>
-								Supplier Management
+									Manage Supplier
 								</div>
+								<Button
+									icon='UploadFile'
+									color='warning'
+									onClick={() => setAddModalStatus(true)}>
+									Export
+								</Button>
 							</CardTitle>
 							<CardBody isScrollable className='table-responsive'>
 								<table className='table table-bordered border-primary table-modern table-hover'>
 									<thead>
 										<tr>
-											<th>User</th>
-											
-											<th>Email</th>
-											<th>Mobile number</th>
+											<th>Seller name</th>
+											<th>Company name</th>
+											<th>Company email</th>
+											<th>Phone number</th>
+											<th>Seller email</th>
+										
 											<th></th>
 										</tr>
 									</thead>
 									<tbody>
-										<tr>
-											<td>Kalpa Chamathkara</td>
-											
-											<td>kalpa@gmail.com</td>
-											<td>0772369745</td>
-											<td>
-												<td>
-													<Button
-														icon='Edit'
-														tag='a'
-														color='info'
-														onClick={() => setEditModalStatus(true)}>
-														Edit
-													</Button>
-													<Button
-														className='m-2'
-														icon='Delete'
-														color='danger'
-														onClick={() => handleClickDelete(user)}>
-														Delete
-													</Button>
-												</td>
-											</td>
-										</tr>
-										<tr>
-											<td>Ravidu Idamalgoda</td>
-										
-											<td>ravidu@gmail.com</td>
-											<td>0772369745</td>
-											<td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete(user)}>
-													Delete
-												</Button>
-											</td>
-										</tr>
+						
+										{isLoading && (
+											<tr>
+												<td>Loading...</td>
+											</tr>
+										)}
+										{error && (
+											<tr>
+												<td>Error fetching categories.</td>
+											</tr>
+										)}
+										{supplier &&
+											supplier
+												.filter((supplier: any) =>
+													searchTerm
+														? supplier.name
+																.toLowerCase()
+																.includes(searchTerm.toLowerCase())
+														: true,
+												)
+												.map((supplier: any) => (
+													<tr key={supplier.id}>
+														<td>{supplier.name}</td>
+														<td>{supplier.company_name}</td>
+														<td>{supplier.company_email}</td>
+														<td>{supplier.phone}</td>
+														<td>{supplier.email}</td>
+														
+
+														<td>
+															<Button
+																icon='Edit'
+																color='info'
+																onClick={() => (
+																	setEditModalStatus(true),
+																	setId(supplier.id)
+																)}>
+																Edit
+															</Button>
+															<Button
+																className='m-2'
+																icon='Delete'
+																color='danger'
+																onClick={() =>
+																	handleClickDelete(supplier)
+																}>
+																Delete
+															</Button>
+														</td>
+													</tr>
+												))}
 									</tbody>
 								</table>
 								<Button
@@ -279,8 +208,9 @@ const Index: NextPage = () => {
 					</div>
 				</div>
 			</Page>
-			<UserAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
-			<UserEditModal setIsOpen={setEditModalStatus} isOpen={editModalStatus} id={id} />
+			{/* Add Seller modal */}
+			<SellerAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
+			<SellerEditModal setIsOpen={setEditModalStatus} isOpen={editModalStatus} id={id} />
 			<SellerDeleteModal setIsOpen={setDeleteModalStatus} isOpen={deleteModalStatus} id='' />
 		</PageWrapper>
 	);

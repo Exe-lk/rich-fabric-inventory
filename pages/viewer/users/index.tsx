@@ -116,8 +116,7 @@ const Index: NextPage = () => {
 					</div>
 				</div>
 			</Page>
-			<UserAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
-			<UserEditModal setIsOpen={setEditModalStatus} isOpen={editModalStatus} id={id} />
+			
 		</PageWrapper>
 	);
 };

@@ -50,7 +50,7 @@ const Index: NextPage = () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'You will not be able to recover this!',
+				text: 'You will not be able to recover this user!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -70,7 +70,7 @@ const Index: NextPage = () => {
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete user.', 'error');
 		}
 	};
 
@@ -78,7 +78,7 @@ const Index: NextPage = () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				// text: 'You will not be able to recover this!',
+				// text: 'You will not be able to recover this user!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -114,7 +114,7 @@ const Index: NextPage = () => {
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete user.', 'error');
 		}
 	};
 	const handleDeleteAll = async () => {
@@ -136,7 +136,7 @@ const Index: NextPage = () => {
 			}
 		} catch (error) {
 			console.error('Error deleting documents: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete users.', 'error');
 		}
 	};
 
@@ -283,7 +283,7 @@ const Index: NextPage = () => {
 				</div>
 			</Page>
 			<UserAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
-			<UserEditModal setIsOpen={setEditModalStatus} isOpen={editModalStatus} id={id} />
+		
 		</PageWrapper>
 	);
 };

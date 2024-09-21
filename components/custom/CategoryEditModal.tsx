@@ -1,175 +1,154 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useFormik } from 'formik';
 import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../bootstrap/Modal';
-import showNotification from '../extras/showNotification';
 import Icon from '../icon/Icon';
 import FormGroup from '../bootstrap/forms/FormGroup';
 import Input from '../bootstrap/forms/Input';
 import Button from '../bootstrap/Button';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { firestore, storage } from '../../firebaseConfig';
 import Swal from 'sweetalert2';
+import {
+	useUpdateCategoryMutation,
+	useGetCategoriesQuery,
+} from '../../redux/slices/categoryApiSlice';
 
-// Define the props for the CategoryEditModal component
 interface CategoryEditModalProps {
 	id: string;
 	isOpen: boolean;
 	setIsOpen(...args: unknown[]): unknown;
 }
-interface Category {
-	cid: string;
-	categoryname: string;
-	status: boolean;
-}
-// CategoryEditModal component definition
+
 const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }) => {
-	const data: Category = {
-		cid: '',
-		categoryname: '',
-		status: true,
-	};
-	const [stock, setStock] = useState<Category>(data);
-	//fetch data from database
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const dataCollection = collection(firestore, 'category');
-				const q = query(dataCollection, where('__name__', '==', id));
-				const querySnapshot = await getDocs(q);
-				const firebaseData: any = querySnapshot.docs.map((doc) => {
-					const data = doc.data() as Category;
-					return {
-						...data,
-						cid: doc.id,
-					};
-				});
-				await setStock(firebaseData[0]);
-				console.log('Firebase Data:', stock);
-			} catch (error) {
-				console.error('Error fetching data: ', error);
-			}
-		};
-		fetchData();
-	}, [id]);
-	// Initialize formik for form management
+	const { data: categories } = useGetCategoriesQuery(undefined);
+	const [updateCategory, { isLoading }] = useUpdateCategoryMutation();
+
+	const categoryToEdit = categories?.find((category: any) => category.id === id);
+
 	const formik = useFormik({
 		initialValues: {
-			categoryname: '',
-			product: [{ category: '', name: '' }],
+			id: '',
+			categoryname: categoryToEdit?.name || '',
+			subcategory: categoryToEdit?.subcategory || [''],
 		},
+		enableReinitialize: true, // This allows the form to reinitialize when categoryToEdit changes
 		validate: (values) => {
-			const errors: {
-				categoryname?: string;
-			} = {};
-			if (!stock.categoryname) {
+			const errors: { categoryname?: string; subcategory?: string } = {};
+			if (!values.categoryname) {
 				errors.categoryname = 'Required';
 			}
 			return errors;
 		},
 		onSubmit: async (values) => {
 			try {
-				let data: any = stock;
-				const docRef = doc(firestore, 'category', id);
-				// Update the data
-				updateDoc(docRef, data)
-					.then(() => {
-						setIsOpen(false);
-						showNotification(
-							<span className='d-flex align-items-center'>
-								<Icon icon='Info' size='lg' className='me-1' />
-								<span>Successfully Added</span>
-							</span>,
-							'category has been added successfully',
-						);
-						Swal.fire('Added!', 'category has been add successfully.', 'success');
-					})
-					.catch((error) => {
-						console.error('Error adding document: ', error);
-						alert(
-							'An error occurred while adding the document. Please try again later.',
-						);
+				const process = Swal.fire({
+					title: 'Processing...',
+					html: 'Please wait while the data is being processed.<br><div class="spinner-border" role="status"></div>',
+					allowOutsideClick: false,
+					showCancelButton: false,
+					showConfirmButton: false,
+				});
+
+				try {
+					// Update the category
+					console.log(values);
+					const data = {
+						name: values.categoryname,
+						subcategory: values.subcategory,
+						status: true,
+						id: id,
+					};
+					await updateCategory(data).unwrap();
+
+					// Success feedback
+					await Swal.fire({
+						icon: 'success',
+						title: 'Category Updated Successfully',
 					});
+					setIsOpen(false); // Close the modal after successful update
+				} catch (error) {
+					await Swal.fire({
+						icon: 'error',
+						title: 'Error',
+						text: 'Failed to update the category. Please try again.',
+					});
+				}
 			} catch (error) {
 				console.error('Error during handleUpload: ', error);
 				alert('An error occurred during file upload. Please try again later.');
 			}
 		},
 	});
-	const addProductField = () => {
+
+	// Functions to handle adding/removing subcategories
+	const addSubcategoryField = () => {
 		formik.setValues({
 			...formik.values,
-			product: [...formik.values.product, { category: '', name: '' }],
+			subcategory: [...formik.values.subcategory, ''],
 		});
 	};
-	const removeProductField = (index: number) => {
-		const newProducts = [...formik.values.product];
-		newProducts.splice(index, 1);
+
+	const removeSubcategoryField = (index: number) => {
+		const newSubcategories = [...formik.values.subcategory];
+		newSubcategories.splice(index, 1);
 		formik.setValues({
 			...formik.values,
-			product: newProducts,
+			subcategory: newSubcategories,
 		});
 	};
+
 	return (
 		<Modal isOpen={isOpen} setIsOpen={setIsOpen} size='xl' titleId={id}>
 			<ModalHeader setIsOpen={setIsOpen} className='p-4'>
-				<ModalTitle id=''>{'Edit category'}</ModalTitle>
+				<ModalTitle id=''>{'Edit Category'}</ModalTitle>
 			</ModalHeader>
 			<ModalBody className='px-4'>
 				<div className='row g-4'>
 					<FormGroup
 						id='categoryname'
-						label='Category name'
+						label='Category Name'
 						onChange={formik.handleChange}
 						className='col-md-6'>
 						<Input
-							onChange={(e: any) => {
-								stock.categoryname = e.target.value;
-							}}
-							value={stock?.categoryname}
+							name='categoryname'
+							onChange={formik.handleChange}
+							value={formik.values.categoryname}
 							onBlur={formik.handleBlur}
 							isValid={formik.isValid}
-							isTouched={formik.touched.categoryname}
-							invalidFeedback={formik.errors.categoryname}
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-
-					{formik.values.product.map((product, index) => (
+					{formik.values.subcategory.map((sub: any, index: any) => (
 						<FormGroup
 							key={index}
-							id={`product-${index}`}
+							id={`subcategory-${index}`}
 							label={`Sub Category ${index + 1}`}
 							className='col-md-6'>
 							<div className='d-flex align-items-center'>
 								<Input
+									name={`subcategory[${index}]`}
 									onChange={formik.handleChange}
-									value={formik.values.categoryname}
+									value={formik.values.subcategory[index]}
 									onBlur={formik.handleBlur}
 									isValid={formik.isValid}
-									isTouched={formik.touched.categoryname}
-									invalidFeedback={formik.errors.categoryname}
 									validFeedback='Looks good!'
 								/>
 								<button
 									type='button'
-									onClick={() => removeProductField(index)}
+									onClick={() => removeSubcategoryField(index)}
 									className='btn btn-outline-danger ms-2'>
 									<Icon icon='Delete' />
 								</button>
 							</div>
 						</FormGroup>
 					))}
-				</div>
-				{/* Button to add new product input field */}
-				<div className='col-md-12'>
-					<Button color='info' onClick={addProductField}>
-						Add Sub Category
-					</Button>
+					<div className='col-md-12'>
+						<Button color='info' onClick={addSubcategoryField}>
+							Add Sub Category
+						</Button>
+					</div>
 				</div>
 			</ModalBody>
 			<ModalFooter className='px-4 pb-4'>
-				{/* Save button to submit the form */}
 				<Button color='info' onClick={formik.handleSubmit}>
 					Save
 				</Button>
@@ -177,10 +156,11 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 		</Modal>
 	);
 };
-// Prop types definition for CustomerEditModal component
+
 CategoryEditModal.propTypes = {
 	id: PropTypes.string.isRequired,
 	isOpen: PropTypes.bool.isRequired,
 	setIsOpen: PropTypes.func.isRequired,
 };
+
 export default CategoryEditModal;

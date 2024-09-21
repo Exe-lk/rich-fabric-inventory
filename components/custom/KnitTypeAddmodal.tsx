@@ -11,6 +11,7 @@ import { collection, addDoc } from 'firebase/firestore';
 import { firestore, storage } from '../../firebaseConfig';
 import Swal from 'sweetalert2';
 import { NULL } from 'sass';
+import { useGetKnitTypesQuery,useAddKnitTypeMutation} from '../../redux/slices/knitTypeApiSlice';
 
 // Define the props for the CategoryEditModal component
 interface CategoryEditModalProps {
@@ -21,40 +22,49 @@ interface CategoryEditModalProps {
 // CategoryEditModal component definition
 const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }) => {
     // Initialize formik for form management
+	const [addknit , {isLoading}] = useAddKnitTypeMutation();
+	const {refetch} = useGetKnitTypesQuery(undefined);
+
+	
 	const formik = useFormik({
         initialValues: {
-			categoryname: '',
+			name: '',
 			status:true
 		},
 		validate: (values) => {
 			const errors: {
-				categoryname?: string;
+				name?: string;
 			} = {};
-			if (!values.categoryname) {
-				errors.categoryname = 'Required';
+			if (!values.name) {
+				errors.name = 'Required';
 			}
 			return errors;
 		},
 		onSubmit: async (values) => {
 			try {
-				values.status=true
-                const collectionRef = collection(firestore, 'category');
-				addDoc(collectionRef, values).then(() => {
-					
-					showNotification(
-						<span className='d-flex align-items-center'>
-							<Icon icon='Info' size='lg' className='me-1' />
-							<span>Successfully Added</span>
-						</span>,
-						'category has been added successfully',
-					);
-					Swal.fire('Added!', 'category has been add successfully.', 'success');
-					formik.resetForm()
-					setIsOpen(false);
-				}).catch((error) => {
-					console.error('Error adding document: ', error);
-					alert('An error occurred while adding the document. Please try again later.');
+				// Show a processing modal
+				const process = Swal.fire({
+					title: 'Processing...',
+					html: 'Please wait while the data is being processed.<br><div class="spinner-border" role="status"></div>',
+					allowOutsideClick: false,
+					showCancelButton: false,
+					showConfirmButton: false,
 				});
+				
+			
+					// Add the new category
+					const response: any = await addknit(values).unwrap();
+					console.log(response);
+
+					// Refetch categories to update the list
+					refetch();
+
+					// Success feedback
+					await Swal.fire({
+						icon: 'success',
+						title: 'Color added Successfully',
+					});
+					setIsOpen(false);
 			} catch (error) {
 				console.error('Error during handleUpload: ', error);
 				alert('An error occurred during file upload. Please try again later.');
@@ -69,14 +79,14 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 			</ModalHeader>
 			<ModalBody className='px-4'>
 				<div className='row g-4'>
-					<FormGroup id='categoryname' label='Knit type' className='col-md-6'>
+					<FormGroup id='name' label='Knit type' className='col-md-6'>
 						<Input
 							onChange={formik.handleChange}
-							value={formik.values.categoryname}
+							value={formik.values.name}
                             onBlur={formik.handleBlur}
 							isValid={formik.isValid}
-							isTouched={formik.touched.categoryname}
-							invalidFeedback={formik.errors.categoryname}
+							isTouched={formik.touched.name}
+							invalidFeedback={formik.errors.name}
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>

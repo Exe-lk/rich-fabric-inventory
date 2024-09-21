@@ -12,8 +12,8 @@ import Input from '../../../components/bootstrap/forms/Input';
 import Button from '../../../components/bootstrap/Button';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody, CardTitle } from '../../../components/bootstrap/Card';
-import UserAddModal from '../../../components/custom/UserAddModal';
-import UserEditModal from '../../../components/custom/UserEditModal';
+import CoustomerAddModal from '../../../components/custom/CaustomerAddModal';
+import CoustomerEditModal from '../../../components/custom/CaustomerEditModal';
 import { doc, deleteDoc, collection, getDocs, updateDoc, query, where } from 'firebase/firestore';
 import { firestore } from '../../../firebaseConfig';
 import Dropdown, { DropdownToggle, DropdownMenu } from '../../../components/bootstrap/Dropdown';
@@ -22,7 +22,11 @@ import { getFirstLetter } from '../../../helpers/helpers';
 import Swal from 'sweetalert2';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
-import SellerDeleteModal from '../../../components/custom/UserDeleteModal';
+import CoustomerDeleteModal from '../../../components/custom/CaustomerDeleteModal';
+import {
+	useGetCustomersQuery,
+	useUpdateCustomerMutation,
+} from '../../../redux/slices/coustomerApiSlice';
 
 interface User {
 	cid: string;
@@ -46,42 +50,22 @@ const Index: NextPage = () => {
 	const [user, setuser] = useState<User[]>([]);
 	const [id, setId] = useState<string>('');
 	const [status, setStatus] = useState(true);
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-	const position = [
-		{ position: 'Admin' },
-		{ position: 'Stock keeper' },
-		{ position: 'Accountant' },
-		{ position: 'Cashier' },
-		{ position: 'Data entry operator' },
+	const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+	const role = [
+		{ role: 'bill keeper' },
+		{ role: 'accessosry stock keeper' },
+		{ role: 'display stock keeper' },
+		{ role: 'cashier' },
 	];
-	//get user data from database
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const dataCollection = collection(firestore, 'user');
-				const q = query(dataCollection, where('status', '==', true));
-				const querySnapshot = await getDocs(q);
-				const firebaseData = querySnapshot.docs.map((doc) => {
-					const data = doc.data() as User;
-					return {
-						...data,
-						cid: doc.id,
-					};
-				});
-				setuser(firebaseData);
-			} catch (error) {
-				console.error('Error fetching data: ', error);
-			}
-		};
-		fetchData();
-	}, [editModalStatus, addModalStatus, status]);
-
+	const { data: users, error, isLoading, refetch } = useGetCustomersQuery(undefined);
+	const [updateuser] = useUpdateCustomerMutation();
 	//delete user
+	// Update the user's status to false instead of deleting
 	const handleClickDelete = async (user: any) => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				// text: 'You will not be able to recover this!',
+				text: 'You will not be able to recover this user!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -90,34 +74,27 @@ const Index: NextPage = () => {
 			});
 			if (result.isConfirmed) {
 				try {
-					user.status = false;
-					const docRef = doc(firestore, 'user', user.cid);
-					// Update the data
-					updateDoc(docRef, user)
-						.then(() => {
-							// Show success message
-
-							if (status) {
-								setStatus(false);
-							} else {
-								setStatus(true);
-							}
-							Swal.fire('Deleted!', 'user has been deleted.', 'success');
-						})
-						.catch((error) => {
-							console.error('Error adding document: ', error);
-							alert(
-								'An error occurred while adding the document. Please try again later.',
-							);
-						});
+					// Set the user's status to false (soft delete)
+					const values = await {
+						...user,
+						status: false,
+					};
+					await updateuser(values);
+					// Refresh the list after deletion
+					Swal.fire('Deleted!', 'User has been deleted.', 'success');
+					// This will refresh the list of users to reflect the changes
 				} catch (error) {
-					console.error('Error during handleUpload: ', error);
-					alert('An error occurred during file upload. Please try again later.');
+					console.error('Error during handleDelete: ', error);
+					Swal.fire(
+						'Error',
+						'An error occurred during deletion. Please try again later.',
+						'error',
+					);
 				}
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete user.', 'error');
 		}
 	};
 
@@ -155,27 +132,25 @@ const Index: NextPage = () => {
 						<DropdownMenu isAlignmentEnd size='lg'>
 							<div className='container py-2'>
 								<div className='row g-3'>
-									<FormGroup label='Category type' className='col-12'>
+									<FormGroup label='User type' className='col-12'>
 										<ChecksGroup>
-											{position.map((category, index) => (
+											{role.map((user, index) => (
 												<Checks
-													key={category.position}
-													id={category.position}
-													label={category.position}
-													name={category.position}
-													value={category.position}
-													checked={selectedCategories.includes(
-														category.position,
-													)}
+													key={user.role}
+													id={user.role}
+													label={user.role}
+													name={user.role}
+													value={user.role}
+													checked={selectedUsers.includes(user.role)}
 													onChange={(event: any) => {
 														const { checked, value } = event.target;
-														setSelectedCategories(
-															(prevCategories) =>
+														setSelectedUsers(
+															(prevUsers) =>
 																checked
-																	? [...prevCategories, value] // Add category if checked
-																	: prevCategories.filter(
-																			(category) =>
-																				category !== value,
+																	? [...prevUsers, value] // Add category if checked
+																	: prevUsers.filter(
+																			(user) =>
+																				user !== value,
 																	  ), // Remove category if unchecked
 														);
 													}}
@@ -194,7 +169,7 @@ const Index: NextPage = () => {
 						color='success'
 						isLight
 						onClick={() => setAddModalStatus(true)}>
-						New Customer
+						New Coustomer
 					</Button>
 				</SubHeaderRight>
 			</SubHeader>
@@ -205,7 +180,7 @@ const Index: NextPage = () => {
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
 								<div className='flex-grow-1 text-center text-info'>
-								Customer Management
+									Coustomer Management
 								</div>
 							</CardTitle>
 							<CardBody isScrollable className='table-responsive'>
@@ -213,59 +188,68 @@ const Index: NextPage = () => {
 									<thead>
 										<tr>
 											<th>User</th>
-											
 											<th>Email</th>
 											<th>Mobile number</th>
+											<th>NIC</th>
+
 											<th></th>
 										</tr>
 									</thead>
 									<tbody>
-										<tr>
-											<td>Kalpa Chamathkara</td>
-											
-											<td>kalpa@gmail.com</td>
-											<td>0772369745</td>
-											<td>
-												<td>
-													<Button
-														icon='Edit'
-														tag='a'
-														color='info'
-														onClick={() => setEditModalStatus(true)}>
-														Edit
-													</Button>
-													<Button
-														className='m-2'
-														icon='Delete'
-														color='danger'
-														onClick={() => handleClickDelete(user)}>
-														Delete
-													</Button>
-												</td>
-											</td>
-										</tr>
-										<tr>
-											<td>Ravidu Idamalgoda</td>
-										
-											<td>ravidu@gmail.com</td>
-											<td>0772369745</td>
-											<td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='danger'
-													onClick={() => handleClickDelete(user)}>
-													Delete
-												</Button>
-											</td>
-										</tr>
+										{isLoading && (
+											<tr>
+												<td>Loading...</td>
+											</tr>
+										)}
+										{error && (
+											<tr>
+												<td>Error fetching users.</td>
+											</tr>
+										)}
+										{users &&
+											users
+												.filter((user: any) => user.status === true) // Only show users where status is true
+												.filter((user: any) =>
+													searchTerm
+														? user.nic
+																.toLowerCase()
+																.includes(searchTerm.toLowerCase())
+														: true,
+												)
+												.filter((user: any) =>
+													selectedUsers.length > 0
+														? selectedUsers.includes(user.role)
+														: true,
+												)
+												.map((user: any) => (
+													<tr key={user.id}>
+														<td>{user.name}</td>
+														<td>{user.email}</td>
+														<td>{user.mobile}</td>
+														<td>{user.nic}</td>
+
+														<td>
+															<Button
+																icon='Edit'
+																color='info'
+																onClick={() => {
+																	setEditModalStatus(true);
+																	setId(user.id);
+																}}>
+																Edit
+															</Button>
+															<Button
+																className='m-2'
+																icon='Delete'
+																color='danger'
+																onClick={() =>
+																	handleClickDelete(user)
+																}>
+																Delete
+															</Button>
+														</td>
+													</tr>
+												))}
 									</tbody>
 								</table>
 								<Button
@@ -279,9 +263,15 @@ const Index: NextPage = () => {
 					</div>
 				</div>
 			</Page>
-			<UserAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
-			<UserEditModal setIsOpen={setEditModalStatus} isOpen={editModalStatus} id={id} />
-			<SellerDeleteModal setIsOpen={setDeleteModalStatus} isOpen={deleteModalStatus} id='' />
+			<CoustomerAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
+			<CoustomerEditModal
+				setIsOpen={setEditModalStatus}
+				isOpen={editModalStatus}
+				id={id}
+				refetch={refetch} // Pass refetch function here
+			/>
+
+			<CoustomerDeleteModal setIsOpen={setDeleteModalStatus} isOpen={deleteModalStatus} id='' />
 		</PageWrapper>
 	);
 };

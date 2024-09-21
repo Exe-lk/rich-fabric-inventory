@@ -51,7 +51,7 @@ const Index: NextPage = () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				// text: 'You will not be able to recover this!',
+				// text: 'You will not be able to recover this category!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -82,14 +82,14 @@ const Index: NextPage = () => {
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete category.', 'error');
 		}
 	};
 	const handleClickDelete = async (id: string) => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'You will not be able to recover this!',
+				text: 'You will not be able to recover this category!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -109,7 +109,7 @@ const Index: NextPage = () => {
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete category.', 'error');
 		}
 	};
 	const handleDeleteAll = async () => {
@@ -130,12 +130,12 @@ const Index: NextPage = () => {
 					batch.delete(docRef);
 				});
 				await batch.commit();
-				Swal.fire('Deleted!', 'All things have been deleted.', 'success');
+				Swal.fire('Deleted!', 'All categories have been deleted.', 'success');
 				setStatus(!status);
 			}
 		} catch (error) {
 			console.error('Error deleting all documents: ', error);
-			Swal.fire('Error', 'Failed to delete all.', 'error');
+			Swal.fire('Error', 'Failed to delete all categories.', 'error');
 		}
 	};
 

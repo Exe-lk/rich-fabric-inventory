@@ -53,13 +53,13 @@ export const addminPagesMenu = {
 		icon: 'Ballot',
 		subMenu: null,
 	},
-	seller: {
-		id: 'lot',
-		text: 'Cashier Management',
-		path: 'admin/cashier-management',
-		icon: 'SelectAll',
-		subMenu: null,
-	},
+	// seller: {
+	// 	id: 'lot',
+	// 	text: 'Cashier Management',
+	// 	path: 'admin/cashier-management',
+	// 	icon: 'SelectAll',
+	// 	subMenu: null,
+	// },
 	employee: {
 		id: 'lot',
 		text: 'Employee Management',
@@ -81,12 +81,12 @@ export const addminPagesMenu = {
 		path: 'single-pages',
 		icon: 'Settings',
 		subMenu: {
-			boxedSingle: {
-				id: 'boxedSingle',
-				text: 'Account',
-				path: 'admin/setting/account',
-				icon: 'Groups',
-			},
+			// boxedSingle: {
+			// 	id: 'boxedSingle',
+			// 	text: 'Account',
+			// 	path: 'admin/setting/account',
+			// 	icon: 'Groups',
+			// },
 			color: {
 				id: 'fluidSingle',
 				text: 'Color',
