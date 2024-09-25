@@ -80,16 +80,30 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 		enableReinitialize: true,
 		validate: (values) => {
 			const errors: Record<string, string> = {};
-			// if (!values.code) errors.code = 'Required';
-			// if (!values.description) errors.description = 'Required';
-			// if (!values.color) errors.color = 'Required';
-			// if (!values.fabric_type) errors.fabric_type = 'Required';
-			// if (!values.gsm) errors.gsm = 'Required';
-			// if (!values.width) errors.width = 'Required';
-			// if (!values.knit_type) errors.knit_type = 'Required';
-			// if (!values.GRA_number) errors.GRA_number = 'Required';
-			// if (!values.GRN_number) errors.GRN_number = 'Required';
-			// if (!values.supplier) errors.supplier = 'Required';
+			if (!values.code) errors.code = 'Required';
+			if (!values.description) errors.description = 'Required';
+			if (!values.color) errors.color = 'Required';
+			if (!values.fabric_type) errors.fabric_type = 'Required';
+			if (!values.gsm) errors.gsm = 'Required';
+			if (!values.width) errors.width = 'Required';
+			if (!values.knit_type) errors.knit_type = 'Required';
+			if (!values.GRN_number) errors.GRA_number = 'Required';
+			if (!values.GRN_number) errors.GRN_number = 'Required';
+			if (!values.fabric_type) errors.fabric_type = 'Required';
+			if (!values.supplier) errors.supplier = 'Required';
+			if (!values.uom) errors.uom = 'Required';
+			if (!values.date) errors.date = 'Required';
+			if (!values.PackType) errors.PackType = 'Required';
+			if (!values.remark) errors.remark = 'Required';
+			if (!values.suppl_gatepass_no) errors.suppl_gatepass_no = 'Required';
+			if (!values.operater) errors.operater = 'Required';
+			if (!values.collor_cuff_type) errors.collor_cuff_type = 'Required';
+			if (!values.category) errors.category = 'Required';
+			if (!values.subcategory) errors.subcategory = 'Required';
+			if (!values.stockOutId) errors.stockOutId = 'Required';
+			if (!values.collor_cuff_type) errors.collor_cuff_type = 'Required';
+			if (!values.FinishType) errors.FinishType = 'Required';
+
 			return errors;
 		},
 		onSubmit: async (values) => {
@@ -323,8 +337,13 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							type='number'
 							onChange={formik.handleChange}
 							value={formik.values.code}
+							// onBlur={formik.handleBlur}
+							// isValid={formik.isValid}
+							// validFeedback='Looks good!'	
 							onBlur={formik.handleBlur}
 							isValid={formik.isValid}
+							isTouched={formik.touched.date}
+							invalidFeedback={formik.errors.date}
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
@@ -398,7 +417,12 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 														formik.handleChange(e);
 													}
 												}}
-												value={formik.values.fabric_type}>
+												value={formik.values.fabric_type}
+												onBlur={formik.handleBlur}
+												isValid={formik.isValid}
+												isTouched={formik.touched.gsm}
+												invalidFeedback={formik.errors.gsm}
+												validFeedback='Looks good!'>
 												<Option value='Add new'>Add New</Option>
 												<Option value='Cotton'>Plain</Option>
 												<Option value='Polyester'>Tiffin</Option>
@@ -434,7 +458,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 														formik.handleChange(e);
 													}
 												}}
-												value={formik.values.fabric_type}>
+												>
 												<Option value=''>Select Fabric Type</Option>
 												<Option value='Add new'>Add New</Option>
 												{/* Existing fabric type options can be dynamically loaded here */}
@@ -461,6 +485,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 											formik.setFieldValue('gsm', e.target.value)
 										}
 										value={formik.values.gsm}
+										
 									/>
 								) : (
 									<Select
@@ -472,7 +497,12 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 												formik.handleChange(e);
 											}
 										}}
-										value={formik.values.gsm}>
+										value={formik.values.gsm}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										isTouched={formik.touched.gsm}
+										invalidFeedback={formik.errors.gsm}
+										validFeedback='Looks good!'>
 										<Option value=''>Select GSM</Option>
 										<Option value='Add new'>Add New</Option>
 										{gsm &&
