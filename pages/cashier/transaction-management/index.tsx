@@ -15,14 +15,11 @@ import Page from '../../../layout/Page/Page';
 import Card, { CardBody, CardTitle } from '../../../components/bootstrap/Card';
 import StockAddModal from '../../../components/custom/ItemAddModal';
 import StockEditModal from '../../../components/custom/ItemEditModal';
-import { doc, deleteDoc, collection, getDocs, updateDoc, query, where } from 'firebase/firestore';
-import { firestore } from '../../../firebaseConfig';
 import Dropdown, { DropdownToggle, DropdownMenu } from '../../../components/bootstrap/Dropdown';
-import Swal from 'sweetalert2';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
-import showNotification from '../../../components/extras/showNotification';
-import { Redo } from '../../../components/icon/material-icons';
+import { useGetStockOutsQuery } from '../../../redux/slices/stockOutApiSlice';
+
 // Define interfaces for data objects
 interface Item {
 	cid: string;
@@ -46,15 +43,12 @@ const Index: NextPage = () => {
 	const [searchTerm, setSearchTerm] = useState(''); // State for search term
 	const [addModalStatus, setAddModalStatus] = useState<boolean>(false); // State for add modal status
 	const [editModalStatus, setEditModalStatus] = useState<boolean>(false); // State for edit modal status
-	const [item, setItem] = useState<Item[]>([]); // State for stock data
-	const [category, setcategory] = useState<Category[]>([]);
-	const [orderData, setOrdersData] = useState([]);
-	const [stockData, setStockData] = useState([]);
 	const [id, setId] = useState<string>(''); // State for current stock item ID
 	const [id1, setId1] = useState<string>('12356'); // State for new item ID
-	const [status, setStatus] = useState(true);
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-	const [quantityDifference, setQuantityDifference] = useState([]);
+	const { data: transaction, error, isLoading } = useGetStockOutsQuery(undefined);
+	const [startDate, setStartDate] = useState<string>(''); // State for start date
+	const [endDate, setEndDate] = useState<string>(''); // State for end date
 
 	const position = [
 		{ position: 'Gray Fabric' },
@@ -63,6 +57,22 @@ const Index: NextPage = () => {
 		{ position: 'Finish collor cuff' },
 		{ position: 'Yarn' },
 	];
+		// Filter transactions based on date range
+		const filteredTransactions = transaction?.filter((trans: any) => {
+			const transactionDate = new Date(trans.date);
+			const start = startDate ? new Date(startDate) : null;
+			const end = endDate ? new Date(endDate) : null;
+	
+			// Check if transaction date is within the selected range
+			if (start && end) {
+				return transactionDate >= start && transactionDate <= end;
+			} else if (start) {
+				return transactionDate >= start;
+			} else if (end) {
+				return transactionDate <= end;
+			}
+			return true;
+		});
 	return (
 		<PageWrapper>
 			<SubHeader>
@@ -87,14 +97,9 @@ const Index: NextPage = () => {
 
 				<SubHeaderRight>
 					<SubheaderSeparator />
-
 					<Dropdown>
 						<DropdownToggle hasIcon={false}>
-							<Button
-								icon='FilterAlt'
-								color='dark'
-								isLight
-								className='btn-only-icon position-relative'></Button>
+							<Button icon='FilterAlt' color='dark' isLight className='btn-only-icon position-relative'></Button>
 						</DropdownToggle>
 						<DropdownMenu isAlignmentEnd size='lg'>
 							<div className='container py-2'>
@@ -108,24 +113,33 @@ const Index: NextPage = () => {
 													label={category.position}
 													name={category.position}
 													value={category.position}
-													checked={selectedCategories.includes(
-														category.position,
-													)}
+													checked={selectedCategories.includes(category.position)}
 													onChange={(event: any) => {
 														const { checked, value } = event.target;
-														setSelectedCategories(
-															(prevCategories) =>
-																checked
-																	? [...prevCategories, value] // Add category if checked
-																	: prevCategories.filter(
-																			(category) =>
-																				category !== value,
-																	  ), // Remove category if unchecked
+														setSelectedCategories((prevCategories) =>
+															checked
+																? [...prevCategories, value]
+																: prevCategories.filter((category) => category !== value),
 														);
 													}}
 												/>
 											))}
 										</ChecksGroup>
+									</FormGroup>
+									{/* Date Range Filters */}
+									<FormGroup label='Start Date' className='col-6'>
+										<Input
+											type='date'
+											onChange={(e: any) => setStartDate(e.target.value)}
+											value={startDate}
+										/>
+									</FormGroup>
+									<FormGroup label='End Date' className='col-6'>
+										<Input
+											type='date'
+											onChange={(e: any) => setEndDate(e.target.value)}
+											value={endDate}
+										/>
 									</FormGroup>
 								</div>
 							</div>
@@ -139,7 +153,7 @@ const Index: NextPage = () => {
 						{/* Table for displaying customer data */}
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
-								<FormGroup id='code' className='col-md-3'>
+								{/* <FormGroup id='code' className='col-md-3'>
 									<Input
 										type='date'
 										// onChange={formik.handleChange}
@@ -150,7 +164,7 @@ const Index: NextPage = () => {
 										// invalidFeedback={formik.errors.code}
 										validFeedback='Looks good!'
 									/>
-								</FormGroup>
+								</FormGroup> */}
 								<div className='flex-grow-1 text-center text-info'>
 									Transaction Report
 								</div>
@@ -168,28 +182,28 @@ const Index: NextPage = () => {
 											<th>
 												<Checks
 													type='checkbox'
-													id='colour'
+													id='Code'
 													name='type'
-													label='code'
-													value='Colour'
+													label='Code'
+													value='Code'
 												/>
 											</th>
 											<th>
 												<Checks
 													type='checkbox'
-													id='colour'
+													id='GRN number'
+													name='type'
+													label='GRN number'
+													value='GRN number'
+												/>
+											</th>
+											<th>
+												<Checks
+													type='checkbox'
+													id='Dater'
 													name='type'
 													label='Date'
-													value='Colour'
-												/>
-											</th>
-											<th>
-												<Checks
-													type='checkbox'
-													id='colour'
-													name='type'
-													label='Type'
-													value='Colour'
+													value='Date'
 												/>
 											</th>
 											<th>
@@ -204,10 +218,10 @@ const Index: NextPage = () => {
 											<th>
 												<Checks
 													type='checkbox'
-													id='colour'
+													id='Type'
 													name='type'
-													label='Remaining Balance'
-													value='Colour'
+													label='Stock Out Type'
+													value='Type'
 												/>{' '}
 											</th>
 											<th>
@@ -215,107 +229,88 @@ const Index: NextPage = () => {
 													type='checkbox'
 													id='colour'
 													name='type'
-													label='GRN'
+													label='Price (Rs.)'
 													value='Colour'
 												/>
 											</th>
 											<th>
 												<Checks
 													type='checkbox'
-													id='colour'
-													name='type'
-													label='Gate pass'
-													value='Colour'
-												/>
-											</th>
-											<th>
-												<Checks
-													type='checkbox'
-													id='colour'
-													name='type'
-													label='Location'
-													value='Colour'
-												/>
-											</th>
-											<th>
-												<Checks
-													type='checkbox'
-													id='colour'
+													id='Category'
 													name='type'
 													label='Category'
-													value='Colour'
-												/>
-											</th>
-											<th>
-												<Checks
-													type='checkbox'
-													id='colour'
-													name='type'
-													label='Sub Category'
-													value='Colour'
+													value='Category'
 												/>
 											</th>
 										</tr>
 									</thead>
 
 									<tbody>
-										<tr className='text-success'>
-											<td className='text-warning'>15368</td>
-											<td className='text-warning'>2024/08/09</td>
-											<td className='text-warning'>Gray Fabric</td>
-											<td className='text-warning'>260</td>
-											<td className='text-warning'>500</td>
-											<td className='text-warning'>GR456</td>
-											<td className='text-warning'>G753</td>
-											<td className='text-warning'>Customer</td>
-											<td className='text-warning'>Dye fabric</td>
-											<td className='text-warning'>silk</td>
+										{isLoading && (
+											<tr>
+												<td>Loading...</td>
+											</tr>
+										)}
+										{error && (
+											<tr>
+												<td>Error fetching categories.</td>
+											</tr>
+										)}
+										{filteredTransactions  &&
+											filteredTransactions 
+												.filter((transaction: any) =>
+													searchTerm
+														? transaction.code
+																.toLowerCase()
+																.includes(searchTerm.toLowerCase())
+														: true,
+												)
+												.map((transaction: any) => {
+													// Determine the appropriate Bootstrap text color class based on order_type
+													let textColorClass = '';
+													if (transaction.stock_received == 'Customer') {
+														textColorClass = 'text-warning';
+													} else if (
+														transaction.stock_received ===
+														'Yarn Transaction'
+													) {
+														textColorClass = 'text-danger';
+													} else if (
+														transaction.stock_received === 'Dye Plant'
+													) {
+														textColorClass = 'text-success';
+													}
 
-											{/* <td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='warning'
-													onClick={() => handleClickDelete(item)}>
-													Delete
-												</Button>
-											</td> */}
-										</tr>
-										<tr>
-											<td className='text-success'>15368</td>
-											<td className='text-success'>2024/08/09</td>
-											<td className='text-success'>Finish Fabric</td>
-											<td className='text-success'>260</td>
-											<td className='text-success'>500</td>
-											<td className='text-success'>GR967</td>
-											<td className='text-success'>G756</td>
-											<td className='text-success'>Dye Plant</td>
-											<td className='text-success'>Gray fabric</td>
-											<td className='text-success'>efd</td>
-											{/* <td> */}
-											{/* <Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='warning'
-													onClick={() => handleClickDelete(item)}>
-													Delete
-												</Button> */}
-											{/* </td> */}
-										</tr>
+													return (
+														<tr
+															key={transaction.id}
+															className={textColorClass}>
+															<td className={textColorClass}>
+																{transaction.code}
+															</td>
+															<td className={textColorClass}>
+																{transaction.GRN_number}
+															</td>
+															<td className={textColorClass}>
+																{transaction.date} -{' '}
+																{transaction.time}
+															</td>
+															<td className={textColorClass}>
+																{transaction.quentity}
+															</td>
+															<td className={textColorClass}>
+																{transaction.stock_received}
+															</td>
+															<td className={textColorClass}>
+																{transaction.price}
+															</td>
+															<td className={textColorClass}>
+																{transaction.category ||
+																	transaction.type}
+															</td>
+														</tr>
+													);
+												})}
 									</tbody>
 								</table>
 							</CardBody>

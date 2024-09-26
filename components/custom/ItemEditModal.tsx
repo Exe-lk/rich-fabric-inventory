@@ -9,7 +9,7 @@ import Swal from 'sweetalert2';
 import Select from '../bootstrap/forms/Select';
 import Option from '../bootstrap/Option';
 import Checks, { ChecksGroup } from '../bootstrap/forms/Checks';
-import { useUpdateLotMutation, useGetLotsQuery } from '../../redux/slices/lotAPISlice';
+import { useUpdateLotMutation, useGetLotsQuery } from '../../redux/slices/stockInAPISlice';
 import { useGetFabricsQuery } from '../../redux/slices/fabricApiSlice';
 import { useGetGSMsQuery } from '../../redux/slices/gsmApiSlice';
 import { useGetKnitTypesQuery } from '../../redux/slices/knitTypeApiSlice';
@@ -47,7 +47,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 	const [updateLot, { isLoading }] = useUpdateLotMutation();
 
 	const lotToEdit = lots?.find((lot: any) => lot.id === id);
-
+	
 	const { refetch } = useGetLotsQuery(undefined);
 	const { data: fabric } = useGetFabricsQuery(undefined);
 	const { data: gsm } = useGetGSMsQuery(undefined);
@@ -68,7 +68,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 			width: lotToEdit?.width || '',
 			knit_type: lotToEdit?.knit_type || '',
 			GRN_number: lotToEdit?.GRN_number || '',
-			uom: lotToEdit?.uom || '',
+			quentity: lotToEdit?.quentity|| '',
 			status: lotToEdit?.status || true,
 			category: lotToEdit?.category || '',
 			subcategory: lotToEdit?.subcategory || '',
@@ -82,20 +82,46 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 			suppl_gatepass_no: lotToEdit?.suppl_gatepass_no || '',
 			suppl_invoice_no: lotToEdit?.suppl_invoice_no || '',
 			operater: lotToEdit?.operater || '',
+			rolls:lotToEdit?.rolls|| '',
+			
 		},
 		enableReinitialize: true,
 		validate: (values) => {
 			const errors: Record<string, string> = {};
-			// if (!values.code) errors.code = 'Required';
-			// if (!values.description) errors.description = 'Required';
-			// if (!values.color) errors.color = 'Required';
-			// if (!values.fabric_type) errors.fabric_type = 'Required';
-			// if (!values.gsm) errors.gsm = 'Required';
-			// if (!values.width) errors.width = 'Required';
-			// if (!values.knit_type) errors.knit_type = 'Required';
-			// if (!values.GRA_number) errors.GRA_number = 'Required';
-			// if (!values.GRN_number) errors.GRN_number = 'Required';
-			// if (!values.supplier) errors.supplier = 'Required';
+			if (!values.date) errors.date = 'Required';
+			if (!values.code) errors.code = 'Required';
+			if (!values.GRN_number) errors.GRN_number = 'Required';
+			if (!values.description) errors.description = 'Required';
+			if (!values.quentity) errors.quentity = 'Required';
+			if (selectedOption == 'Finish Fabric' && !values.color) errors.color = 'Required';
+			if (
+				(selectedOption == 'Finish Fabric' ||
+					selectedOption == 'Gray Fabric' ||
+					selectedOption == 'Other') &&
+				!values.fabric_type
+			)
+				errors.fabric_type = 'Required';
+			if (selectedOption != 'Yarn' && !values.gsm) errors.gsm = 'Required';
+			if (selectedOption != 'Yarn' && !values.width) errors.width = 'Required';
+			if (selectedOption != 'Yarn' && !values.knit_type) errors.knit_type = 'Required';
+			if (selectedOption != 'Yarn' && !values.rolls) errors.rolls = 'Required';
+			if (selectedOption != 'Yarn' && !values.PackType) errors.PackType = 'Required';
+			if (selectedOption != 'Yarn' && !values.supplier) errors.supplier = 'Required';
+			if (selectedOption != 'Yarn' && !values.remark) errors.remark = 'Required';
+			if (selectedOption != 'Yarn' && !values.suppl_gatepass_no)
+				errors.suppl_gatepass_no = 'Required';
+			if (selectedOption != 'Yarn' && !values.operater) errors.operater = 'Required';
+			if (selectedOption != 'Yarn' && !values.suppl_invoice_no)
+				errors.suppl_invoice_no = 'Required';
+			if (
+				(selectedOption == 'Gray collor cuff' || selectedOption == 'Finish collor cuff') &&
+				!values.collor_cuff_type
+			)
+				errors.collor_cuff_type = 'Required';
+			if (selectedOption == 'Other' && !values.category) errors.category = 'Required';
+			if (selectedOption == 'Other' && !values.subcategory) errors.subcategory = 'Required';
+			if (selectedOption == 'Finish Fabric' && !values.stockOutId)
+				errors.stockOutId = 'Required';
 			return errors;
 		},
 		onSubmit: async (values) => {
@@ -109,7 +135,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 				});
 				await updateLot(values).unwrap();
 
-				Swal.fire('Added!', 'Lot has been update successfully.', 'success');
+				Swal.fire('Added!', 'stock has been update successfully.', 'success');
 
 				formik.resetForm();
 				setIsOpen(false);
@@ -155,7 +181,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 	return (
 		<Modal isOpen={isOpen} setIsOpen={setIsOpen} size='xl' titleId={id}>
 			<ModalHeader setIsOpen={setIsOpen} className='p-4'>
-				<ModalTitle id=''>{'New Stock'}</ModalTitle>
+				<ModalTitle id=''>{'Edit Stock'}</ModalTitle>
 			</ModalHeader>
 			<ModalBody className='px-4'>
 				<div className='row g-4'>
@@ -218,46 +244,104 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 						</ChecksGroup>
 					</FormGroup>
 					{selectedOption === 'Other' && (
-						<FormGroup
-							id='category'
-							label='Category'
-							onChange={formik.handleChange}
-							className='col-md-6'>
-							<Select
-								ariaLabel='Default select example'
-								placeholder='Open this select category'
-								onChange={handleCategoryChange}
-								value={formik.values.category}
-								onBlur={formik.handleBlur}
-								isValid={formik.isValid}
-								validFeedback='Looks good!'>
-								{categories &&
-									categories.map((category: any) => (
-										<>
-											<Option value={category.name}>{category.name}</Option>
-										</>
-									))}
-							</Select>
-						</FormGroup>
+						<>
+							<FormGroup
+								id='category'
+								label='Category'
+								onChange={formik.handleChange}
+								className='col-md-6'>
+								<Select
+									ariaLabel='Default select example'
+									placeholder='Open this select category'
+									onChange={handleCategoryChange}
+									value={formik.values.category}
+									onBlur={formik.handleBlur}
+									isValid={formik.isValid}
+									// isTouched={formik.touched.category}
+									// invalidFeedback={formik.errors.category}
+									validFeedback='Looks good!'>
+									{categories &&
+										categories.map((category: any) => (
+											<>
+												<Option value={category.name}>
+													{category.name}
+												</Option>
+											</>
+										))}
+								</Select>
+							</FormGroup>
+							<FormGroup id='subcategory' label='Sub Category' className='col-md-6'>
+								<Select
+									ariaLabel='Default select example'
+									placeholder='Open this select sub category'
+									onChange={formik.handleChange}
+									value={formik.values.subcategory}
+									onBlur={formik.handleBlur}
+									isValid={formik.isValid}
+									// isTouched={formik.touched.subcategory}
+									// invalidFeedback={formik.errors.subcategory}
+									validFeedback='Looks good!'>
+									{subcategories &&
+										subcategories.map((category: any) => (
+											<>
+												<Option value={category.value}>
+													{category.label}
+												</Option>
+											</>
+										))}
+								</Select>
+							</FormGroup>
+						</>
 					)}
-					<FormGroup id='subcategory' label='Sub Category' className='col-md-6'>
-						<Select
-							ariaLabel='Default select example'
-							placeholder='Open this select sub category'
+
+					<FormGroup id='code' label='GRN number' className='col-md-6'>
+						<Input
+							type='number'
 							onChange={formik.handleChange}
-							value={formik.values.subcategory}
+							value={formik.values.code}
 							onBlur={formik.handleBlur}
 							isValid={formik.isValid}
-							validFeedback='Looks good!'>
-							{subcategories &&
-								subcategories.map((category: any) => (
-									<>
-										<Option value={category.value}>{category.label}</Option>
-									</>
-								))}
-						</Select>
+							// isTouched={formik.touched.date}
+							// invalidFeedback={formik.errors.date}
+							validFeedback='Looks good!'
+						/>
+					</FormGroup>
+					<FormGroup id='date' label='date' className='col-md-6'>
+						<Input
+							type='date'
+							onChange={formik.handleChange}
+							value={formik.values.date}
+							onBlur={formik.handleBlur}
+							isValid={formik.isValid}
+							// isTouched={formik.touched.date}
+							// invalidFeedback={formik.errors.date}
+							validFeedback='Looks good!'
+						/>
+					</FormGroup>
+					<FormGroup id='description' label='Description' className='col-md-6'>
+						<Input
+							onChange={formik.handleChange}
+							value={formik.values.description}
+							onBlur={formik.handleBlur}
+							isValid={formik.isValid}
+							// isTouched={formik.touched.description}
+							// invalidFeedback={formik.errors.description}
+							validFeedback='Looks good!'
+						/>
 					</FormGroup>
 
+					<FormGroup id='quentity' label='Quentity (Kg)' className='col-md-6'>
+						<Input
+							type='number'
+							onChange={formik.handleChange}
+							value={formik.values.quentity}
+							onBlur={formik.handleBlur}
+							isValid={formik.isValid}
+							// isTouched={formik.touched.quentity}
+							// invalidFeedback={formik.errors.quentity}
+							validFeedback='Looks good!'
+						/>
+					</FormGroup>
 					{selectedOption === 'Finish Fabric' && (
 						<>
 							<FormGroup id='stockOutId' label='Stock Out ID' className='col-md-6'>
@@ -266,6 +350,8 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 									value={formik.values.stockOutId}
 									onBlur={formik.handleBlur}
 									isValid={formik.isValid}
+									// isTouched={formik.touched.stockOutId}
+									// invalidFeedback={formik.errors.stockOutId}
 									validFeedback='Looks good!'
 								/>
 							</FormGroup>
@@ -285,6 +371,8 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 										value={formik.values.color}
 										onBlur={formik.handleBlur}
 										isValid={formik.isValid}
+										// isTouched={formik.touched.color}
+										// invalidFeedback={formik.errors.color}
 										validFeedback='Looks good!'>
 										<Option value='Add new'>Add new</Option>
 
@@ -303,53 +391,14 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 										value={formik.values.color}
 										onBlur={formik.handleBlur}
 										isValid={formik.isValid}
+										// isTouched={formik.touched.color}
+										// invalidFeedback={formik.errors.color}
 										validFeedback='Looks good!'
 									/>
 								)}
 							</FormGroup>
 						</>
 					)}
-
-					<FormGroup id='code' label='GRN number' className='col-md-6'>
-						<Input
-							type='number'
-							onChange={formik.handleChange}
-							value={formik.values.code}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-					<FormGroup id='date' label='date' className='col-md-6'>
-						<Input
-							type='date'
-							onChange={formik.handleChange}
-							value={formik.values.date}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-					<FormGroup id='description' label='Description' className='col-md-6'>
-						<Input
-							onChange={formik.handleChange}
-							value={formik.values.description}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-
-					<FormGroup id='uom' label='UOM' className='col-md-6'>
-						<Input
-							type='number'
-							onChange={formik.handleChange}
-							value={formik.values.uom}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
 
 					{selectedOption == 'Yarn' ? (
 						<></>
@@ -384,7 +433,12 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 														formik.handleChange(e);
 													}
 												}}
-												value={formik.values.fabric_type}>
+												value={formik.values.fabric_type}
+												onBlur={formik.handleBlur}
+												isValid={formik.isValid}
+												// isTouched={formik.touched.gsm}
+												// invalidFeedback={formik.errors.gsm}
+												validFeedback='Looks good!'>
 												<Option value='Add new'>Add New</Option>
 												<Option value='Cotton'>Plain</Option>
 												<Option value='Polyester'>Tiffin</Option>
@@ -419,8 +473,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 													} else {
 														formik.handleChange(e);
 													}
-												}}
-												value={formik.values.fabric_type}>
+												}}>
 												<Option value=''>Select Fabric Type</Option>
 												<Option value='Add new'>Add New</Option>
 												{/* Existing fabric type options can be dynamically loaded here */}
@@ -458,7 +511,12 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 												formik.handleChange(e);
 											}
 										}}
-										value={formik.values.gsm}>
+										value={formik.values.gsm}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										// isTouched={formik.touched.gsm}
+										// invalidFeedback={formik.errors.gsm}
+										validFeedback='Looks good!'>
 										<Option value=''>Select GSM</Option>
 										<Option value='Add new'>Add New</Option>
 										{gsm &&
@@ -477,6 +535,8 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 									value={formik.values.width}
 									onBlur={formik.handleBlur}
 									isValid={formik.isValid}
+									// isTouched={formik.touched.width}
+									// invalidFeedback={formik.errors.width}
 									validFeedback='Looks good!'
 								/>
 							</FormGroup>
@@ -504,6 +564,8 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 										value={formik.values.knit_type}
 										onBlur={formik.handleBlur}
 										isValid={formik.isValid}
+										// isTouched={formik.touched.knit_type}
+										// invalidFeedback={formik.errors.knit_type}
 										validFeedback='Looks good!'>
 										{/* <Option value=''>Select Knit Type</Option> */}
 
@@ -519,79 +581,99 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							</FormGroup>
 						</>
 					)}
-
-					<FormGroup
-						id='FinishType'
-						label='Number of rolls or bales'
-						className='col-md-6'>
-						<Input
-							type='number'
-							onChange={formik.handleChange}
-							value={formik.values.FinishType}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-					<FormGroup id='PackType' label='PackType' className='col-md-6'>
-						<Input
-							type='number'
-							onChange={formik.handleChange}
-							value={formik.values.PackType}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-					<FormGroup id='remark' label='Remark' className='col-md-6'>
-						<Input
-							type='text'
-							onChange={formik.handleChange}
-							value={formik.values.remark}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-					<FormGroup id='supplier' label='Supplier/Customer' className='col-md-6'>
-						<Input
-							onChange={formik.handleChange}
-							value={formik.values.supplier}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-					<FormGroup
-						id='suppl_gatepass_no'
-						label='supplier gate pass no'
-						className='col-md-6'>
-						<Input
-							onChange={formik.handleChange}
-							value={formik.values.suppl_gatepass_no}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-					<FormGroup id='operater' label='Operator name' className='col-md-6'>
-						<Input
-							onChange={formik.handleChange}
-							value={formik.values.operater}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
-					<FormGroup id='suppl_invoice_no' label='invoice number ' className='col-md-6'>
-						<Input
-							onChange={formik.handleChange}
-							value={formik.values.suppl_invoice_no}
-							onBlur={formik.handleBlur}
-							isValid={formik.isValid}
-							validFeedback='Looks good!'
-						/>
-					</FormGroup>
+					{selectedOption != 'Yarn' && (
+						<>
+							<FormGroup
+								id='FinishType'
+								label='Number of rolls or bales'
+								className='col-md-6'>
+								<Input
+									type='number'
+									onChange={formik.handleChange}
+									value={formik.values.FinishType}
+									onBlur={formik.handleBlur}
+									isValid={formik.isValid}
+									// isTouched={formik.touched.FinishType}
+									// invalidFeedback={formik.errors.FinishType}
+									validFeedback='Looks good!'
+								/>
+							</FormGroup>
+							<FormGroup id='PackType' label='PackType' className='col-md-6'>
+								<Input
+									type='number'
+									onChange={formik.handleChange}
+									value={formik.values.PackType}
+									onBlur={formik.handleBlur}
+									isValid={formik.isValid}
+									// isTouched={formik.touched.PackType}
+									// invalidFeedback={formik.errors.PackType}
+									validFeedback='Looks good!'
+								/>
+							</FormGroup>
+							<FormGroup id='remark' label='Remark' className='col-md-6'>
+								<Input
+									type='text'
+									onChange={formik.handleChange}
+									value={formik.values.remark}
+									onBlur={formik.handleBlur}
+									isValid={formik.isValid}
+									// isTouched={formik.touched.remark}
+									// invalidFeedback={formik.errors.remark}
+									validFeedback='Looks good!'
+								/>
+							</FormGroup>
+							<FormGroup id='supplier' label='Supplier/Customer' className='col-md-6'>
+								<Input
+									onChange={formik.handleChange}
+									value={formik.values.supplier}
+									onBlur={formik.handleBlur}
+									isValid={formik.isValid}
+									// isTouched={formik.touched.supplier}
+									// invalidFeedback={formik.errors.supplier}
+									validFeedback='Looks good!'
+								/>
+							</FormGroup>
+							<FormGroup
+								id='suppl_gatepass_no'
+								label='supplier gate pass no'
+								className='col-md-6'>
+								<Input
+									onChange={formik.handleChange}
+									value={formik.values.suppl_gatepass_no}
+									onBlur={formik.handleBlur}
+									isValid={formik.isValid}
+									// isTouched={formik.touched.suppl_gatepass_no}
+									// invalidFeedback={formik.errors.suppl_gatepass_no}
+									validFeedback='Looks good!'
+								/>
+							</FormGroup>
+							<FormGroup id='operater' label='Operator name' className='col-md-6'>
+								<Input
+									onChange={formik.handleChange}
+									value={formik.values.operater}
+									onBlur={formik.handleBlur}
+									isValid={formik.isValid}
+									// isTouched={formik.touched.operater}
+									// invalidFeedback={formik.errors.operater}
+									validFeedback='Looks good!'
+								/>
+							</FormGroup>
+							<FormGroup
+								id='suppl_invoice_no'
+								label='invoice number '
+								className='col-md-6'>
+								<Input
+									onChange={formik.handleChange}
+									value={formik.values.suppl_invoice_no}
+									onBlur={formik.handleBlur}
+									isValid={formik.isValid}
+									// isTouched={formik.touched.suppl_invoice_no}
+									// invalidFeedback={formik.errors.supplier}
+									validFeedback='Looks good!'
+								/>
+							</FormGroup>
+						</>
+					)}
 
 					{selectedOption === 'grayFabric' && (
 						<>
@@ -601,6 +683,8 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 									// value={formik.values.suppl_invoice_no}
 									onBlur={formik.handleBlur}
 									isValid={formik.isValid}
+									// isTouched={formik.touched.suppl_invoice_no}
+									// invalidFeedback={formik.errors.supplier}
 									validFeedback='Looks good!'
 								/>
 							</FormGroup>
@@ -610,6 +694,8 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 									// value={formik.values.suppl_invoice_no}
 									onBlur={formik.handleBlur}
 									isValid={formik.isValid}
+									// isTouched={formik.touched.suppl_invoice_no}
+									// invalidFeedback={formik.errors.supplier}
 									validFeedback='Looks good!'
 								/>
 							</FormGroup>

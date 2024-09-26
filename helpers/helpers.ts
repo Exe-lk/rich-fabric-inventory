@@ -86,7 +86,7 @@ export const getFirstLetter = (text: string, letterCount = 2): string =>
 	text
 		.toUpperCase()
 		.match(/\b(\w)/g)
-		.join('')
+		.join('a')
 		.substring(0, letterCount);
 
 export const debounce = (func: (arg0: any) => void, wait = 1000) => {

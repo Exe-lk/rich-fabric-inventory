@@ -2,153 +2,87 @@ import React, { useEffect, useRef, useState } from 'react';
 import CommonRightPanel from '../../../components/CommonRightPanel';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Button from '../../../components/bootstrap/Button';
-import Page from '../../../layout/Page/Page';
-import { addDoc, collection, getDocs } from 'firebase/firestore';
-import { firestore } from '../../../firebaseConfig';
 import 'react-simple-keyboard/build/css/index.css';
 import Swal from 'sweetalert2';
 import Additem from '../../../components/add-item';
 import Edit from '../../../components/edit-item';
-import Card, {
-	CardActions,
-	CardBody,
-	CardHeader,
-	CardLabel,
-	CardSubTitle,
-	CardTitle,
-} from '../../../components/bootstrap/Card';
+import Card, { CardBody } from '../../../components/bootstrap/Card';
 import Input from '../../../components/bootstrap/forms/Input';
 import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
-import Carousel from '../../../components/bootstrap/Carousel';
-import CarouselSlide from '../../../components/bootstrap/CarouselSlide';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import { useFormik } from 'formik';
-import { number } from 'prop-types';
+import {
+	useGetStockOutsQuery,
+	useAddStockOutMutation,
+} from '../../../redux/slices/stockOutApiSlice'; // Import the query
 
 function index() {
 	const [toggleRightPanel, setToggleRightPanel] = useState(false);
 	const [orderedItems, setOrderedItems] = useState<any>([]);
-	const [cname, setCname] = useState<string>('');
-	const [amount, setAmount] = useState<number>(0);
 	const [id, setId] = useState<number>(1530);
 	const customerNameInputRef = useRef<HTMLInputElement>(null);
 	const customerAmountInputRef = useRef<HTMLInputElement>(null);
-	const [casher, setCasher] = useState<any>({});
-	const [payment, setPayment] = useState(true);
 	const [activeComponent, setActiveComponent] = useState<'additem' | 'edit'>('additem');
-	const [selectedOption, setSelectedOption] = useState<string>('');
-	const [userName, setUserName] = useState<string>(''); // State for name input
-	const [contactNumber, setContactNumber] = useState<string>(''); // State for contact number input
-	const [location, setLocation] = useState<string>(''); // State for location input
-	const currentDate = new Date().toLocaleDateString('en-CA');
+	const [selectedOption, setSelectedOption] = useState<string>('Customer');
 	const currentTime = new Date().toLocaleTimeString('en-GB', {
 		hour: '2-digit',
 		minute: '2-digit',
 	});
-
+	const [addtransaction, { isLoading }] = useAddStockOutMutation();
+	const { refetch } = useGetStockOutsQuery(undefined);
 	const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setSelectedOption(event.target.value);
 	};
-
+	console.log(orderedItems);
 	const addbill = async () => {
-		if (
-			amount >=
-				orderedItems.reduce(
-					(total: any, item: any) =>
-						total +
-						item.quantity * item.price +
-						((total + item.quantity * item.price) / 100) * 10,
-					0.0,
-				) &&
-			orderedItems.reduce(
-				(total: any, item: any) =>
-					total +
-					item.quantity * item.price +
-					((total + item.quantity * item.price) / 100) * 10,
-				0.0,
-			) > 1
-		) {
-			try {
-				const result = await Swal.fire({
-					title: 'Are you sure?',
-					text: 'You will not be able to recover this!',
-					// text: id,
-					icon: 'warning',
-					showCancelButton: true,
-					confirmButtonColor: '#3085d6',
-					cancelButtonColor: '#d33',
-					confirmButtonText: 'Yes, update it!',
-				});
+		try {
+			const result = await Swal.fire({
+				title: 'Are you sure?',
+				text: 'You will not be able to recover this!',
+				// text: id,
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, update it!',
+			});
 
-				if (result.isConfirmed) {
-					const amount = orderedItems.reduce(
-						(total: any, item: any) =>
-							total +
-							item.quantity * item.price +
-							((total + item.quantity * item.price) / 100) * 10,
-						0.0,
-					);
-					const currentDate = new Date();
-					const formattedDate = currentDate.toLocaleDateString();
+			if (result.isConfirmed) {
+				const currentDate = new Date();
+				const formattedDate = currentDate.toLocaleDateString();
 
-					const year = currentDate.getFullYear();
-					const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-					const day = String(currentDate.getDate()).padStart(2, '0');
-					const formattedDate1 = `${year}-${month}-${day}`;
+				const year = currentDate.getFullYear();
+				const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+				const day = String(currentDate.getDate()).padStart(2, '0');
+				const formattedDate1 = `${year}-${month}-${day}`;
 
+				for (const orderedItem of orderedItems) {
 					const values = {
-						orders: orderedItems,
+						stock_id: orderedItem.id,
+						fabric_type: orderedItem.fabric_type,
+						type: orderedItem.type,
+						code: orderedItem.code,
+						category: orderedItem.category,
+						subcategory: orderedItem.subcategory,
 						time: currentTime,
-						date: formattedDate,
-						casheir: casher.email,
-						amount: Number(amount),
-						type: payment ? 'cash' : 'card',
-						id: id,
-					};
-					const values1 = {
-						description: id,
 						date: formattedDate1,
-						price: Number(amount),
-						type: 'Incoming',
-						url: '',
+						quentity: orderedItem.order_quantity,
+						stock_received: selectedOption,
+						price: formik.values.price,
+						customer_name: formik.values.name,
+						customer_mobile: formik.values.mobile,
+						vehicle_number: formik.values.vehiclenumber,
+						gate_pass_No: formik.values.gatepassno,
 					};
-					const collectionRef = collection(firestore, 'orders');
-					const collectionRef1 = collection(firestore, 'cashBook');
-
-					addDoc(collectionRef, values)
-						.then(() => {
-							addDoc(collectionRef1, values1)
-								.then(() => {
-									Swal.fire(
-										'Added!',
-
-										'bill has been add successfully.',
-										'success',
-									);
-									setOrderedItems([]);
-									setCname('');
-									setAmount(0);
-								})
-								.catch((error) => {
-									console.error('Error adding document: ', error);
-									alert(
-										'An error occurred while adding the document. Please try again later.',
-									);
-								});
-						})
-						.catch((error) => {
-							console.error('Error adding document: ', error);
-							alert(
-								'An error occurred while adding the document. Please try again later.',
-							);
-						});
+					const response: any = await addtransaction(values).unwrap();
 				}
-			} catch (error) {
-				console.error('Error during handleUpload: ', error);
-				alert('An error occurred during file upload. Please try again later.');
+
+				refetch();
+				Swal.fire('Added!', 'transaction has been added successfully.', 'success');
 			}
-		} else {
-			Swal.fire('warning..!', 'insufficient amount', 'error');
+		} catch (error) {
+			console.error('Error during handleUpload: ', error);
+			alert('An error occurred during file upload. Please try again later.');
 		}
 	};
 	const handleKeyPress = (event: KeyboardEvent) => {
@@ -156,7 +90,7 @@ function index() {
 			setToggleRightPanel((prevState) => !prevState);
 			event.preventDefault(); // Prevent default browser behavior
 		} else if (event.ctrlKey && event.key.toLowerCase() === 'p') {
-			addbill();
+			formik.handleSubmit();
 			event.preventDefault(); // Prevent default browser behavior
 		} else if (event.key === 'Shift') {
 			// Check if the focus is on the input fields
@@ -184,7 +118,7 @@ function index() {
 			if (event.key === 'Shift') {
 				event.stopPropagation();
 				event.preventDefault();
-				addbill();
+				formik.handleSubmit();
 			}
 		};
 
@@ -201,60 +135,79 @@ function index() {
 			customerAmountInput?.removeEventListener('keydown', handleAmountEnter);
 			window.removeEventListener('keydown', handleKeyPress);
 		};
-	}, [cname, amount]);
-
-	useEffect(() => {
-		const cashier = localStorage.getItem('user');
-		if (cashier) {
-			const jsonObject = JSON.parse(cashier);
-			console.log(jsonObject);
-			setCasher(jsonObject);
-		}
 	}, []);
 
 	const formik = useFormik({
 		initialValues: {
-			width: '',
-			quantity: '',
 			price: '',
-			packtype: '',
-			remark: '',
+			gatepassno: '',
 			name: '',
-			email: '',
 			mobile: '',
 			vehiclenumber: '',
-			status: true,
 		},
 		validate: (values) => {
-			const errors: {
-				width?: string;
-				quantity?: string;
-				price?: string;
-				packtype?: string;
-				remark?: string;
-			} = {};
-			if (!values.width) {
-				errors.width = 'Required';
-			}
-			if (!values.quantity) {
-				errors.quantity = 'Required';
-			}
-			if (!values.packtype) {
-				errors.packtype = 'Required';
-			}
-			if (!values.remark) {
-				errors.remark = 'Required';
-			}
-			if (!values.price) {
-				errors.price = 'Required';
-			}
+			const errors: Record<string, string> = {};
+			if (!values.price) errors.price = 'Required';
+			if (selectedOption == 'Dye Plant' && !values.gatepassno) errors.gatepassno = 'Required';
+			if (selectedOption == 'Customer' && !values.name) errors.name = 'Required';
+			if (selectedOption == 'Customer' && !values.mobile) errors.mobile = 'Required';
+			if (selectedOption == 'Dye Plant' && !values.vehiclenumber)
+				errors.vehiclenumber = 'Required';
+
 			return errors;
 		},
 		onSubmit: async (values) => {
-			try {
-			} catch (error) {
-				console.error('Error during handleUpload: ', error);
-				alert('An error occurred during file upload. Please try again later.');
+			if (orderedItems.length >= 1) {
+				try {
+					const result = await Swal.fire({
+						title: 'Are you sure?',
+						text: 'You will not be able to recover this!',
+						// text: id,
+						icon: 'warning',
+						showCancelButton: true,
+						confirmButtonColor: '#3085d6',
+						cancelButtonColor: '#d33',
+						confirmButtonText: 'Yes, update it!',
+					});
+
+					if (result.isConfirmed) {
+						const currentDate = new Date();
+						const formattedDate = currentDate.toLocaleDateString();
+
+						const year = currentDate.getFullYear();
+						const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+						const day = String(currentDate.getDate()).padStart(2, '0');
+						const formattedDate1 = `${year}-${month}-${day}`;
+
+						for (const orderedItem of orderedItems) {
+							const values1 = {
+								stock_id: orderedItem.id,
+								fabric_type: orderedItem.fabric_type,
+								type: orderedItem.type,
+								code: orderedItem.code,
+								GRN_number:orderedItem.GRN_number,
+								category: orderedItem.category,
+								subcategory: orderedItem.subcategory,
+								time: currentTime,
+								date: formattedDate1,
+								quentity: orderedItem.order_quantity,
+								stock_received: selectedOption,
+								price: values.price,
+								customer_name: values.name,
+								customer_mobile: values.mobile,
+								vehicle_number: values.vehiclenumber,
+								gate_pass_No: values.gatepassno,
+							};
+							const response: any = await addtransaction(values1).unwrap();
+						}
+						setOrderedItems([]);
+						refetch();
+						Swal.fire('Added!', 'transaction has been added successfully.', 'success');
+					}
+				} catch (error) {
+					console.error('Error during handleUpload: ', error);
+					alert('An error occurred during file upload. Please try again later.');
+				}
 			}
 		},
 	});
@@ -272,13 +225,13 @@ function index() {
 		{ status: true, categoryname: 'Gray Collar Cuff', cid: '0bc5HUELspDzvrUdt5u6' },
 
 		{ status: true, categoryname: 'Finished Collar Cuff', cid: '0bc5HUELspDzvrUdt5u6' },
-		
+
 		{ status: true, categoryname: 'Yarn', cid: 'LKcV57ThRnHtE9bxBHMb' },
 	];
 	const [category, setCategory] = useState<Category[]>(cdata);
 	return (
 		<PageWrapper className=''>
-			<div>
+			{/* <div>
 				<div className='mt-5'>
 					<Button className='btn btn-outline-warning '>All</Button>
 					{category.map((category, index) => (
@@ -287,7 +240,7 @@ function index() {
 						</Button>
 					))}
 				</div>
-			</div>
+			</div> */}
 			<div className='row'>
 				<div className='col-4  mb-sm-0'>
 					<Additem
@@ -321,10 +274,10 @@ function index() {
 									/>
 									<Checks
 										type='radio'
-										id='colour'
+										id='Dye Plant'
 										label='Dye Plant'
 										name='type'
-										value='Colour'
+										value='Dye Plant'
 										onChange={handleOptionChange}
 										checked={selectedOption}
 									/>
@@ -332,8 +285,6 @@ function index() {
 							</FormGroup>
 
 							<div className='row g-4 mt-1'>
-								
-								
 								<FormGroup id='price' label='Price' className='col-md-12'>
 									<Input
 										onChange={formik.handleChange}
@@ -345,67 +296,77 @@ function index() {
 										validFeedback='Looks good!'
 									/>
 								</FormGroup>
-								
-							
 
-							{selectedOption === 'Colour' && (
-								<div>
-									<FormGroup id='vehiclenumber' label='Vehicle Number' className='col-md-12'>
-									<Input
-										onChange={formik.handleChange}
-										value={formik.values.vehiclenumber}
-										onBlur={formik.handleBlur}
-										isValid={formik.isValid}
-										isTouched={formik.touched.vehiclenumber}
-										invalidFeedback={formik.errors.vehiclenumber}
-										validFeedback='Looks good!'
-									/>
-									</FormGroup>
-									<FormGroup id='vehiclenumber' label='Gate Pass Number' className='col-md-12'>
-									<Input
-										onChange={formik.handleChange}
-										value={formik.values.vehiclenumber}
-										onBlur={formik.handleBlur}
-										isValid={formik.isValid}
-										isTouched={formik.touched.vehiclenumber}
-										invalidFeedback={formik.errors.vehiclenumber}
-										validFeedback='Looks good!'
-									/>
-									</FormGroup>
-								</div>
-							)}
+								{selectedOption === 'Dye Plant' && (
+									<div>
+										<FormGroup
+											id='vehiclenumber'
+											label='Vehicle Number'
+											className='col-md-12'>
+											<Input
+												onChange={formik.handleChange}
+												value={formik.values.vehiclenumber}
+												onBlur={formik.handleBlur}
+												isValid={formik.isValid}
+												isTouched={formik.touched.vehiclenumber}
+												invalidFeedback={formik.errors.vehiclenumber}
+												validFeedback='Looks good!'
+											/>
+										</FormGroup>
+										<FormGroup
+											id='gatepassno'
+											label='Gate Pass Number'
+											className='col-md-12'>
+											<Input
+												onChange={formik.handleChange}
+												value={formik.values.gatepassno}
+												onBlur={formik.handleBlur}
+												isValid={formik.isValid}
+												isTouched={formik.touched.gatepassno}
+												invalidFeedback={formik.errors.gatepassno}
+												validFeedback='Looks good!'
+											/>
+										</FormGroup>
+									</div>
+								)}
 
-							{selectedOption === 'Customer' && (
-								<div>
-								<FormGroup id='name' label='Customer Name' className='col-md-12'>
-								<Input
-									onChange={formik.handleChange}
-									value={formik.values.name}
-									onBlur={formik.handleBlur}
-									isValid={formik.isValid}
-									isTouched={formik.touched.name}
-									invalidFeedback={formik.errors.name}
-									validFeedback='Looks good!'
-								/>
-								</FormGroup>
-								
-								<FormGroup id='mobile' label='Contact No.' className='col-md-12'>
-								<Input
-									onChange={formik.handleChange}
-									value={formik.values.mobile}
-									onBlur={formik.handleBlur}
-									isValid={formik.isValid}
-									isTouched={formik.touched.mobile}
-									invalidFeedback={formik.errors.mobile}
-									validFeedback='Looks good!'
-								/>
-								</FormGroup>
-							</div>
-							)}
+								{selectedOption === 'Customer' && (
+									<div>
+										<FormGroup
+											id='name'
+											label='Customer Name'
+											className='col-md-12'>
+											<Input
+												onChange={formik.handleChange}
+												value={formik.values.name}
+												onBlur={formik.handleBlur}
+												isValid={formik.isValid}
+												isTouched={formik.touched.name}
+												invalidFeedback={formik.errors.name}
+												validFeedback='Looks good!'
+											/>
+										</FormGroup>
+
+										<FormGroup
+											id='mobile'
+											label='Contact No.'
+											className='col-md-12'>
+											<Input
+												onChange={formik.handleChange}
+												value={formik.values.mobile}
+												onBlur={formik.handleBlur}
+												isValid={formik.isValid}
+												isTouched={formik.touched.mobile}
+												invalidFeedback={formik.errors.mobile}
+												validFeedback='Looks good!'
+											/>
+										</FormGroup>
+									</div>
+								)}
 							</div>
 							<Button
 								className='btn btn-success w-100 mt-3 fs-4 p-3 mb-3'
-								onClick={addbill}>
+								onClick={formik.handleSubmit}>
 								Proceed
 							</Button>
 						</CardBody>

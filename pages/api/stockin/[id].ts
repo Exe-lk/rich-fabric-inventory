@@ -1,6 +1,6 @@
 // pages/api/lot/[id].ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { getLotById, updateLot, deleteLot } from '../../../service/lotServices';
+import { getLotById, updateLot, deleteLot } from '../../../service/stockInServices';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;

@@ -1,29 +1,29 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-export const lotApiSlice = createApi({
+export const lotInApiSlice = createApi({
   reducerPath: 'lotApi',
   baseQuery: fetchBaseQuery({ baseUrl: 'http://localhost:3000/api/' }),
   tagTypes: ['Lot'],
   endpoints: (builder) => ({
     // Fetch all lots
     getLots: builder.query({
-      query: () => 'lot/route',
+      query: () => 'stockin/route',
       providesTags: ['Lot'],
     }),
     // Fetch a single lot by ID
     getLotById: builder.query({
-      query: (id) => `lot/${id}`,
+      query: (id) => `stockin/${id}`,
       providesTags: ['Lot'],
     }),
     // Fetch deleted lots (status = false)
     getDeletedLots: builder.query({
-      query: () => 'lot/bin',
+      query: () => 'stockin/bin',
       providesTags: ['Lot'],
     }),
     // Add a new lot
     addLot: builder.mutation({
       query: (newLot) => ({
-        url: 'lot/route',
+        url: 'stockin/route',
         method: 'POST',
         body: newLot,
       }),
@@ -32,7 +32,7 @@ export const lotApiSlice = createApi({
     // Update an existing lot
     updateLot: builder.mutation({
       query: (updatedLot) => ({
-        url: `lot/${updatedLot.id}`,
+        url: `stockin/${updatedLot.id}`,
         method: 'PUT',
         body: updatedLot,
       }),
@@ -41,7 +41,7 @@ export const lotApiSlice = createApi({
     // Delete a lot
     deleteLot: builder.mutation({
       query: (id) => ({
-        url: `lot/${id}`,
+        url: `stockin/${id}`,
         method: 'DELETE',
       }),
     }),
@@ -55,4 +55,4 @@ export const {
   useAddLotMutation,
   useUpdateLotMutation,
   useDeleteLotMutation,
-} = lotApiSlice;
+} = lotInApiSlice;

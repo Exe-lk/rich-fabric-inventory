@@ -8,7 +8,7 @@ import {
 	useGetLotsQuery,
 	useGetDeletedLotsQuery,
 	useUpdateLotMutation,
-} from '../../redux/slices/lotAPISlice';
+} from '../../redux/slices/stockInAPISlice';
 interface CategoryEditModalProps {
 	id: string;
 	isOpen: boolean;
@@ -41,7 +41,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 
 			if (inputText === 'DELETE') {
 				await deletelot(lot.id).unwrap();
-				Swal.fire('Deleted!', 'The category has been deleted.', 'success');
+				Swal.fire('Deleted!', 'The stock has been deleted.', 'success');
 
 				// Perform delete action here
 				console.log('Delete confirmed');
@@ -49,7 +49,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete category.', 'error');
+			Swal.fire('Error', 'Failed to delete stock.', 'error');
 		}
 	};
 
@@ -72,11 +72,11 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 
 				await updatelot(values);
 
-				Swal.fire('Restory!', 'The category has been deleted.', 'success');
+				Swal.fire('Restory!', 'The stock has been deleted.', 'success');
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete category.', 'error');
+			Swal.fire('Error', 'Failed to delete stock.', 'error');
 		}
 	};
 
@@ -84,7 +84,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 		try {
 			const { value: inputText } = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'Please type "DELETE ALL" to confirm deleting all categories',
+				text: 'Please type "DELETE ALL" to confirm deleting all stock',
 				input: 'text',
 				icon: 'warning',
 				inputValidator: (value) => {
@@ -99,17 +99,23 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 			});
 
 			if (inputText === 'DELETE ALL') {
+				Swal.fire({
+					title: 'Processing...',
+					html: 'Please wait while the data is being processed.<br><div class="spinner-border" role="status"></div>',
+					allowOutsideClick: false,
+					showCancelButton: false,
+					showConfirmButton: false,
+				});
 				for (const lots of lot) {
 					await deletelot(lots.id).unwrap();
 				}
-				Swal.fire('Deleted!', 'All categories have been deleted.', 'success');
+				Swal.fire('Deleted!', 'All stock have been deleted.', 'success');
 
 				// Refetch categories after deletion
 				refetch();
 			}
 		} catch (error) {
-			console.error('Error deleting all categories:', error);
-			Swal.fire('Error', 'Failed to delete all categories.', 'error');
+			Swal.fire('Error', 'Failed to delete all stock.', 'error');
 		}
 	};
 
@@ -118,7 +124,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'This will restore all categories.',
+				text: 'This will restore all stock.',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -135,14 +141,13 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					};
 					await updatelot(values).unwrap();
 				}
-				Swal.fire('Restored!', 'All categories have been restored.', 'success');
+				Swal.fire('Restored!', 'All stock have been restored.', 'success');
 
 				// Refetch categories after restoring
 				refetch();
 			}
 		} catch (error) {
-			console.error('Error restoring all categories:', error);
-			Swal.fire('Error', 'Failed to restore all categories.', 'error');
+			Swal.fire('Error', 'Failed to restore all stock.', 'error');
 		}
 	};
 
