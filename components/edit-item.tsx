@@ -1,19 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import Card, {
-	CardBody,
-	CardHeader,
-	CardLabel,
-	CardTitle,
-} from './bootstrap/Card';
+import Card, { CardBody, CardHeader, CardLabel, CardTitle } from './bootstrap/Card';
 import classNames from 'classnames';
 import useDarkMode from '../hooks/useDarkMode';
 import { getFirstLetter, priceFormat } from '../helpers/helpers';
 import Input from './bootstrap/forms/Input';
-import Dropdown, {
-	DropdownItem,
-	DropdownMenu,
-	DropdownToggle,
-} from './bootstrap/Dropdown';
+import Dropdown, { DropdownItem, DropdownMenu, DropdownToggle } from './bootstrap/Dropdown';
 import Button from './bootstrap/Button';
 import { or } from 'firebase/firestore';
 import Checks, { ChecksGroup } from './bootstrap/forms/Checks';
@@ -28,16 +19,21 @@ interface Item {
 	reorderlevel: number;
 }
 interface KeyboardProps {
-    orderedItems: Item[];
-    setOrderedItems: React.Dispatch<React.SetStateAction<Item[]>>;
-    isActive: boolean;
-    setActiveComponent: React.Dispatch<React.SetStateAction<'additem' | 'edit'>>;
+	orderedItems: Item[];
+	setOrderedItems: React.Dispatch<React.SetStateAction<Item[]>>;
+	isActive: boolean;
+	setActiveComponent: React.Dispatch<React.SetStateAction<'additem' | 'edit'>>;
 }
 
-const Index: React.FC<KeyboardProps>  = ({ orderedItems, setOrderedItems, isActive,setActiveComponent }: any) => {
+const Index: React.FC<KeyboardProps> = ({
+	orderedItems,
+	setOrderedItems,
+	isActive,
+	setActiveComponent,
+}: any) => {
 	const { themeStatus } = useDarkMode();
 	const { darkModeStatus } = useDarkMode();
-    const [focusedIndex, setFocusedIndex] = useState<number>(0);
+	const [focusedIndex, setFocusedIndex] = useState<number>(0);
 	const handleDelete = (index: number) => {
 		setOrderedItems((prevItems: any) =>
 			prevItems.filter((item: any, i: number) => i !== index),
@@ -46,34 +42,36 @@ const Index: React.FC<KeyboardProps>  = ({ orderedItems, setOrderedItems, isActi
 	const handleQuantityChange = (index: number, newQuantity: number) => {
 		setOrderedItems((prevItems: any) =>
 			prevItems.map((item: any, i: number) =>
-				i === index ? { ...item, quantity: newQuantity } : item,
+				i === index ? { ...item, order_quantity: newQuantity } : item,
 			),
 		);
 	};
-    const handleKeyPress = (event: KeyboardEvent) => {
-        if (!isActive) return;
-      
-        if (event.key === 'ArrowDown') {
-          setFocusedIndex((prevIndex) => (prevIndex + 1) % orderedItems.length);
-        } else if (event.key === 'ArrowUp') {
-          setFocusedIndex((prevIndex) => (prevIndex - 1 + orderedItems.length) % orderedItems.length);
-        } else if (event.key === 'ArrowLeft') {
-          setActiveComponent('additem');
-          setFocusedIndex(-1);
-        } else if (event.key === 'ArrowRight') {
-          setActiveComponent('edit');
-          setFocusedIndex(0);
-        }else if (event.key.toLowerCase() === 'd') {
-            handleDelete(focusedIndex)
-          }
-      };
-    useEffect(() => {
-        window.addEventListener('keydown', handleKeyPress);
-        
-        return () => {
-            window.removeEventListener('keydown', handleKeyPress);
-        };
-    }, [orderedItems, focusedIndex,isActive]);
+	const handleKeyPress = (event: KeyboardEvent) => {
+		if (!isActive) return;
+
+		if (event.key === 'ArrowDown') {
+			setFocusedIndex((prevIndex) => (prevIndex + 1) % orderedItems.length);
+		} else if (event.key === 'ArrowUp') {
+			setFocusedIndex(
+				(prevIndex) => (prevIndex - 1 + orderedItems.length) % orderedItems.length,
+			);
+		} else if (event.key === 'ArrowLeft') {
+			setActiveComponent('additem');
+			setFocusedIndex(-1);
+		} else if (event.key === 'ArrowRight') {
+			setActiveComponent('edit');
+			setFocusedIndex(0);
+		} else if (event.key.toLowerCase() === 'd') {
+			handleDelete(focusedIndex);
+		}
+	};
+	useEffect(() => {
+		window.addEventListener('keydown', handleKeyPress);
+
+		return () => {
+			window.removeEventListener('keydown', handleKeyPress);
+		};
+	}, [orderedItems, focusedIndex, isActive]);
 	return (
 		<div>
 			<Card className='mt-4' style={{ height: '75vh' }}>
@@ -85,11 +83,12 @@ const Index: React.FC<KeyboardProps>  = ({ orderedItems, setOrderedItems, isActi
 					</CardLabel>
 				</CardHeader>
 				<CardBody isScrollable className='table-responsive'>
-					{orderedItems.map((order: Item, index: any) => (
-						<Card  key={index}
-                        className={classNames('col-12 p-3', {
-                            'bg-info': index === focusedIndex,
-                        })}>
+					{orderedItems.map((order: any, index: any) => (
+						<Card
+							key={index}
+							className={classNames('col-12 p-3', {
+								'bg-info': index === focusedIndex,
+							})}>
 							<div className={classNames('todo-item')}>
 								<div className='col d-flex align-items-center'>
 									{order.image ? (
@@ -115,7 +114,7 @@ const Index: React.FC<KeyboardProps>  = ({ orderedItems, setOrderedItems, isActi
 														},
 													)}>
 													<span className='fw-bold'>
-														{getFirstLetter(order.name)}
+														{getFirstLetter(order.type)}
 													</span>
 												</div>
 											</div>
@@ -123,27 +122,22 @@ const Index: React.FC<KeyboardProps>  = ({ orderedItems, setOrderedItems, isActi
 									)}
 
 									<div className='flex-grow-1'>
-										<div className='fs-6'>{order.name}</div>
+										<div className='fs-6'>
+											GRN No : {order.GRN_number}
+											<br />
+											Code : {order.code}
+										</div>
 										<div className='text-muted'>
-											<small>{order.category}</small>
+											<small>{order.category || order.type}</small>
 										</div>
 									</div>
-									<div className='me-2'>
-										<Input
-											type='number'
-											value={order.quantity}
-											onChange={(e: any) =>
-												handleQuantityChange(
-													index,
-													parseInt(e.target.value),
-												)
-											}
-											className='form-control '
-										/>
+								
+								
+								</div>
+								<div className='col-auto text-end'>
+									<div>
+										<strong>{order.order_quantity} Kg</strong>
 									</div>
-									{/* <div className='me-2'>
-										<strong>{priceFormat(order.quantity * order.price)}</strong>
-									</div> */}
 								</div>
 								<div className='todo-extras'>
 									<span>
@@ -153,7 +147,6 @@ const Index: React.FC<KeyboardProps>  = ({ orderedItems, setOrderedItems, isActi
 									</span>
 								</div>
 							</div>
-						
 						</Card>
 					))}
 				</CardBody>

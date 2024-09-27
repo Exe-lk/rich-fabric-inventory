@@ -1,6 +1,6 @@
 // pages/api/lot/bin.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createLot, getDeletedLots, updateLot, deleteLot } from '../../../service/lotServices';
+import { createLot, getDeletedLots, updateLot, deleteLot } from '../../../service/stockOutService';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {

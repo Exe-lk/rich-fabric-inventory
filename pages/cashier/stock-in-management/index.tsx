@@ -13,14 +13,16 @@ import Page from '../../../layout/Page/Page';
 import Card, { CardBody, CardTitle } from '../../../components/bootstrap/Card';
 import StockAddModal from '../../../components/custom/ItemAddModal';
 import StockEditModal from '../../../components/custom/ItemEditModal';
+import StockTransformModal from '../../../components/custom/StockTransformModal';
 import Swal from 'sweetalert2';
 import StockDeleteModal from '../../../components/custom/ItemDeleteModal';
-import { useUpdateLotMutation, useGetLotsQuery } from '../../../redux/slices/lotAPISlice';
+import { useUpdateLotMutation, useGetLotsQuery } from '../../../redux/slices/stockInAPISlice';
 
 const Index: NextPage = () => {
 	const [searchTerm, setSearchTerm] = useState(''); // State for search term
 	const [addModalStatus, setAddModalStatus] = useState<boolean>(false); // State for add modal status
 	const [editModalStatus, setEditModalStatus] = useState<boolean>(false); // State for edit modal status
+	const [transformModalStatus, setTransformModalStatus] = useState<boolean>(false); 
 	const [deleteModalStatus, setDeleteModalStatus] = useState<boolean>(false);
 	const [id, setId] = useState<string>(''); // State for current stock item ID
 	const [id1, setId1] = useState<string>('12356'); // State for new item ID
@@ -30,7 +32,6 @@ const Index: NextPage = () => {
 	// Function to handle deletion of an item
 	const handleClickDelete = async (item: any) => {
 		try {
-			
 			const result = await Swal.fire({
 				title: 'Are you sure?',
 
@@ -43,11 +44,12 @@ const Index: NextPage = () => {
 			if (result.isConfirmed) {
 				try {
 					const values = await {
-						...item,status:false
+						...item,
+						status: false,
 					};
 					await updatelot(values);
 
-					Swal.fire('Deleted!', 'The category has been deleted.', 'success');
+					Swal.fire('Deleted!', 'The stock has been deleted.', 'success');
 				} catch (error) {
 					console.error('Error during handleUpload: ', error);
 					Swal.close;
@@ -133,7 +135,7 @@ const Index: NextPage = () => {
 						color='success'
 						isLight
 						onClick={() => setAddModalStatus(true)}>
-						New Lot
+						New Stock
 					</Button>
 				</SubHeaderRight>
 			</SubHeader>
@@ -143,7 +145,9 @@ const Index: NextPage = () => {
 						{/* Table for displaying customer data */}
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
-								<div className='flex-grow-1 text-center text-info '>Manage Lot</div>
+								<div className='flex-grow-1 text-center text-info '>
+									Manage Stock In
+								</div>
 								<Button
 									icon='UploadFile'
 									color='warning'
@@ -152,19 +156,18 @@ const Index: NextPage = () => {
 								</Button>
 							</CardTitle>
 							<CardBody isScrollable className='table-responsive'>
-								<table className='table table-bordered border-primary table-modern table-hover'>
+								<table className='table table-modern table-bordered border-primary table-hover '>
 									<thead>
 										<tr>
+											<th>Code</th>
 											<th>GRN number</th>
 											<th>description</th>
-											<th>UOM</th>
-											<th>PackType</th>
-											<th>Remark</th>
-											<th>Type</th>
+											<th>Category</th>
+											<th>Quantity</th>
+											<th>Gate Pass No</th>
+											<th>Invoice No</th>
 											<th></th>
-											{/* <th><Button icon='PersonAdd' color='primary' isLight onClick={() => setAddModalStatus(true)}>
-                        New Item
-                      </Button></th> */}
+									
 										</tr>
 									</thead>
 
@@ -182,21 +185,26 @@ const Index: NextPage = () => {
 										{lot &&
 											lot
 												.filter((lot: any) =>
-													searchTerm
-														? lot.code
-																.toLowerCase()
-																.includes(searchTerm.toLowerCase())
-														: true,
+													searchTerm? 
+												lot.code.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+												lot.category.toLowerCase().includes(searchTerm.toLowerCase())||
+												lot.suppl_invoice_no.toLowerCase().includes(searchTerm.toLowerCase())||
+												lot.suppl_gatepass_no.toLowerCase().includes(searchTerm.toLowerCase())||
+												lot.GRN_number.toString().toLowerCase().includes(searchTerm.toLowerCase())||
+												lot.subcategory.toLowerCase().includes(searchTerm.toLowerCase())
+											  : true
 												)
 												.map((lot: any) => (
 													<tr key={lot.id}>
 														<td>{lot.code}</td>
+														<td>{lot.GRN_number}</td>
 														<td>{lot.description}</td>
-														<td>{lot.uom}</td>
-														<td>{lot.PackType}</td>
-														<td>{lot.remark}</td>
-														<td>{lot.type}</td>
-
+														<td>{lot.category||lot.type}</td>
+														
+														<td>{lot.quentity}</td>
+														<td>{lot.suppl_gatepass_no}</td>
+														<td>{lot.suppl_invoice_no}</td>
+														
 														<td>
 															<Button
 																icon='Edit'
@@ -208,7 +216,7 @@ const Index: NextPage = () => {
 																Edit
 															</Button>
 															<Button
-																className='m-2'
+																className='ms-2'
 																icon='Delete'
 																color='danger'
 																onClick={() =>
@@ -216,6 +224,19 @@ const Index: NextPage = () => {
 																}>
 																Delete
 															</Button>
+
+															{lot.type === 'Yarn' && (
+																<Button
+																	className='ms-2'
+																	icon='Transform'
+																	color='success'
+																	onClick={() => (
+																		setTransformModalStatus(true),
+																		setId(lot.id)
+																	)}>
+																	Stock Transaction
+																</Button>
+															)}
 														</td>
 													</tr>
 												))}
@@ -234,7 +255,7 @@ const Index: NextPage = () => {
 			</Page>
 			<StockAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id={id1} />
 			<StockDeleteModal setIsOpen={setDeleteModalStatus} isOpen={deleteModalStatus} id='' />
-
+			<StockTransformModal setIsOpen={setTransformModalStatus} isOpen={transformModalStatus} id={id} />
 			<StockEditModal setIsOpen={setEditModalStatus} isOpen={editModalStatus} id={id} />
 		</PageWrapper>
 	);

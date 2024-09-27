@@ -4,27 +4,27 @@ import { addDoc, collection, getDocs, doc, updateDoc, deleteDoc, getDoc, query, 
 // Create a new lot
 export const createLot = async (values:any) => {
   const status = true;
-  const docRef = await addDoc(collection(firestore, 'lots'), values);
+  const docRef = await addDoc(collection(firestore, 'stockIn'), values);
   return docRef.id;
 };
 
 // Get all active lots (status == true)
 export const getLots = async () => {
-  const q = query(collection(firestore, 'lots'), where('status', '==', true));
+  const q = query(collection(firestore, 'stockIn'), where('status', '==', true));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
 // Get all deleted lots (status == false)
 export const getDeletedLots = async () => {
-  const q = query(collection(firestore, 'lots'), where('status', '==', false));
+  const q = query(collection(firestore, 'stockIn'), where('status', '==', false));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
 // Get a specific lot by its ID
 export const getLotById = async (id: string) => {
-  const lotRef = doc(firestore, 'lots', id);
+  const lotRef = doc(firestore, 'stockIn', id);
   const lotSnap = await getDoc(lotRef);
 
   if (lotSnap.exists()) {
@@ -36,13 +36,13 @@ export const getLotById = async (id: string) => {
 
 // Update a specific lot
 export const updateLot = async (id: string,values:any) => {
-  const lotRef = doc(firestore, 'lots', id);
+  const lotRef = doc(firestore, 'stockIn', id);
   await updateDoc(lotRef,values);
 };
 
 // Delete (soft delete) a specific lot by changing its status
 export const deleteLot = async (id: string) => {
-  const lotRef = doc(firestore, 'lots', id);
+  const lotRef = doc(firestore, 'stockIn', id);
   console.log(id)
   await deleteDoc(lotRef);
 };

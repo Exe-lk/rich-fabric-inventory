@@ -1,14 +1,14 @@
-// pages/api/lot/route.ts
+// pages/api/lot/bin.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { createLot, getLots, updateLot, deleteLot } from '../../../service/lotServices';
+import { createLot, getDeletedLots, updateLot, deleteLot } from '../../../service/stockInServices';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     switch (req.method) {
       case 'POST': {
-        const values = req.body;
+        const values  = req.body;
         if (!values) {
-          res.status(400).json({ error: 'Lot number is required' });
+          res.status(400).json({ error: 'values is required' });
           return;
         }
         const id = await createLot(values);
@@ -17,14 +17,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       case 'GET': {
-        const lots = await getLots();
+        const lots = await getDeletedLots();
         res.status(200).json(lots);
         break;
       }
 
       case 'PUT': {
-        const values = req.body;
-        if (values) {
+        const values  = req.body;
+        if ( !values) {
           res.status(400).json({ error: 'Lot ID and number are required' });
           return;
         }

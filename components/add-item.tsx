@@ -9,12 +9,7 @@ import { getFirstLetter, priceFormat } from '../helpers/helpers';
 import Keyboard from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
 import Input from './bootstrap/forms/Input';
-import { isatty } from 'tty';
-import FormGroup from './bootstrap/forms/FormGroup';
-import Label from './bootstrap/forms/Label';
-import Checks, { ChecksGroup } from './bootstrap/forms/Checks';
-import Carousel from './bootstrap/Carousel';
-import CarouselSlide from './bootstrap/CarouselSlide';
+import { useUpdateLotMutation, useGetLotsQuery } from '../redux/slices/stockInAPISlice';
 
 // Define TypeScript interfaces for Category and Item
 interface Category {
@@ -84,62 +79,17 @@ const Index: React.FC<KeyboardProps> = ({
 
 	// State variables
 	const [category1, setCategory1] = useState<string>('');
-	const [category, setCategory] = useState<Category[]>(cdata);
-	const [items, setItems] = useState<any[]>(idata);
 	const [input, setInput] = useState<string>('');
 	const keyboard = useRef<any>(null);
 	const [showPopup, setShowPopup] = useState<boolean>(false);
 	const [popupInput, setPopupInput] = useState<any>('');
-	const [popupInput1, setPopupInput1] = useState<any>('');
-	const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+	const [selectedItem, setSelectedItem] = useState<any>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const popupInputRef = useRef<HTMLInputElement>(null);
 
 	const [layout, setLayout] = useState<string>('default');
 	const [focusedIndex, setFocusedIndex] = useState<number>(0);
-
-	// Fetch categories from Firestore on component mount
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const dataCollection = collection(firestore, 'category');
-				const q = query(dataCollection, where('status', '==', true));
-				const querySnapshot = await getDocs(q);
-				const firebaseData = querySnapshot.docs.map((doc) => {
-					const data = doc.data() as Category;
-					return {
-						...data,
-						cid: doc.id,
-					};
-				});
-				// setCategory(firebaseData);
-			} catch (error) {
-				console.error('Error fetching data: ', error);
-			}
-		};
-		fetchData();
-	}, []);
-
-	// Fetch items from Firestore on component mount
-	useEffect(() => {
-		const fetchData = async () => {
-			try {
-				const dataCollection = collection(firestore, 'item');
-				const querySnapshot = await getDocs(dataCollection);
-				const firebaseData = querySnapshot.docs.map((doc) => {
-					const data = doc.data() as Item;
-					return {
-						...data,
-						cid: doc.id,
-					};
-				});
-				// setItems(firebaseData);
-			} catch (error) {
-				console.error('Error fetching data: ', error);
-			}
-		};
-		fetchData();
-	}, []);
+	const { data: items, error, isLoading } = useGetLotsQuery(undefined);
 
 	// Handle input change
 	const onChangeInput = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -176,15 +126,15 @@ const Index: React.FC<KeyboardProps> = ({
 
 	// Handle OK button click in the popup
 	const handlePopupOk = async () => {
-		if (popupInput <= 0) {
+		if (popupInput <= 0 || popupInput>selectedItem?.quentity) {
 			return;
 		}
 		if (selectedItem) {
 			console.log(popupInput);
-			const updatedItem = { ...selectedItem, quantity: Number(popupInput) };
+			const updatedItem: any = { ...selectedItem, order_quantity: Number(popupInput) };
 			console.log(updatedItem);
 			await setOrderedItems((prevItems: any) => {
-				const itemIndex = prevItems.findIndex((item: any) => item.cid === updatedItem.cid);
+				const itemIndex = prevItems.findIndex((item: any) => item.id === updatedItem.id);
 				if (itemIndex > -1) {
 					const updatedItems = [...prevItems];
 					updatedItems[itemIndex] = updatedItem;
@@ -350,71 +300,73 @@ const Index: React.FC<KeyboardProps> = ({
 					</CardHeader>
 					<CardBody isScrollable>
 						<div className='row g-3'>
-							{items
-								.filter((val) => {
-									if (input === '') {
-										if (category1 === '') {
-											return val;
-										} else if (category1.includes(val.category)) {
-											return val;
+							{items &&
+								items
+									.filter((val: any) => {
+										if (val.category.toLowerCase() != 'yarn') {
+											if (input === '') {
+												return val;
+											} else if (val.code.toString().includes(input)||val.GRN_number.toString().includes(input)) {
+												return val;
+											}
 										}
-									} else if (val.cid.includes(input)) {
-										if (category1 === '') {
-											return val;
-										} else if (category1.includes(val.category)) {
-											return val;
-										}
-									}
-									return null;
-								})
-								.map((item: Item, index: any) => (
-									<div
-										key={index}
-										className={classNames('col-12 ', {
-											'bg-info': index === focusedIndex,
-										})}
-										onClick={async () => {
-											handlePopupOpen(index);
-										}}>
-										<div className='row p-1'>
-											<div className='col d-flex align-items-center'>
-												<div className='flex-shrink-0'>
-													<div
-														className='ratio ratio-1x1 me-3'
-														style={{ width: 48 }}>
+
+										return null;
+									})
+									.map((item: any, index: any) => (
+										<div
+											key={index}
+											className={classNames('col-12 ', {
+												'bg-info': index === focusedIndex,
+											})}
+											onClick={async () => {
+												handlePopupOpen(index);
+											}}>
+											<div className='row p-1'>
+												<div className='col d-flex align-items-center'>
+													<div className='flex-shrink-0'>
 														<div
-															className={classNames(
-																'rounded-2',
-																'd-flex align-items-center justify-content-center',
-																{
-																	'bg-l10-dark': !darkModeStatus,
-																	'bg-l90-dark': darkModeStatus,
-																},
-															)}>
-															<span className='fw-bold'>
-																{getFirstLetter(item.name)}
-															</span>
+															className='ratio ratio-1x1 me-3'
+															style={{ width: 48 }}>
+															<div
+																className={classNames(
+																	'rounded-2',
+																	'd-flex align-items-center justify-content-center',
+																	{
+																		'bg-l10-dark':
+																			!darkModeStatus,
+																		'bg-l90-dark':
+																			darkModeStatus,
+																	},
+																)}>
+																<span className='fw-bold'>
+																	{getFirstLetter(item.type)}
+																</span>
+															</div>
+														</div>
+													</div>
+													<div className='flex-grow-1'>
+														<div className='fs-6'>
+														GRN No :	{item.GRN_number}
+														<br />
+														Code : {item.code}
+														</div>
+														<div className='text-muted'>
+															<small>{item.type}</small>
 														</div>
 													</div>
 												</div>
-												<div className='flex-grow-1'>
-													<div className='fs-6'>{item.name}</div>
-													<div className='text-muted'>
-														<small>{item.category}</small>
+												<div className='col-auto text-end'>
+													<div>
+														<strong>{item.quentity} Kg</strong>
 													</div>
-												</div>
-											</div>
-											<div className='col-auto text-end'>
-												<div>
-													<strong>{item.cid}</strong>
-												</div>
-												{/* <div className='text-muted'>
+													{/* <div className='text-muted'>
 													<small>{item.cid}</small>
 												</div> */}
+												</div>
 											</div>
 										</div>
-									</div>
-								))}
+									))}
 						</div>
 					</CardBody>
 				</Card>
@@ -437,7 +389,7 @@ const Index: React.FC<KeyboardProps> = ({
 							default: ['1 2 3', '4 5 6', '7 8 9', '0 {bksp}'],
 						}}
 						display={{
-							'{bksp}': ' &#9003;'
+							'{bksp}': ' &#9003;',
 						}}
 					/>
 					<style>
