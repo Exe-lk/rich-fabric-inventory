@@ -49,9 +49,8 @@ const Index: NextPage = () => {
 	const [status, setStatus] = useState(true);
 	const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 	const role = [
-		{ role: 'bill keeper' },
-		{ role: 'accessosry stock keeper' },
-		{ role: 'display stock keeper' },
+	
+		{ role: 'employee' },
 		{ role: 'cashier' },
 	];
 	const { data: users, error, isLoading, refetch } = useGetUsersQuery(undefined);
