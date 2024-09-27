@@ -51,9 +51,9 @@ export const ChecksGroup = forwardRef<HTMLDivElement, IChecksGroupProps>(
 					)}
 					// eslint-disable-next-line react/jsx-props-no-spreading
 					{...props}>
-					{Children.map(children, (child) =>
+					{Children.map(children, (child:any) =>
 						cloneElement(child, {
-							isInline: child.props.isInline || isInline,
+							isInline: child?.props.isInline || isInline,
 							isValid,
 							isTouched,
 							invalidFeedback,
