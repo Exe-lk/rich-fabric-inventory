@@ -300,7 +300,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<FormGroup id='GRN_number' label='GRN number' className='col-md-6'>
+					<FormGroup id='GRN_number' label='GRN Number' className='col-md-6'>
 						<Input
 							type='number'
 							onChange={formik.handleChange}
@@ -310,7 +310,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<FormGroup id='date' label='date' className='col-md-6'>
+					<FormGroup id='date' label='Date' className='col-md-6'>
 						<Input
 							type='date'
 							onChange={formik.handleChange}
@@ -334,7 +334,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 						/>
 					</FormGroup>
 
-					<FormGroup id='quentity' label='Quentity (Kg)' className='col-md-6'>
+					<FormGroup id='quentity' label='Quantity (Kg)' className='col-md-6'>
 						<Input
 							type='number'
 							onChange={formik.handleChange}
@@ -412,7 +412,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							selectedOption === 'Finish collor cuff' ? (
 								<>
 									<FormGroup
-										id='fabric_type'
+										id='collor_cuff_type'
 										label='Collor Cuff Type'
 										className='col-md-6'>
 										{isAddingNewFabric ? (
@@ -420,7 +420,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 												placeholder='Add new collor cuff type'
 												onChange={(e: any) =>
 													formik.setFieldValue(
-														'fabric_type',
+														'collor_cuff_type',
 														e.target.value,
 													)
 												}
@@ -620,7 +620,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 									validFeedback='Looks good!'
 								/>
 							</FormGroup>
-							<FormGroup id='PackType' label='PackType' className='col-md-6'>
+							<FormGroup id='PackType' label='Pack Type' className='col-md-6'>
 								<Input
 									type='number'
 									onChange={formik.handleChange}
@@ -657,7 +657,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							</FormGroup>
 							<FormGroup
 								id='suppl_gatepass_no'
-								label='supplier gate pass no'
+								label='Supplier Gate Pass No'
 								className='col-md-6'>
 								<Input
 									onChange={formik.handleChange}
@@ -669,7 +669,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 									validFeedback='Looks good!'
 								/>
 							</FormGroup>
-							<FormGroup id='operater' label='Operator name' className='col-md-6'>
+							<FormGroup id='operater' label='Operator Name' className='col-md-6'>
 								<Input
 									onChange={formik.handleChange}
 									value={formik.values.operater}
@@ -682,7 +682,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							</FormGroup>
 							<FormGroup
 								id='suppl_invoice_no'
-								label='invoice number '
+								label='Invoice Number '
 								className='col-md-6'>
 								<Input
 									onChange={formik.handleChange}

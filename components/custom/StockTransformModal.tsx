@@ -74,7 +74,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 				// Refetch categories to update the list
 				refetch();
 
-				Swal.fire('Added!', 'Color has been update successfully.', 'success');
+				Swal.fire('Added!', 'data has been update successfully.', 'success');
 				formik.resetForm();
 				setIsOpen(false)
 			} catch (error) {
@@ -87,7 +87,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 	return (
 		<Modal isOpen={isOpen} setIsOpen={setIsOpen} size='xl' titleId={id}>
 			<ModalHeader setIsOpen={setIsOpen} className='p-4'>
-				<ModalTitle id=''>{'Edit GSM'}</ModalTitle>
+				<ModalTitle id=''>{'Stock Transaction'}</ModalTitle>
 			</ModalHeader>
 			<ModalBody className='px-4'>
 				<div className='row g-4'>
@@ -101,7 +101,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<FormGroup id='quentity' label='Quentity' className='col-md-6'>
+					<FormGroup id='quentity' label='Quantity' className='col-md-6'>
 						<Input
 							onChange={formik.handleChange}
 							value={formik.values.quentity}

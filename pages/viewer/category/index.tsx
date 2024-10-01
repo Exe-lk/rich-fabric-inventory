@@ -1,9 +1,10 @@
-import React, { useContext, useEffect, useState } from 'react';
-import type { NextPage } from 'next';
+// pages/index.tsx
+import React, { useState } from 'react';
+import { NextPage } from 'next';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import useDarkMode from '../../../hooks/useDarkMode';
 import Page from '../../../layout/Page/Page';
-import { firestore } from '../../../firebaseConfig';
+import { useGetCategoriesQuery } from '../../../redux/slices/categoryApiSlice'; // Import the RTK Query hook
 import SubHeader, {
 	SubHeaderLeft,
 	SubHeaderRight,
@@ -11,34 +12,38 @@ import SubHeader, {
 } from '../../../layout/SubHeader/SubHeader';
 import Icon from '../../../components/icon/Icon';
 import Input from '../../../components/bootstrap/forms/Input';
-import Dropdown, { DropdownMenu, DropdownToggle } from '../../../components/bootstrap/Dropdown';
 import Button from '../../../components/bootstrap/Button';
 import Card, { CardBody, CardTitle } from '../../../components/bootstrap/Card';
-import { collection, deleteDoc, doc, getDocs, query, updateDoc, where } from 'firebase/firestore';
 import CategoryAddModal from '../../../components/custom/CategoryAddModal';
+import CategoryDeleteModal from '../../../components/custom/CategoryDeleteModal';
 import CategoryEditModal from '../../../components/custom/CategoryEditModal';
 import Swal from 'sweetalert2';
-// Define the interface for category data
-interface Category {
-	cid: string;
-	categoryname: string;
-	status: boolean;
-}
+import { useUpdateCategoryMutation } from '../../../redux/slices/categoryApiSlice';
+import { toPng, toSvg } from 'html-to-image';
+import Dropdown from '../../../components/bootstrap/Dropdown';
+import { DropdownToggle } from '../../../components/bootstrap/Dropdown';
+import { DropdownMenu } from '../../../components/bootstrap/Dropdown';
+import { DropdownItem }from '../../../components/bootstrap/Dropdown';
+import jsPDF from 'jspdf'; 
+import autoTable from 'jspdf-autotable';
 // Define the functional component for the index page
 const Index: NextPage = () => {
-	const { darkModeStatus } = useDarkMode(); // Dark mode
-	const [searchTerm, setSearchTerm] = useState(''); // State for search term
-	const [addModalStatus, setAddModalStatus] = useState<boolean>(false); // State for add modal status
-	const [editModalStatus, setEditModalStatus] = useState<boolean>(false); // State for edit modal status
-	const [category, setcategory] = useState<Category[]>([]); // State for category data
-	const [id, setId] = useState<string>(''); // State for current category ID
-	const [status, setStatus] = useState(true); // State for managing data fetching status
+	const { darkModeStatus } = useDarkMode();
+	const [searchTerm, setSearchTerm] = useState('');
+	const [addModalStatus, setAddModalStatus] = useState(false);
+	const [deleteModalStatus, setDeleteModalStatus] = useState(false);
+	const [editModalStatus, setEditModalStatus] = useState(false);
+	const [id, setId] = useState<string>('');
+
+	// Fetch categories using RTK Query from the custom API
+	const { data: categories, error, isLoading } = useGetCategoriesQuery(undefined);
+	const [updateCategory] = useUpdateCategoryMutation();
 
 	const handleClickDelete = async (category: any) => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'You will not be able to recover this!',
+				// text: 'You will not be able to recover this category!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -46,38 +51,167 @@ const Index: NextPage = () => {
 				confirmButtonText: 'Yes, delete it!',
 			});
 			if (result.isConfirmed) {
-				category.status = false;
-				let data: any = category;
-				const docRef = doc(firestore, 'category', category.cid);
+				const values = await {
+					id: category.id,
+					name: category.name,
+					status: false,
+					subcategory: category.subcategory,
+				};
 
-				updateDoc(docRef, data)
-					.then(() => {
-						if (status) {
-							setStatus(false);
-						} else {
-							setStatus(true);
-						}
+				await updateCategory(values);
 
-						Swal.fire('Delete!', 'category has been delete successfully.', 'success');
-					})
-					.catch((error) => {
-						console.error('Error adding document: ', error);
-						alert(
-							'An error occurred while adding the document. Please try again later.',
-						);
-					});
+				Swal.fire('Deleted!', 'The category has been deleted.', 'success');
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
-			Swal.fire('Error', 'Failed to delete this.', 'error');
+			Swal.fire('Error', 'Failed to delete category.', 'error');
 		}
 	};
+
+	// Function to handle the download in different formats
+	const handleExport = async (format: string) => {
+		const table = document.querySelector('table');
+		if (!table) return;
+
+		const clonedTable = table.cloneNode(true) as HTMLElement;
+
+		// Remove Edit/Delete buttons column from cloned table
+		const rows = clonedTable.querySelectorAll('tr');
+		rows.forEach((row) => {
+			const lastCell = row.querySelector('td:last-child, th:last-child');
+			if (lastCell) {
+				lastCell.remove();
+			}
+		});
+	
+		
+		const clonedTableStyles = getComputedStyle(table);
+		clonedTable.setAttribute('style', clonedTableStyles.cssText);
+	
+		
+		try {
+			switch (format) {
+				case 'svg':
+					await downloadTableAsSVG(clonedTable);
+					break;
+				case 'png':
+					await downloadTableAsPNG(clonedTable);
+					break;
+				case 'csv':
+					downloadTableAsCSV(clonedTable);
+					break;
+				case 'pdf': 
+					await downloadTableAsPDF(clonedTable);
+					break;
+				default:
+					console.warn('Unsupported export format: ', format);
+			}
+		} catch (error) {
+			console.error('Error exporting table: ', error);
+		}
+	};
+
+	// function to export the table data in CSV format
+	const downloadTableAsCSV = (table: any) => {
+				let csvContent = '';
+				const rows = table.querySelectorAll('tr');
+				rows.forEach((row: any) => {
+					const cols = row.querySelectorAll('td, th');
+					const rowData = Array.from(cols)
+						.map((col: any) => `"${col.innerText}"`)
+						.join(',');
+					csvContent += rowData + '\n';
+				});
+
+				const blob = new Blob([csvContent], { type: 'text/csv' });
+				const link = document.createElement('a');
+				link.href = URL.createObjectURL(blob);
+				link.download = 'table_data.csv';
+				link.click();
+	};
+	//  function for PDF export
+	const downloadTableAsPDF = (table: HTMLElement) => {
+		try {
+		  const pdf = new jsPDF('p', 'pt', 'a4');
+		  const rows: any[] = [];
+		  const headers: any[] = [];
+		  
+		  const thead = table.querySelector('thead');
+		  if (thead) {
+			const headerCells = thead.querySelectorAll('th');
+			headers.push(Array.from(headerCells).map((cell: any) => cell.innerText));
+		  }
+		  const tbody = table.querySelector('tbody');
+		  if (tbody) {
+			const bodyRows = tbody.querySelectorAll('tr');
+			bodyRows.forEach((row: any) => {
+			  const cols = row.querySelectorAll('td');
+			  const rowData = Array.from(cols).map((col: any) => col.innerText);
+			  rows.push(rowData);
+			});
+		  }
+		  autoTable(pdf, {
+			head: headers,
+			body: rows,
+			margin: { top: 50 },
+			styles: {
+			  overflow: 'linebreak',
+			  cellWidth: 'wrap',
+			},
+			theme: 'grid',
+		  });
+	  
+		  pdf.save('table_data.pdf');
+		} catch (error) {
+		  console.error('Error generating PDF: ', error);
+		  alert('Error generating PDF. Please try again.');
+		}
+	  };
+	
+	
+	// Function to export the table data in SVG format using library html-to-image
+	const downloadTableAsSVG = async (table: HTMLElement) => {
+		try {
+			const dataUrl = await toSvg(table, {
+				backgroundColor: 'white', 
+				cacheBust: true, 
+				style: { 
+					width: table.offsetWidth + 'px'
+				}
+			});
+			const link = document.createElement('a');
+			link.href = dataUrl;
+			link.download = 'table_data.svg'; 
+			link.click();
+		} catch (error) {
+			console.error('Error generating SVG: ', error); 
+		}
+	};
+	
+	// Function to export the table data in PNG format using library html-to-image
+	const downloadTableAsPNG = async (table: HTMLElement) => {
+		try {
+			const dataUrl = await toPng(table, {
+				backgroundColor: 'white', 
+				cacheBust: true, 
+				style: { 
+					width: table.offsetWidth + 'px'
+				}
+			});
+			const link = document.createElement('a');
+			link.href = dataUrl;
+			link.download = 'table_data.png'; 
+			link.click();
+		} catch (error) {
+			console.error('Error generating PNG: ', error); 
+		}
+	};
+
 	// JSX for rendering the page
 	return (
 		<PageWrapper>
 			<SubHeader>
 				<SubHeaderLeft>
-					{/* Search input */}
 					<label
 						className='border-0 bg-transparent cursor-pointer me-0'
 						htmlFor='searchInput'>
@@ -88,76 +222,100 @@ const Index: NextPage = () => {
 						type='search'
 						className='border-0 shadow-none bg-transparent'
 						placeholder='Search...'
-						onChange={(event: any) => {
-							setSearchTerm(event.target.value);
-						}}
+						onChange={(event: any) => setSearchTerm(event.target.value)}
 						value={searchTerm}
 					/>
 				</SubHeaderLeft>
+				<SubHeaderRight>
+					<SubheaderSeparator />
+					
+				</SubHeaderRight>
 			</SubHeader>
 			<Page>
 				<div className='row h-100'>
 					<div className='col-12'>
-						{/* Table for displaying customer data */}
 						<Card stretch>
-							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
-								<div className='flex-grow-1 text-center text-info'>
-									Categories
-								</div>
-								<Button
-									icon='UploadFile'
-									color='warning'
-									onClick={() => setAddModalStatus(true)}>
-									Export
-								</Button>
-							</CardTitle>
+						<CardTitle className='d-flex justify-content-between align-items-center m-4'>
+							<div className='flex-grow-1 text-center text-info '>Manage Category</div>
+							{/* dropdown for export */}
+							<Dropdown>
+								<DropdownToggle hasIcon={false}>
+									<Button
+										icon='UploadFile'
+										color='warning'>
+										Export
+									</Button>
+								</DropdownToggle>
+								<DropdownMenu isAlignmentEnd>
+									<DropdownItem onClick={() => handleExport('svg')}>Download SVG</DropdownItem>
+									<DropdownItem onClick={() => handleExport('png')}>Download PNG</DropdownItem>
+									<DropdownItem onClick={() => handleExport('csv')}>Download CSV</DropdownItem>
+									<DropdownItem onClick={() => handleExport('pdf')}>Download PDF</DropdownItem>
+								</DropdownMenu>
+							</Dropdown>
+						</CardTitle>
 
 							<CardBody isScrollable className='table-responsive'>
-								{/* <table className='table table-modern table-hover'> */}
 								<table className='table table-modern table-bordered border-primary table-hover text-center'>
 									<thead>
 										<tr>
 											<th>Category name</th>
 											<th>Sub Category</th>
+											
 										</tr>
 									</thead>
 									<tbody>
-										<tr>
-											<td>Gray Fabric</td>
-											<td>
-												<p>polyester</p>
-												<p>Linen</p>
-												<p>Silk</p>
-												<p>Velvet</p>
-											</td>
-										</tr>
-										<tr>
-											<td>Dye Fabric</td>
-											<td>
-												<p>polyester</p>
-												<p>Linen</p>
-												<p>Silk</p>
-												<p>Velvet</p>
-											</td>
-										</tr>
-										<tr>
-											<td>collar cuff</td>
-											<td>
-												<p>Spread collar</p>
-												<p>Regular Collar</p>
-												<p>Button Collar</p>
-											</td>
-										</tr>
+										{isLoading && (
+											<tr>
+												<td>Loading...</td>
+											</tr>
+										)}
+										{error && (
+											<tr>
+												<td>Error fetching categories.</td>
+											</tr>
+										)}
+										{categories &&
+											categories
+												.filter((category: any) =>
+													searchTerm
+														? category.name
+																.toLowerCase()
+																.includes(searchTerm.toLowerCase())
+														: true,
+												)
+												.map((category: any) => (
+													<tr key={category.cid}>
+														<td>{category.name}</td>
+														<td>
+															<ul>
+																{category.subcategory?.map(
+																	(sub: any, index: any) => (
+																		<p>{sub}</p>
+																	),
+																)}
+															</ul>
+														</td>
+													
+													</tr>
+												))}
 									</tbody>
 								</table>
+							
 							</CardBody>
 						</Card>
 					</div>
 				</div>
 			</Page>
 			<CategoryAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
+			<CategoryDeleteModal
+				setIsOpen={setDeleteModalStatus}
+				isOpen={deleteModalStatus}
+				id=''
+			/>
 			<CategoryEditModal setIsOpen={setEditModalStatus} isOpen={editModalStatus} id={id} />
 		</PageWrapper>
 	);
 };
+
 export default Index;

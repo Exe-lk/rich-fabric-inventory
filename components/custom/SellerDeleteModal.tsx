@@ -72,7 +72,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 
 				await updateSupplier(values);
 
-				Swal.fire('Restory!', 'The uppliers has been deleted.', 'success');
+				Swal.fire('Restored!', 'The suppliers has been deleted.', 'success');
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
@@ -135,7 +135,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					};
 					await updateSupplier(values).unwrap();
 				}
-				Swal.fire('Restored!', 'All categories have been restored.', 'success');
+				Swal.fire('Restored!', 'All Suppliers have been restored.', 'success');
 
 				// Refetch categories after restoring
 				refetch();

@@ -15,13 +15,12 @@ import Page from '../../../layout/Page/Page';
 import Card, { CardBody, CardTitle } from '../../../components/bootstrap/Card';
 import StockAddModal from '../../../components/custom/ItemAddModal';
 import StockEditModal from '../../../components/custom/ItemEditModal';
-import { doc, deleteDoc, collection, getDocs, updateDoc, query, where } from 'firebase/firestore';
-import { firestore } from '../../../firebaseConfig';
 import Dropdown, { DropdownToggle, DropdownMenu } from '../../../components/bootstrap/Dropdown';
-import Swal from 'sweetalert2';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
+import { useGetStockOutsQuery } from '../../../redux/slices/stockOutApiSlice';
 
+// Define interfaces for data objects
 interface Item {
 	cid: string;
 	category: number;
@@ -44,22 +43,44 @@ const Index: NextPage = () => {
 	const [searchTerm, setSearchTerm] = useState(''); // State for search term
 	const [addModalStatus, setAddModalStatus] = useState<boolean>(false); // State for add modal status
 	const [editModalStatus, setEditModalStatus] = useState<boolean>(false); // State for edit modal status
-	const [item, setItem] = useState<Item[]>([]); // State for stock data
-	const [category, setcategory] = useState<Category[]>([]);
-	const [orderData, setOrdersData] = useState([]);
-	const [stockData, setStockData] = useState([]);
 	const [id, setId] = useState<string>(''); // State for current stock item ID
 	const [id1, setId1] = useState<string>('12356'); // State for new item ID
-	const [status, setStatus] = useState(true);
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-	const [quantityDifference, setQuantityDifference] = useState([]);
+	const [selectedStockOutTypes, setSelectedStockOutTypes] = useState<string[]>([]); // New state for StockOutType filter
+	const { data: transaction, error, isLoading } = useGetStockOutsQuery(undefined);
+	const [startDate, setStartDate] = useState<string>(''); // State for start date
+	const [endDate, setEndDate] = useState<string>(''); // State for end date
+
 	const position = [
-		{ position: 'Return' },
-		{ position: 'Out going' },
-		
+		{ position: 'Gray Fabric' },
+		{ position: 'Finish Fabric' },
+		{ position: 'Gray collor cuff' },
+		{ position: 'Finish collor cuff' },
+		{ position: 'Yarn' },
+		{ position: 'Other' },
 	];
 
-	// Return the JSX for rendering the page
+	const StockOutType = [
+		{ position: 'Yarn Transaction' },
+		{ position: 'Customer' },
+		{ position: 'Dye Plant' },
+	];
+		// Filter transactions based on date range
+		const filteredTransactions = transaction?.filter((trans: any) => {
+			const transactionDate = new Date(trans.date);
+			const start = startDate ? new Date(startDate) : null;
+			const end = endDate ? new Date(endDate) : null;
+	
+			// Check if transaction date is within the selected range
+			if (start && end) {
+				return transactionDate >= start && transactionDate <= end;
+			} else if (start) {
+				return transactionDate >= start;
+			} else if (end) {
+				return transactionDate <= end;
+			}
+			return true;
+		});
 	return (
 		<PageWrapper>
 			<SubHeader>
@@ -81,40 +102,83 @@ const Index: NextPage = () => {
 						value={searchTerm}
 					/>
 				</SubHeaderLeft>
+
 				<SubHeaderRight>
+					<SubheaderSeparator />
 					<Dropdown>
 						<DropdownToggle hasIcon={false}>
-							<Button
-								icon='FilterAlt'
-								color='dark'
-								isLight
-								className='btn-only-icon position-relative'></Button>
+							<Button icon='FilterAlt' color='dark' isLight className='btn-only-icon position-relative'></Button>
 						</DropdownToggle>
 						<DropdownMenu isAlignmentEnd size='lg'>
 							<div className='container py-2'>
 								<div className='row g-3'>
-									<FormGroup label='Category type' className='col-12'>
+									{/* Date Range Filters */}
+									<FormGroup label='Start Date' className='col-6'>
+										<Input
+											type='date'
+											onChange={(e: any) => setStartDate(e.target.value)}
+											value={startDate}
+										/>
+									</FormGroup>
+									<FormGroup label='End Date' className='col-6'>
+										<Input
+											type='date'
+											onChange={(e: any) => setEndDate(e.target.value)}
+											value={endDate}
+										/>
+									</FormGroup>
+
+									{/* Stock Out Type Filter */}
+									<FormGroup label='Stock Out Type' className='col-12'>
 										<ChecksGroup>
-											<Checks
-												key='check'
-												id='check'
-												label='Outgoing'
-												name='check'
-												value='check'></Checks>
-											<Checks
-												key='check'
-												id='check'
-												label='Return'
-												name='check'
-												value='check'></Checks>
+											{StockOutType.map((type, index) => (
+												<Checks
+													key={type.position}
+													id={type.position}
+													label={type.position}
+													name={type.position}
+													value={type.position}
+													checked={selectedStockOutTypes.includes(type.position)}
+													onChange={(event: any) => {
+														const { checked, value } = event.target;
+														setSelectedStockOutTypes((prevTypes) =>
+															checked
+																? [...prevTypes, value]
+																: prevTypes.filter((type) => type !== value)
+														);
+													}}
+												/>
+											))}
+										</ChecksGroup>
+									</FormGroup>
+
+									{/* Category Filter */}
+									<FormGroup label='Category' className='col-12'>
+										<ChecksGroup>
+											{position.map((category: any, index) => (
+												<Checks
+													key={category.position}
+													id={category.position}
+													label={category.position}
+													name={category.position}
+													value={category.position}
+													checked={selectedCategories.includes(category.position)}
+													onChange={(event: any) => {
+														const { checked, value } = event.target;
+														setSelectedCategories((prevCategories) =>
+															checked
+																? [...prevCategories, value]
+																: prevCategories.filter((category) => category !== value)
+														);
+													}}
+												/>
+											))}
 										</ChecksGroup>
 									</FormGroup>
 								</div>
 							</div>
 						</DropdownMenu>
 					</Dropdown>
-
-					{/* Button to open  New Item modal */}
 				</SubHeaderRight>
 			</SubHeader>
 			<Page>
@@ -123,8 +187,21 @@ const Index: NextPage = () => {
 						{/* Table for displaying customer data */}
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
+								{/* <FormGroup id='code' className='col-md-3'>
+									<Input
+										type='date'
+										// onChange={formik.handleChange}
+										// value={formik.values.code}
+										// onBlur={formik.handleBlur}
+										// isValid={formik.isValid}
+										// isTouched={formik.touched.code}
+										// invalidFeedback={formik.errors.code}
+										validFeedback='Looks good!'
+									/>
+								</FormGroup> */}
+							
 								<div className='flex-grow-1 text-center text-info'>
-									Transaction History
+									Transaction Report
 								</div>
 								<Button
 									icon='UploadFile'
@@ -137,68 +214,151 @@ const Index: NextPage = () => {
 								<table className='table table-modern table-bordered border-primary table-hover '>
 									<thead>
 										<tr>
-											<th>Code</th>
-											<th>Date</th>
-											<th>Type</th>
-											<th>Quantity</th>
-											<th>Location</th>
-											<th>Category</th>
-											<th>Sub Category</th>
+											<th>
+												<Checks
+													type='checkbox'
+													id='Code'
+													name='type'
+													label='Code'
+													value='Code'
+												/>
+											</th>
+											<th>
+												<Checks
+													type='checkbox'
+													id='GRN number'
+													name='type'
+													label='GRN number'
+													value='GRN number'
+												/>
+											</th>
+											<th>
+												<Checks
+													type='checkbox'
+													id='Dater'
+													name='type'
+													label='Date'
+													value='Date'
+												/>
+											</th>
+											<th>
+												<Checks
+													type='checkbox'
+													id='colour'
+													name='type'
+													label='Quantity'
+													value='Colour'
+												/>
+											</th>
+											<th>
+												<Checks
+													type='checkbox'
+													id='Type'
+													name='type'
+													label='Stock Out Type'
+													value='Type'
+												/>{' '}
+											</th>
+											<th>
+												<Checks
+													type='checkbox'
+													id='colour'
+													name='type'
+													label='Price (Rs.)'
+													value='Colour'
+												/>
+											</th>
+											<th>
+												<Checks
+													type='checkbox'
+													id='Category'
+													name='type'
+													label='Category'
+													value='Category'
+												/>
+											</th>
 										</tr>
 									</thead>
 
 									<tbody>
-										<tr className='text-success'>
-											<td className='text-warning'>15368</td>
-											<td className='text-warning'>2024/08/09</td>
-											<td className='text-warning'>Return</td>
-											<td className='text-warning'>260</td>
-											<td className='text-warning'>Garment</td>
-											<td className='text-warning'>gray fabric</td>
-											<td className='text-warning'>velvat</td>
+										{isLoading && (
+											<tr>
+												<td>Loading...</td>
+											</tr>
+										)}
+										{error && (
+											<tr>
+												<td>Error fetching categories.</td>
+											</tr>
+										)}
+										{filteredTransactions  &&
+											filteredTransactions 
+												.filter((transaction: any) =>
+													searchTerm? 
+												transaction.code.toString().includes(searchTerm.toLowerCase()) ||
+												// transaction.category.toLowerCase().includes(searchTerm.toLowerCase())||
+												// transaction.price.toString().includes(searchTerm.toLowerCase())||
+												transaction.date.includes(searchTerm.toLowerCase())
+												// transaction.GRN_number.toString().includes(searchTerm.toLowerCase())
+												
+											  : true
+												)
+												.filter((transaction: any) =>
+													selectedCategories.length > 0
+														? selectedCategories.includes(transaction.type)
+														: true,
+												)
+												.filter((transaction: any) =>
+													selectedStockOutTypes.length > 0
+														? selectedStockOutTypes.includes(transaction.stock_received)
+														: true,
+												)
+												.map((transaction: any) => {
+													// Determine the appropriate Bootstrap text color class based on order_type
+													let textColorClass = '';
+													if (transaction.stock_received == 'Customer') {
+														textColorClass = 'text-warning';
+													} else if (
+														transaction.stock_received ===
+														'Yarn Transaction'
+													) {
+														textColorClass = 'text-danger';
+													} else if (
+														transaction.stock_received === 'Dye Plant'
+													) {
+														textColorClass = 'text-success';
+													}
 
-											{/* <td>
-												<Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='warning'
-													onClick={() => handleClickDelete(item)}>
-													Delete
-												</Button>
-											</td> */}
-										</tr>
-										<tr>
-											<td className='text-success'>15368</td>
-											<td className='text-success'>2024/08/09</td>
-											<td className='text-success'>outgoing</td>
-											<td className='text-success'>260</td>
-											<td className='text-success'>Garment</td>
-											<td className='text-success'>Dye Fabric</td>
-											<td className='text-success'>silk</td>
-											{/* <td> */}
-											{/* <Button
-													icon='Edit'
-													tag='a'
-													color='info'
-													onClick={() => setEditModalStatus(true)}>
-													Edit
-												</Button>
-												<Button
-													className='m-2'
-													icon='Delete'
-													color='warning'
-													onClick={() => handleClickDelete(item)}>
-													Delete
-												</Button> */}
-											{/* </td> */}
-										</tr>
+													return (
+														<tr
+															key={transaction.id}
+															className={textColorClass}>
+															<td className={textColorClass}>
+																{transaction.code}
+															</td>
+															<td className={textColorClass}>
+																{transaction.GRN_number}
+															</td>
+															<td className={textColorClass}>
+																{transaction.date} -{' '}
+																{transaction.time}
+															</td>
+															<td className={textColorClass}>
+																{transaction.quentity}
+															</td>
+															<td className={textColorClass}>
+																{transaction.stock_received}
+															</td>
+															<td className={textColorClass}>
+																{transaction.price}
+															</td>
+															<td className={textColorClass}>
+																{transaction.category ||
+																	transaction.type}
+															</td>
+														</tr>
+													);
+												})}
 									</tbody>
 								</table>
 							</CardBody>

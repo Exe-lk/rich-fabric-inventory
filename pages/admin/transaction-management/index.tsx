@@ -46,15 +46,41 @@ const Index: NextPage = () => {
 	const [id, setId] = useState<string>(''); // State for current stock item ID
 	const [id1, setId1] = useState<string>('12356'); // State for new item ID
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+	const [selectedStockOutTypes, setSelectedStockOutTypes] = useState<string[]>([]); // New state for StockOutType filter
 	const { data: transaction, error, isLoading } = useGetStockOutsQuery(undefined);
-	console.log(transaction);
+	const [startDate, setStartDate] = useState<string>(''); // State for start date
+	const [endDate, setEndDate] = useState<string>(''); // State for end date
+
 	const position = [
 		{ position: 'Gray Fabric' },
 		{ position: 'Finish Fabric' },
 		{ position: 'Gray collor cuff' },
 		{ position: 'Finish collor cuff' },
 		{ position: 'Yarn' },
+		{ position: 'Other' },
 	];
+
+	const StockOutType = [
+		{ position: 'Yarn Transaction' },
+		{ position: 'Customer' },
+		{ position: 'Dye Plant' },
+	];
+		// Filter transactions based on date range
+		const filteredTransactions = transaction?.filter((trans: any) => {
+			const transactionDate = new Date(trans.date);
+			const start = startDate ? new Date(startDate) : null;
+			const end = endDate ? new Date(endDate) : null;
+	
+			// Check if transaction date is within the selected range
+			if (start && end) {
+				return transactionDate >= start && transactionDate <= end;
+			} else if (start) {
+				return transactionDate >= start;
+			} else if (end) {
+				return transactionDate <= end;
+			}
+			return true;
+		});
 	return (
 		<PageWrapper>
 			<SubHeader>
@@ -79,40 +105,70 @@ const Index: NextPage = () => {
 
 				<SubHeaderRight>
 					<SubheaderSeparator />
-
 					<Dropdown>
 						<DropdownToggle hasIcon={false}>
-							<Button
-								icon='FilterAlt'
-								color='dark'
-								isLight
-								className='btn-only-icon position-relative'></Button>
+							<Button icon='FilterAlt' color='dark' isLight className='btn-only-icon position-relative'></Button>
 						</DropdownToggle>
 						<DropdownMenu isAlignmentEnd size='lg'>
 							<div className='container py-2'>
 								<div className='row g-3'>
-									<FormGroup label='Transaction type' className='col-12'>
+									{/* Date Range Filters */}
+									<FormGroup label='Start Date' className='col-6'>
+										<Input
+											type='date'
+											onChange={(e: any) => setStartDate(e.target.value)}
+											value={startDate}
+										/>
+									</FormGroup>
+									<FormGroup label='End Date' className='col-6'>
+										<Input
+											type='date'
+											onChange={(e: any) => setEndDate(e.target.value)}
+											value={endDate}
+										/>
+									</FormGroup>
+
+									{/* Stock Out Type Filter */}
+									<FormGroup label='Stock Out Type' className='col-12'>
 										<ChecksGroup>
-											{position.map((category, index) => (
+											{StockOutType.map((type, index) => (
+												<Checks
+													key={type.position}
+													id={type.position}
+													label={type.position}
+													name={type.position}
+													value={type.position}
+													checked={selectedStockOutTypes.includes(type.position)}
+													onChange={(event: any) => {
+														const { checked, value } = event.target;
+														setSelectedStockOutTypes((prevTypes) =>
+															checked
+																? [...prevTypes, value]
+																: prevTypes.filter((type) => type !== value)
+														);
+													}}
+												/>
+											))}
+										</ChecksGroup>
+									</FormGroup>
+
+									{/* Category Filter */}
+									<FormGroup label='Category' className='col-12'>
+										<ChecksGroup>
+											{position.map((category: any, index) => (
 												<Checks
 													key={category.position}
 													id={category.position}
 													label={category.position}
 													name={category.position}
 													value={category.position}
-													checked={selectedCategories.includes(
-														category.position,
-													)}
+													checked={selectedCategories.includes(category.position)}
 													onChange={(event: any) => {
 														const { checked, value } = event.target;
-														setSelectedCategories(
-															(prevCategories) =>
-																checked
-																	? [...prevCategories, value] // Add category if checked
-																	: prevCategories.filter(
-																			(category) =>
-																				category !== value,
-																	  ), // Remove category if unchecked
+														setSelectedCategories((prevCategories) =>
+															checked
+																? [...prevCategories, value]
+																: prevCategories.filter((category) => category !== value)
 														);
 													}}
 												/>
@@ -131,7 +187,7 @@ const Index: NextPage = () => {
 						{/* Table for displaying customer data */}
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
-								<FormGroup id='code' className='col-md-3'>
+								{/* <FormGroup id='code' className='col-md-3'>
 									<Input
 										type='date'
 										// onChange={formik.handleChange}
@@ -142,7 +198,8 @@ const Index: NextPage = () => {
 										// invalidFeedback={formik.errors.code}
 										validFeedback='Looks good!'
 									/>
-								</FormGroup>
+								</FormGroup> */}
+							
 								<div className='flex-grow-1 text-center text-info'>
 									Transaction Report
 								</div>
@@ -234,13 +291,26 @@ const Index: NextPage = () => {
 												<td>Error fetching categories.</td>
 											</tr>
 										)}
-										{transaction &&
-											transaction
+										{filteredTransactions  &&
+											filteredTransactions 
 												.filter((transaction: any) =>
-													searchTerm
-														? transaction.code
-																.toLowerCase()
-																.includes(searchTerm.toLowerCase())
+													searchTerm? 
+												transaction.code.toString().includes(searchTerm.toLowerCase()) ||
+												// transaction.category.toLowerCase().includes(searchTerm.toLowerCase())||
+												// transaction.price.toString().includes(searchTerm.toLowerCase())||
+												transaction.date.includes(searchTerm.toLowerCase())
+												// transaction.GRN_number.toString().includes(searchTerm.toLowerCase())
+												
+											  : true
+												)
+												.filter((transaction: any) =>
+													selectedCategories.length > 0
+														? selectedCategories.includes(transaction.type)
+														: true,
+												)
+												.filter((transaction: any) =>
+													selectedStockOutTypes.length > 0
+														? selectedStockOutTypes.includes(transaction.stock_received)
 														: true,
 												)
 												.map((transaction: any) => {

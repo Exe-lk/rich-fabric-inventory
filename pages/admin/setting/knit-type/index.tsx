@@ -33,7 +33,7 @@ const Index: NextPage = () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'You will not be able to recover this category!',
+				text: 'You will not be able to recover this data!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -48,7 +48,7 @@ const Index: NextPage = () => {
 					};
 					await updateknit(values);
 
-					Swal.fire('Deleted!', 'The Color has been deleted.', 'success');
+					Swal.fire('Deleted!', 'The kani type  has been deleted.', 'success');
 				} catch (error) {
 					console.error('Error during deleting: ', error);
 					Swal.close;

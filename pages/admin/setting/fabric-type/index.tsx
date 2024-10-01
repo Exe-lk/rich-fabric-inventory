@@ -44,7 +44,7 @@ const Index: NextPage = () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'You will not be able to recover this category!',
+				text: 'You will not be able to recover this data!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',

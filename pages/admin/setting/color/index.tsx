@@ -33,7 +33,7 @@ const Index: NextPage = () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'You will not be able to recover this category!',
+				text: 'You will not be able to recover this data!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -106,7 +106,7 @@ const Index: NextPage = () => {
 								<table className='table table-bordered border-primary table-modern table-hover text-center'>
 									<thead>
 										<tr>
-											<th>Colour name</th>
+											<th>Color name</th>
 											<th></th>
 										</tr>
 									</thead>

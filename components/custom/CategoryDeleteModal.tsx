@@ -83,7 +83,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 
 				await updateCategory(values);
 
-				Swal.fire('Restory!', 'The category has been deleted.', 'success');
+				Swal.fire('Restored!', 'The category has been restored.', 'success');
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);

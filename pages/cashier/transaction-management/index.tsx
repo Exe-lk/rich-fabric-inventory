@@ -294,11 +294,14 @@ const Index: NextPage = () => {
 										{filteredTransactions  &&
 											filteredTransactions 
 												.filter((transaction: any) =>
-													searchTerm
-														? transaction.code
-																.toLowerCase()
-																.includes(searchTerm.toLowerCase())
-														: true,
+													searchTerm? 
+												transaction.code.toString().includes(searchTerm.toLowerCase()) ||
+												// transaction.category.toLowerCase().includes(searchTerm.toLowerCase())||
+												// transaction.price.toString().includes(searchTerm.toLowerCase())||
+												transaction.date.includes(searchTerm.toLowerCase())
+												// transaction.GRN_number.toString().includes(searchTerm.toLowerCase())
+												
+											  : true
 												)
 												.filter((transaction: any) =>
 													selectedCategories.length > 0

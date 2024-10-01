@@ -242,7 +242,7 @@ const Index: NextPage = () => {
 					<div className='col-12'>
 						<Card stretch>
 						<CardTitle className='d-flex justify-content-between align-items-center m-4'>
-							<div className='flex-grow-1 text-center text-info '>Manage Lot</div>
+							<div className='flex-grow-1 text-center text-info '>Manage Category</div>
 							{/* dropdown for export */}
 							<Dropdown>
 								<DropdownToggle hasIcon={false}>

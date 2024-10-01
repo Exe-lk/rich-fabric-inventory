@@ -434,7 +434,7 @@ const Index: React.FC<KeyboardProps> = ({
 					<div
 						className='p-4 rounded-4  '
 						style={{ zIndex: 1051, width: 600, backgroundColor: '#1D1F27' }}>
-						<h4 className='mb-4'>Enter a Quantity(Kg)</h4>
+						<h4 className='mb-4'>Enter Quantity(Kg)</h4>
 						<Input
 							type='number'
 							value={popupInput}
