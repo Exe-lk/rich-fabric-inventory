@@ -78,7 +78,7 @@ const Index: NextPage = () => {
 
 				await updatedata(values);
 
-				Swal.fire('Restory!', 'The data has been restored.', 'success');
+				Swal.fire('Restored!', 'The data has been restored.', 'success');
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
@@ -90,7 +90,7 @@ const Index: NextPage = () => {
 		try {
 			const { value: inputText } = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'Please type "DELETE ALL" to confirm deleting all Suppliers',
+				text: 'Please type "DELETE ALL" to confirm deleting all data',
 				input: 'text',
 				icon: 'warning',
 				inputValidator: (value) => {
@@ -124,7 +124,7 @@ const Index: NextPage = () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'This will restore all suppliers.',
+				text: 'This will restore all data.',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -146,7 +146,7 @@ const Index: NextPage = () => {
 				refetch();
 			}
 		} catch (error) {
-			console.error('Error restoring all categories:', error);
+			
 			Swal.fire('Error', 'Failed to restore all data.', 'error');
 		}
 	};
@@ -197,7 +197,7 @@ const Index: NextPage = () => {
 								<table className='table table-bordered border-primary table-modern table-hover text-center'>
 									<thead>
 										<tr>
-											<th>Colour name</th>
+											<th>Color name</th>
 											<th></th>
 										</tr>
 									</thead>
@@ -213,7 +213,14 @@ const Index: NextPage = () => {
 											</tr>
 										)}
 										{data &&
-											data.map((data: any) => (
+											data
+											.filter((color: any) =>
+												searchTerm
+													? color.name
+															.toLowerCase()
+															.includes(searchTerm.toLowerCase())
+													: true,
+											).map((data: any) => (
 												<tr key={data.id}>
 													<td>{data.name}</td>
 

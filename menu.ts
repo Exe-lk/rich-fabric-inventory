@@ -95,7 +95,7 @@ export const addminPagesMenu = {
 			},
 			fabric: {
 				id: 'fluidSingle',
-				text: 'fabric',
+				text: 'Fabric',
 				path: 'admin/setting/fabric-type',
 				icon: 'AppSettingsAlt',
 			},
@@ -127,7 +127,7 @@ export const addminPagesMenu = {
 					},
 					fabric: {
 						id: 'fluidSingle',
-						text: 'fabric',
+						text: 'Fabric',
 						path: 'admin/setting/recycle-bin/fabric',
 						icon: 'AppSettingsAlt',
 					},

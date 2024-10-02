@@ -91,7 +91,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 		try {
 			const { value: inputText } = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'Please type "DELETE ALL" to confirm deleting all Suppliers',
+				text: 'Please type "DELETE ALL" to confirm deleting all customer',
 				input: 'text',
 				icon: 'warning',
 				inputValidator: (value) => {
@@ -109,14 +109,14 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 				for (const users of user) {
 					await deleteuser(users.id).unwrap();
 				}
-				Swal.fire('Deleted!', 'All users have been deleted.', 'success');
+				Swal.fire('Deleted!', 'All customer have been deleted.', 'success');
 
 				// Refetch categories after deletion
 				refetch();
 			}
 		} catch (error) {
 			console.error('Error deleting all categories:', error);
-			Swal.fire('Error', 'Failed to delete all suppliers.', 'error');
+			Swal.fire('Error', 'Failed to delete all data', 'error');
 		}
 	};
 
@@ -125,7 +125,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				text: 'This will restore all suppliers.',
+				text: 'This will restore all customer.',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -142,14 +142,14 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					};
 					await updateuser(values).unwrap();
 				}
-				Swal.fire('Restored!', 'All categories have been restored.', 'success');
+				Swal.fire('Restored!', 'All customers have been restored.', 'success');
 
 				// Refetch categories after restoring
 				refetch();
 			}
 		} catch (error) {
-			console.error('Error restoring all categories:', error);
-			Swal.fire('Error', 'Failed to restore all categories.', 'error');
+
+			Swal.fire('Error', 'Failed to restore all customers.', 'error');
 		}
 	};
 	return (

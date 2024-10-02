@@ -60,7 +60,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					// Success feedback
 					await Swal.fire({
 						icon: 'success',
-						title: 'Color added Successfully',
+						title: 'GSM added Successfully',
 					});
 					setIsOpen(false);
 			} catch (error) {

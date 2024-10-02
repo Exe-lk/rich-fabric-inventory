@@ -22,6 +22,8 @@ import { getFirstLetter } from '../../../helpers/helpers';
 import Swal from 'sweetalert2';
 import FormGroup from '../../../components/bootstrap/forms/FormGroup';
 import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
+import SellerDeleteModal from '../../../components/custom/UserDeleteModal';
+import { useGetUsersQuery,useUpdateUserMutation } from '../../../redux/slices/userManagementApiSlice';
 
 interface User {
 	cid: string;
@@ -41,17 +43,55 @@ const Index: NextPage = () => {
 	const [searchTerm, setSearchTerm] = useState('');
 	const [addModalStatus, setAddModalStatus] = useState<boolean>(false);
 	const [editModalStatus, setEditModalStatus] = useState<boolean>(false);
+	const [deleteModalStatus, setDeleteModalStatus] = useState<boolean>(false);
 	const [user, setuser] = useState<User[]>([]);
 	const [id, setId] = useState<string>('');
 	const [status, setStatus] = useState(true);
-	const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-	const position = [
-		{ position: 'Admin' },
-		{ position: 'Stock keeper' },
-		{ position: 'Accountant' },
-		{ position: 'Cashier' },
-		{ position: 'Data entry operator' },
+	const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+	const role = [
+	
+		{ role: 'employee' },
+		{ role: 'cashier' },
 	];
+	const { data: users, error, isLoading, refetch } = useGetUsersQuery(undefined);
+	const [updateuser] = useUpdateUserMutation();
+	//delete user
+	// Update the user's status to false instead of deleting
+	const handleClickDelete = async (user: any) => {
+		try {
+			const result = await Swal.fire({
+				title: 'Are you sure?',
+				text: 'You will not be able to recover this user!',
+				icon: 'warning',
+				showCancelButton: true,
+				confirmButtonColor: '#3085d6',
+				cancelButtonColor: '#d33',
+				confirmButtonText: 'Yes, delete it!',
+			});
+			if (result.isConfirmed) {
+				try {
+					// Set the user's status to false (soft delete)
+					const values = await {
+						...user,status:false
+					};
+					await updateuser(values);
+					// Refresh the list after deletion
+					Swal.fire('Deleted!', 'User has been deleted.', 'success');
+					 // This will refresh the list of users to reflect the changes
+				} catch (error) {
+					console.error('Error during handleDelete: ', error);
+					Swal.fire(
+						'Error',
+						'An error occurred during deletion. Please try again later.',
+						'error',
+					);
+				}
+			}
+		} catch (error) {
+			console.error('Error deleting document: ', error);
+			Swal.fire('Error', 'Failed to delete user.', 'error');
+		}
+	};
 
 	return (
 		<PageWrapper>
@@ -75,6 +115,52 @@ const Index: NextPage = () => {
 						value={searchTerm}
 					/>
 				</SubHeaderLeft>
+				<SubHeaderRight>
+					<Dropdown>
+						<DropdownToggle hasIcon={false}>
+							<Button
+								icon='FilterAlt'
+								color='dark'
+								isLight
+								className='btn-only-icon position-relative'></Button>
+						</DropdownToggle>
+						<DropdownMenu isAlignmentEnd size='lg'>
+							<div className='container py-2'>
+								<div className='row g-3'>
+									<FormGroup label='User type' className='col-12'>
+										<ChecksGroup>
+											{role.map((user, index) => (
+												<Checks
+													key={user.role}
+													id={user.role}
+													label={user.role}
+													name={user.role}
+													value={user.role}
+													checked={selectedUsers.includes(user.role)}
+													onChange={(event: any) => {
+														const { checked, value } = event.target;
+														setSelectedUsers(
+															(prevUsers) =>
+																checked
+																	? [...prevUsers, value] // Add category if checked
+																	: prevUsers.filter(
+																			(user) =>
+																				user !== value,
+																	  ), // Remove category if unchecked
+														);
+													}}
+												/>
+											))}
+										</ChecksGroup>
+									</FormGroup>
+								</div>
+							</div>
+						</DropdownMenu>
+					</Dropdown>
+
+					<SubheaderSeparator />
+				
+				</SubHeaderRight>
 			</SubHeader>
 			<Page>
 				<div className='row h-100'>
@@ -83,7 +169,7 @@ const Index: NextPage = () => {
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
 								<div className='flex-grow-1 text-center text-info'>
-									User Details
+									Employee Management
 								</div>
 							</CardTitle>
 							<CardBody isScrollable className='table-responsive'>
@@ -91,32 +177,66 @@ const Index: NextPage = () => {
 									<thead>
 										<tr>
 											<th>User</th>
-											<th>Position</th>
 											<th>Email</th>
 											<th>Mobile number</th>
+											<th>NIC</th>
+											<th>Role</th>
+											
 										</tr>
 									</thead>
 									<tbody>
-										<tr>
-											<td>Kalpa Chamathkara</td>
-											<td>Production Codinater</td>
-											<td>kalpa@gmail.com</td>
-											<td>0772369745</td>
-										</tr>
-										<tr>
-											<td>Ravidu Idamalgoda</td>
-											<td>Admin</td>
-											<td>ravidu@gmail.com</td>
-											<td>0772369745</td>
-										</tr>
+										{isLoading && (
+											<tr>
+												<td>Loading...</td>
+											</tr>
+										)}
+										{error && (
+											<tr>
+												<td>Error fetching users.</td>
+											</tr>
+										)}
+										{users &&
+											users
+												.filter((user: any) => user.status === true) // Only show users where status is true
+												.filter((user: any) =>
+													searchTerm
+														? user.nic
+																.toLowerCase()
+																.includes(searchTerm.toLowerCase())
+														: true,
+												)
+												.filter((user: any) =>
+													selectedUsers.length > 0
+														? selectedUsers.includes(user.role)
+														: true,
+												)
+												.map((user: any) => (
+													<tr key={user.id}>
+														<td>{user.name}</td>
+														<td>{user.email}</td>
+														<td>{user.mobile}</td>
+														<td>{user.nic}</td>
+														<td>{user.role}</td>
+														
+													</tr>
+												))}
 									</tbody>
 								</table>
+								
 							</CardBody>
 						</Card>
 					</div>
 				</div>
 			</Page>
-			
+			<UserAddModal setIsOpen={setAddModalStatus} isOpen={addModalStatus} id='' />
+			<UserEditModal
+				setIsOpen={setEditModalStatus}
+				isOpen={editModalStatus}
+				id={id}
+				refetch={refetch} // Pass refetch function here
+			/>
+
+			<SellerDeleteModal setIsOpen={setDeleteModalStatus} isOpen={deleteModalStatus} id='' />
 		</PageWrapper>
 	);
 };

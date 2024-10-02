@@ -72,7 +72,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 
 				await updatelot(values);
 
-				Swal.fire('Restory!', 'The stock has been deleted.', 'success');
+				Swal.fire('Restored!', 'The stock has been restored.', 'success');
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);

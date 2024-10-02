@@ -94,7 +94,7 @@ const UserAddModal: FC<UserAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 					// Success feedback
 					await Swal.fire({
 						icon: 'success',
-						title: 'Coustomer Created Successfully',
+						title: 'Customer Created Successfully',
 					});
 					setIsOpen(false); // Close the modal after successful addition
 				} catch (error) {
@@ -116,7 +116,7 @@ const UserAddModal: FC<UserAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 	return (
 		<Modal isOpen={isOpen} setIsOpen={setIsOpen} size='xl' titleId={id}>
 			<ModalHeader setIsOpen={setIsOpen} className='p-4'>
-				<ModalTitle id=''>{'New User'}</ModalTitle>
+				<ModalTitle id=''>{'New Customer'}</ModalTitle>
 			</ModalHeader>
 			<ModalBody className='px-4'>
 				<div className='row g-4'>
