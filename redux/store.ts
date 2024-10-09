@@ -5,6 +5,7 @@ import { categoryApiSlice } from './slices/categoryApiSlice'; // Adjust the path
 import { userManagementApiSlice } from './slices/userManagementApiSlice';
 import { userApiSlice } from './slices/userApiSlice';
 import {lotInApiSlice} from './slices/stockInAPISlice';
+import {lotMovementApiSlice} from './slices/LotMovementApiSlice';
 import {stockOutApiSlice} from './slices/stockOutApiSlice';
 import {supplierApiSlice } from './slices/supplierAPISlice';
 import {colorApiSlice } from './slices/colorApiSlice';
@@ -19,6 +20,7 @@ const store = configureStore({
     [userManagementApiSlice.reducerPath]: userManagementApiSlice.reducer,
     [userApiSlice.reducerPath]: userApiSlice.reducer, // Both now have unique reducerPaths
     [lotInApiSlice.reducerPath]: lotInApiSlice.reducer, 
+    [lotMovementApiSlice.reducerPath]: lotMovementApiSlice.reducer, 
     [stockOutApiSlice.reducerPath]: stockOutApiSlice.reducer, 
     [supplierApiSlice.reducerPath]: supplierApiSlice.reducer,
     [colorApiSlice.reducerPath]: colorApiSlice.reducer,
@@ -33,6 +35,7 @@ const store = configureStore({
       userManagementApiSlice.middleware, 
       userApiSlice.middleware,
       lotInApiSlice.middleware,
+      lotMovementApiSlice.middleware,
       stockOutApiSlice.middleware,
       supplierApiSlice.middleware,
       colorApiSlice.middleware,

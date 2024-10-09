@@ -14,6 +14,7 @@ import {
 	useAddLotMovementMutation,
 	useGetLotMovementsQuery,
 } from '../redux/slices/LotMovementApiSlice';
+import { Scanner } from '@yudiel/react-qr-scanner';
 
 interface Item {
 	cid: string;
@@ -27,22 +28,13 @@ interface Item {
 
 // Define props for the Keyboard component
 interface KeyboardProps {
-	// orderedItems: Item[];
-	// setOrderedItems: React.Dispatch<React.SetStateAction<Item[]>>;
 	isActive: boolean;
 	setActiveComponent: React.Dispatch<React.SetStateAction<'additem' | 'edit'>>;
 }
 
-const Index: React.FC<KeyboardProps> = ({
-	// orderedItems,
-	// setOrderedItems,
-	isActive,
-	setActiveComponent,
-}) => {
+const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }) => {
 	// Custom hook to manage dark mode
 	const { darkModeStatus } = useDarkMode();
-
-	// State variables
 	const [category1, setCategory1] = useState<string>('');
 	const [input, setInput] = useState<string>('');
 	const keyboard = useRef<any>(null);
@@ -55,10 +47,12 @@ const Index: React.FC<KeyboardProps> = ({
 	const [selectedType, setSelectedType] = useState<any>('');
 	const [layout, setLayout] = useState<string>('default');
 	const [focusedIndex, setFocusedIndex] = useState<number>(0);
-	const { data: items, error, isLoading } = useGetLotsQuery(undefined);
+	const { data: items, error, isLoading, refetch } = useGetLotsQuery(undefined);
 	const [updateLot] = useUpdateLotMutation();
 	const [addlotmovement] = useAddLotMovementMutation();
-	const { refetch } = useGetLotMovementsQuery(undefined);
+	// const { refetch } = useGetLotMovementsQuery(undefined);
+	const [data, setData] = useState<any[]>([]);
+	const [status, setStatus] = useState<boolean>(false);
 	// Handle input change
 	const onChangeInput = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const input = event.target.value;
@@ -67,21 +61,6 @@ const Index: React.FC<KeyboardProps> = ({
 		if (keyboard.current) {
 			keyboard.current.setInput(numericInput);
 		}
-	};
-
-	// Handle virtual keyboard input change
-	const onChange = (input: string) => {
-		const numericInput = input.replace(/\D/g, '');
-		if (showPopup) {
-			//   setPopupInput(numericInput);
-		} else {
-			setInput(numericInput);
-		}
-	};
-
-	// Handle key press events on virtual keyboard
-	const onKeyPress = (button: string) => {
-		if (button === '{shift}' || button === '{lock}') handleShift();
 	};
 
 	// Toggle between default and shift layouts on virtual keyboard
@@ -113,13 +92,13 @@ const Index: React.FC<KeyboardProps> = ({
 
 			// Refetch categories to update the list
 			refetch();
-	
-			const quentity=selectedItem.current_quantity-Number(popupInput)
-			
-			const updatedItem1 = { 
-				...selectedItem, 
-				current_quantity: quentity  // Update current_quantity with the new quentity
-			  };
+
+			const quentity = selectedItem.current_quantity - Number(popupInput);
+
+			const updatedItem1 = {
+				...selectedItem,
+				current_quantity: quentity, // Update current_quantity with the new quentity
+			};
 			await updateLot(updatedItem1).unwrap();
 			refetch();
 			// await setOrderedItems((prevItems: any) => {
@@ -140,22 +119,10 @@ const Index: React.FC<KeyboardProps> = ({
 		setFocusedIndex(-1);
 	};
 
-	// Handle Cancel button click in the popup
-	const handlePopupCancel = () => {
-		setShowPopup(false);
-	};
-
 	// Open the popup to enter quantity
 	const handlePopupOpen = async (selectedIndex1: any) => {
 		setSelectedItem(items[selectedIndex1] || null);
 		setShowPopup(true);
-	};
-
-	// Handle input change in the popup
-	const onChangePopupInput = async (event: React.ChangeEvent<HTMLInputElement>) => {
-		const input: any = event.target.value;
-
-		await setPopupInput(input);
 	};
 
 	// Handle keyboard events for navigation and actions
@@ -191,7 +158,7 @@ const Index: React.FC<KeyboardProps> = ({
 		return () => {
 			window.removeEventListener('keydown', handleKeyPress);
 		};
-	}, [items, focusedIndex, showPopup, isActive]);
+	}, [focusedIndex, showPopup, isActive]);
 
 	// Focus input in the popup when it is shown
 	useEffect(() => {
@@ -199,36 +166,83 @@ const Index: React.FC<KeyboardProps> = ({
 			popupInputRef.current?.focus();
 		}
 	}, [showPopup]);
-	const handleTypeChange = async (e: any) => {
-		await setSelectedType(e.target.value);
+
+	const finditem = async (result: any) => {
+		// Ensure items are defined before proceeding
+
+	
+		await console.log(data);
+		await console.log(result[0]);
+		// Proceed to find the ite
+		const foundItem = data.find((item: any) => item.code.toString() == result[0].rawValue);
+
+		if (foundItem) {
+			setSelectedItem(foundItem);
+			setShowPopup(true);
+		} else {
+			console.log('Item not found');
+			setSelectedItem(null);
+		}
 	};
+
+	useEffect(() => {
+		const getdata = async () => {
+			console.log(items);
+			console.log(data);
+			if (!status) {
+				await setData(items);
+
+				console.log(data);
+			}
+		};
+
+		getdata();
+	}, [items, finditem, selectedItem]);
+
 	return (
 		<div>
 			<div>
+				<Scanner
+					onScan={(result) => finditem(result)} 
+					onError={(error) => console.error(error)}
+					constraints={{ facingMode: 'environment' }} // Use the back camera
+					allowMultiple
+					// styles={{ "width": '300px', height: '300px' }} // Set scanner size
+				/>
+				
+				{/* {data && <p>Scanned QR Data: {data}</p>} */}
+				<Input
+					id='keyboardinput'
+					className='form-control mb-4 p-2 mt-4'
+					value={input}
+					placeholder='Tap on the virtual keyboard to start'
+					onChange={onChangeInput}
+					ref={inputRef}
+				/>
+
 				<Card className='mt-4' style={{ height: '40vh' }}>
 					<CardHeader>
 						<CardLabel>
 							<CardTitle>Lot</CardTitle>
 						</CardLabel>
-						{/* <CardActions>
-						 <Button color='info' isLink icon='Summarize' tag='a'>
-								View
-							</Button> 
-						</CardActions> */}
 					</CardHeader>
-					<CardBody isScrollable>
+					<CardBody style={{ overflowY: 'auto', maxHeight: '30vh' }}>
 						<div className='row g-3'>
 							{items &&
 								items
 									.filter((val: any) => {
 										if (input === '') {
-											
+											if (category1 === '') {
 												return val;
-											
+											} else if (category1.includes(val.category)) {
+												return val;
+											}
 										} else if (val.code.toString().includes(input)) {
-										
+											if (category1 === '') {
 												return val;
-										
+											} else if (category1.includes(val.category)) {
+												return val;
+											}
 										}
 										return null;
 									})
@@ -278,7 +292,7 @@ const Index: React.FC<KeyboardProps> = ({
 												<div className='col-auto text-end'>
 													<div>
 														<strong>
-															{item.current_quantity} Kg
+															{item.current_quantity} {item.uom}
 														</strong>
 													</div>
 													<div className='text-muted'>
@@ -291,67 +305,17 @@ const Index: React.FC<KeyboardProps> = ({
 						</div>
 					</CardBody>
 				</Card>
-				<div>
-					<Input
-						id='keyboardinput'
-						className='form-control mb-4 p-2'
-						value={input}
-						placeholder='Tap on the virtual keyboard to start'
-						onChange={onChangeInput}
-						ref={inputRef}
-					/>
-					<Keyboard
-						className='keyboard w-100 bg-dark text-light'
-						keyboardRef={(r) => (keyboard.current = r)}
-						layoutName={layout}
-						onChange={onChange}
-						onKeyPress={onKeyPress}
-						layout={{
-							default: ['1 2 3', '4 5 6', '7 8 9', '0 {bksp}'],
-						}}
-					/>
-					<style>
-						{`
-            .hg-button {
-                background-color: #1F2128 !important;
-                color: #fff !important;
-                border: 1px solid #555 !important;
-                 
-            }
-
-            .hg-button:hover {
-                background-color: #555 !important;
-            }
-
-            .hg-button:active {
-                background-color: #666 !important;
-            }
-            .simple-keyboard {
-                  background-color: #343a40;
-                 
-            }
-
-            .simple-keyboard .hg-button {
-                  background-color: #495057;
-                  color: #ffffff;
-                  height:6vh
-            }
-
-            .simple-keyboard .hg-button:active,
-            .simple-keyboard .hg-button:hover {
-                      background-color: #6c757d;
-            }
-            `}
-					</style>
-				</div>
 			</div>
 			{showPopup && (
 				<div
 					className='position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center bg-black bg-opacity-50'
 					style={{ zIndex: 1050 }}>
 					<div
-						className='p-4 rounded-4'
-						style={{ zIndex: 1051, width: 600, backgroundColor: '#1D1F27' }}>
+						className={classNames('p-4 rounded-4', {
+							'bg-l10-dark': !darkModeStatus,
+							'bg-l90-dark': darkModeStatus,
+						})}
+						style={{ zIndex: 1051, width: 600 }}>
 						<FormGroup id='membershipDate' className='col-md-6'>
 							<Label htmlFor='ChecksGroup'>Type</Label>
 							<ChecksGroup isInline>

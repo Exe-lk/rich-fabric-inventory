@@ -1,19 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { NextPage } from 'next';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import Page from '../../../layout/Page/Page';
 import Card, { CardBody, CardTitle } from '../../../components/bootstrap/Card';
-// import QRCode  from 'qrcode.react';
-import Qr from '../../../assets/img/QR.png'
+import QRCode from 'react-qr-code';
+import Qr from '../../../assets/img/QR.png';
+import { useRouter } from 'next/router';
 const Index: NextPage = () => {
-
+	const router = useRouter();
+	const [email, setEmail] = useState<any>('');
+	const [password, setPassword] = useState<any>('');
+	useEffect(() => {
+		// Retrieve data from localStorage when the component mounts
+		const storedEmail = localStorage.getItem('email');
+		const storedPassword = localStorage.getItem('password');
+		if (storedEmail && storedPassword) {
+			setEmail(storedEmail);
+			setPassword(storedPassword);
+		} else {
+			// router.push('/');
+		}
+	}, []);
 	const data = {
-		email: "abc@gmail.com",
-		password: "123456"
-	}
-
+		email: 'achinthawijethunga@gmail.com',
+		password: '200133701291',
+	};
 	// Create a string to encode in the QR code
-	const qrData = `Email: ${data.email}, Password: ${data.password}`;
+	const qrData = `email: ${email}, password: ${password}`;
 
 	// JSX for rendering the page
 	return (
@@ -29,9 +42,21 @@ const Index: NextPage = () => {
 
 							<CardBody isScrollable className='table-responsive'>
 								<div className='d-flex justify-content-center'>
-									{/* Render QR code here */}
-									{/* <QRCode value={qrData} size={200} /> */}
-									<img src={Qr}/>
+												{/* Render QR code here */}
+												<div
+										style={{
+											padding: '16px', // Adjust the padding for the border thickness
+											backgroundColor: '#ffffff', // Border color (white)
+											display: 'inline-block', // Keep it wrapped tightly around the QR code
+										}}>
+										<QRCode
+											value={qrData}
+											size={256} // Size of the QR code
+											bgColor='#ffffff' // Background color inside the QR code
+											fgColor='#000000' // Foreground color for the QR code
+											level='Q'
+										/>
+									</div>
 
 								</div>
 

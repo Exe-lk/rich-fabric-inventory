@@ -24,6 +24,9 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { auth, firestore } from '../firebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import Logo from '../components/Logo';
+import {useAddUserMutation}  from '../redux/slices/userApiSlice'
+import { useGetUsersQuery } from '../redux/slices/userApiSlice';
+
 interface ILoginHeaderProps {
 	isNewUser?: boolean;
 }
@@ -50,18 +53,7 @@ const Login: NextPage<ILoginProps> = ({ isSignUp }) => {
 	const { darkModeStatus } = useDarkMode();
 	const [users, setUsers] = useState<User[]>([]);
 	const { setUser } = useContext(AuthContext);
-
-	const signInUser = async (email: string, password: string) => {
-		try {
-			const userCredential = await signInWithEmailAndPassword(auth, email, password);
-			const user = userCredential.user;
-
-			return user;
-		} catch (error) {
-			console.error('Error signing in:', error);
-			return null;
-		}
-	};
+	const [addUser] = useAddUserMutation();
 
 	//login
 	const formik = useFormik({
@@ -86,76 +78,49 @@ const Login: NextPage<ILoginProps> = ({ isSignUp }) => {
 
 		onSubmit: async (values) => {
 			try {
-				const user = await signInUser(values.email, values.password);
-
-				if (user) {
-					if (setUser) {
-						setUser(values.email);
-					}
-					await Swal.fire({
-						icon: 'success',
-						title: 'Login Successful',
-						text: 'You have successfully logged in!',
-					});
-
-					// Store user information in session
-
-					const usersCollection = collection(firestore, 'user');
-
-					const q = query(usersCollection, where('email', '==', values.email));
-
-					const querySnapshot = await getDocs(q);
-
-					const firebaseData = querySnapshot.docs.map((doc) => {
-						const data = doc.data();
-						return {
-							...data,
-							_id: doc.id,
-						};
-					});
-
-					if (!querySnapshot.empty) {
-						const userData = querySnapshot.docs[0].data();
-						localStorage.setItem('user', JSON.stringify(userData));
-						console.log(userData.position);
-						switch (userData.position) {
-							case 'Admin':
-								router.push('/admin/dashboard');
-								break;
-							case 'Cashier':
-								router.push('/cashier/bills');
-								break;
-
-							case 'Stock keeper':
-								router.push('/stock-keeper/dashboard');
-								break;
-							case 'Accountant':
-								router.push('/accountant/dashboard');
-								break;
-							case 'Owner':
-								router.push('/Owner/dashboard');
-								break;
-							case 'Data entry operator':
-								router.push('/dataentry-operater/dashboard');
-								break;
-						}
-					}
-
-					// router.push('/employeepages/dashboard');
-				} else {
-					await Swal.fire({
-						icon: 'error',
-						title: 'Invalid Credentials',
-						text: 'Username and password do not match. Please try again.',
-					});
+			  const response = await addUser(values).unwrap();
+			  const email = response.user.email;
+			  
+			  console.log(response)
+			  if (response.user) {
+				await Swal.fire({
+				  icon: 'success',
+				  title: 'Login Successful',
+				  text: 'You have successfully logged in!',
+				});
+				switch (response.user.position) {
+				  case 'admin':
+					router.push('/admin/dashboard');
+					break;
+				  case 'Viewer':
+					router.push('/viewer/dashboard');
+					break;
+				  case 'Production Coordinator':
+					router.push('/production-coordinator/job-management');
+					break;
+				  case 'cashier':
+					await localStorage.setItem('email',values.email);
+					await localStorage.setItem('password', values.password);
+					router.push('/cashier/dashboard');
+					break;
+				 
+				  default:
+					break;
 				}
+			  } else {
+				await Swal.fire({
+				  icon: 'error',
+				  title: 'Invalid Credentials',
+				  text: 'Username and password do not match. Please try again.',
+				});
+			  }
 			} catch (error) {
-				console.error('Error occurred:', error);
-				Swal.fire('Error', 'An unexpected error occurred', 'error');
+			  console.error('Error occurred:', error);
+			  Swal.fire('Error', 'An unexpected error occurred', 'error');
 			}
-		},
-	});
-
+		  },
+		});
+		
 	return (
 		<PageWrapper
 			isProtected={false}
@@ -219,7 +184,7 @@ const Login: NextPage<ILoginProps> = ({ isSignUp }) => {
 										</div>
 										<div className='col-12'>
 											<Button
-												color='info'
+												color='warning'
 												className='w-100 py-3'
 												onClick={formik.handleSubmit}>
 												Login

@@ -81,6 +81,9 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 	};
 
 	const handleDeleteAll = async () => {
+		if(supplier.length==0){
+			return
+		}
 		try {
 			const { value: inputText } = await Swal.fire({
 				title: 'Are you sure?',
@@ -115,6 +118,9 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 
 	// Handle restore all categories
 	const handleRestoreAll = async () => {
+		if(supplier.length==0){
+			return
+		}
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',

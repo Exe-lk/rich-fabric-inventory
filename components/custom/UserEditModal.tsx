@@ -116,7 +116,7 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen, refetch 
                     'User has been updated successfully',
                 );
                 Swal.fire('Updated!', 'User has been updated successfully.', 'success');
-
+                formik.resetForm()
                 refetch(); // Trigger refetch of users list after update
             } catch (error) {
                 console.error('Error updating document: ', error);
