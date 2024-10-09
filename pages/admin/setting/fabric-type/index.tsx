@@ -58,7 +58,7 @@ const Index: NextPage = () => {
 					};
 					await updatefabric(values);
 
-					Swal.fire('Deleted!', 'The Color has been deleted.', 'success');
+					Swal.fire('Deleted!', 'The fabric has been deleted.', 'success');
 				
 				} catch (error) {
 					console.error('Error during deleting: ', error);
@@ -108,7 +108,7 @@ const Index: NextPage = () => {
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
 								<div className='flex-grow-1 text-center text-info'>
-									Fabric management
+									Fabric Management
 								</div>
 							</CardTitle>
 							<CardBody isScrollable className='table-responsive'>

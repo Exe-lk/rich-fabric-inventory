@@ -48,7 +48,7 @@ const Index: NextPage = () => {
 					};
 					await updateknit(values);
 
-					Swal.fire('Deleted!', 'The kani type  has been deleted.', 'success');
+					Swal.fire('Deleted!', 'The knit type  has been deleted.', 'success');
 				} catch (error) {
 					console.error('Error during deleting: ', error);
 					Swal.close;
@@ -99,7 +99,7 @@ const Index: NextPage = () => {
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
 								<div className='flex-grow-1 text-center text-info'>
-									Knit Type management
+									Knit Type Management
 								</div>
 							</CardTitle>
 							<CardBody isScrollable className='table-responsive'>

@@ -121,7 +121,7 @@ const Index: NextPage = () => {
 					/>
 				</SubHeaderLeft>
 				<SubHeaderRight>
-					<Dropdown>
+					{/* <Dropdown>
 						<DropdownToggle hasIcon={false}>
 							<Button
 								icon='FilterAlt'
@@ -161,7 +161,7 @@ const Index: NextPage = () => {
 								</div>
 							</div>
 						</DropdownMenu>
-					</Dropdown>
+					</Dropdown> */}
 
 					<SubheaderSeparator />
 					<Button

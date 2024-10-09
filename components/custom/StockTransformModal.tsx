@@ -6,7 +6,7 @@ import FormGroup from '../bootstrap/forms/FormGroup';
 import Input from '../bootstrap/forms/Input';
 import Button from '../bootstrap/Button';
 import Swal from 'sweetalert2';
-import { useGetLotsQuery } from '../../redux/slices/stockInAPISlice';
+import { useGetLotsQuery, useUpdateLotMutation } from '../../redux/slices/stockInAPISlice';
 import { useGetStockOutsQuery, useAddStockOutMutation } from '../../redux/slices/stockOutApiSlice';
 
 // Define the props for the CategoryEditModal component
@@ -20,7 +20,7 @@ interface CategoryEditModalProps {
 const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }) => {
 	// Initialize formik for form management
 	const { data: data } = useGetLotsQuery(undefined);
-
+	const [updateLot] = useUpdateLotMutation();
 	const stockToEdit = data?.find((data: any) => data.id === id);
 	const currentTime = new Date().toLocaleTimeString('en-GB', {
 		hour: '2-digit',
@@ -55,6 +55,9 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 			if (!values.quentity) {
 				errors.quentity = 'Required';
 			}
+			if (stockToEdit.current_quantity < Number(values.quentity))
+				errors.quentity = `please enter the quantity less than ${stockToEdit.current_quantity}`;
+			
 			if (!values.location) {
 				errors.location = 'Required';
 			}
@@ -71,10 +74,14 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 				});
 
 				const response: any = await addstock(values).unwrap();
-				// Refetch categories to update the list
+				const updatedItem1 = {
+					...stockToEdit,
+					current_quantity: stockToEdit.current_quantity-Number(values.quentity), // Update current_quantity with the new quentity
+				};
+				await updateLot(updatedItem1).unwrap();
 				refetch();
 
-				Swal.fire('Added!', 'data has been update successfully.', 'success');
+				Swal.fire('Updated!', 'Data has been update successfully.', 'success');
 				formik.resetForm();
 				setIsOpen(false)
 			} catch (error) {

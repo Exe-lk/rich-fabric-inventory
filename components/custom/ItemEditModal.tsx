@@ -138,7 +138,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 				});
 				await updateLot(values).unwrap();
 
-				Swal.fire('Added!', 'stock has been update successfully.', 'success');
+				Swal.fire('Updated!', 'stock has been update successfully.', 'success');
 
 				formik.resetForm();
 				setIsOpen(false);

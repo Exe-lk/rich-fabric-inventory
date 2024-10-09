@@ -96,7 +96,7 @@ const SellerAddModal: FC<SellerAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 
 				setIsOpen(false);
 
-				Swal.fire('Added!', 'supplier has been added successfully.', 'success');
+				Swal.fire('Added!', 'Supplier has been added successfully.', 'success');
 				formik.resetForm();
 				
 			} catch (error) {
@@ -172,7 +172,7 @@ const SellerAddModal: FC<SellerAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					<FormGroup id='company_email' label='company email' className='col-md-6'>
+					<FormGroup id='company_email' label='Company Email' className='col-md-6'>
 						<Input
 							onChange={formik.handleChange}
 							value={formik.values.company_email}

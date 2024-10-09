@@ -204,7 +204,7 @@ const Index: NextPage = () => {
 								<table className='table table-bordered border-primary table-modern table-hover text-center'>
 									<thead>
 										<tr>
-											<th>Fabric name</th>
+											<th>Fabric Name</th>
 											<th></th>
 										</tr>
 									</thead>

@@ -61,7 +61,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 				});
 				await updatefabric(values).unwrap();
 setIsOpen(false)
-				Swal.fire('Update!', 'Color has been update successfully.', 'success');
+				Swal.fire('Updated!', 'Color has been update successfully.', 'success');
 				formik.resetForm();
 			} catch (error) {
 				console.error('Error during handleUpload: ', error);

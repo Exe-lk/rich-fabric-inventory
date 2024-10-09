@@ -72,9 +72,7 @@ const Index: NextPage = () => {
 	const handleExport = async (format: string) => {
 		const table = document.querySelector('table');
 		if (!table) return;
-
 		const clonedTable = table.cloneNode(true) as HTMLElement;
-
 		// Remove Edit/Delete buttons column from cloned table
 		const rows = clonedTable.querySelectorAll('tr');
 		rows.forEach((row) => {
@@ -83,12 +81,8 @@ const Index: NextPage = () => {
 				lastCell.remove();
 			}
 		});
-	
-		
 		const clonedTableStyles = getComputedStyle(table);
 		clonedTable.setAttribute('style', clonedTableStyles.cssText);
-	
-		
 		try {
 			switch (format) {
 				case 'svg':
@@ -100,7 +94,7 @@ const Index: NextPage = () => {
 				case 'csv':
 					downloadTableAsCSV(clonedTable);
 					break;
-				case 'pdf': 
+				case 'pdf':
 					await downloadTableAsPDF(clonedTable);
 					break;
 				default:
@@ -110,103 +104,109 @@ const Index: NextPage = () => {
 			console.error('Error exporting table: ', error);
 		}
 	};
-
 	// function to export the table data in CSV format
 	const downloadTableAsCSV = (table: any) => {
-				let csvContent = '';
-				const rows = table.querySelectorAll('tr');
-				rows.forEach((row: any) => {
-					const cols = row.querySelectorAll('td, th');
-					const rowData = Array.from(cols)
-						.map((col: any) => `"${col.innerText}"`)
-						.join(',');
-					csvContent += rowData + '\n';
-				});
+		let csvContent = '';
+		const rows = table.querySelectorAll('tr');
+		rows.forEach((row: any) => {
+			const cols = row.querySelectorAll('td, th');
+			const rowData = Array.from(cols)
+				.map((col: any) => `"${col.innerText}"`)
+				.join(',');
+			csvContent += rowData + '\n';
+		});
 
-				const blob = new Blob([csvContent], { type: 'text/csv' });
-				const link = document.createElement('a');
-				link.href = URL.createObjectURL(blob);
-				link.download = 'table_data.csv';
-				link.click();
+		const blob = new Blob([csvContent], { type: 'text/csv' });
+		const link = document.createElement('a');
+		link.href = URL.createObjectURL(blob);
+		link.download = 'category.csv';
+		link.click();
 	};
 	//  function for PDF export
 	const downloadTableAsPDF = (table: HTMLElement) => {
 		try {
-		  const pdf = new jsPDF('p', 'pt', 'a4');
-		  const rows: any[] = [];
-		  const headers: any[] = [];
-		  
-		  const thead = table.querySelector('thead');
-		  if (thead) {
-			const headerCells = thead.querySelectorAll('th');
-			headers.push(Array.from(headerCells).map((cell: any) => cell.innerText));
-		  }
-		  const tbody = table.querySelector('tbody');
-		  if (tbody) {
-			const bodyRows = tbody.querySelectorAll('tr');
-			bodyRows.forEach((row: any) => {
-			  const cols = row.querySelectorAll('td');
-			  const rowData = Array.from(cols).map((col: any) => col.innerText);
-			  rows.push(rowData);
+			const pdf = new jsPDF('p', 'pt', 'a4');
+			const rows: any[] = [];
+			const headers: any[] = [];
+
+			const thead = table.querySelector('thead');
+			if (thead) {
+				const headerCells = thead.querySelectorAll('th');
+				headers.push(Array.from(headerCells).map((cell: any) => cell.innerText));
+			}
+			const tbody = table.querySelector('tbody');
+			if (tbody) {
+				const bodyRows = tbody.querySelectorAll('tr');
+				bodyRows.forEach((row: any) => {
+					const cols = row.querySelectorAll('td');
+					const rowData = Array.from(cols).map((col: any) => {
+						const ul = col.querySelector('ul');
+						if (ul) {
+							// Handle <ul> and extract <li> or <p> elements as line-separated text
+							const listItems = Array.from(ul.querySelectorAll('p')).map(
+								(li: any) => li.innerText,
+							);
+							return listItems.join('\n'); // Separate each item by a new line
+						} else {
+							return col.innerText; // Return regular text for other <td> elements
+						}
+					});
+					rows.push(rowData);
+				});
+			}
+
+			autoTable(pdf, {
+				head: headers,
+				body: rows,
+				margin: { top: 50 },
+				styles: {
+					overflow: 'linebreak',
+					cellWidth: 'wrap',
+				},
+				theme: 'grid',
 			});
-		  }
-		  autoTable(pdf, {
-			head: headers,
-			body: rows,
-			margin: { top: 50 },
-			styles: {
-			  overflow: 'linebreak',
-			  cellWidth: 'wrap',
-			},
-			theme: 'grid',
-		  });
-	  
-		  pdf.save('table_data.pdf');
+			pdf.save('category.pdf');
 		} catch (error) {
-		  console.error('Error generating PDF: ', error);
-		  alert('Error generating PDF. Please try again.');
+			console.error('Error generating PDF: ', error);
+			alert('Error generating PDF. Please try again.');
 		}
-	  };
-	
-	
+	};
 	// Function to export the table data in SVG format using library html-to-image
 	const downloadTableAsSVG = async (table: HTMLElement) => {
 		try {
 			const dataUrl = await toSvg(table, {
-				backgroundColor: 'white', 
-				cacheBust: true, 
-				style: { 
-					width: table.offsetWidth + 'px'
-				}
+				backgroundColor: 'white',
+				cacheBust: true,
+				style: {
+					width: table.offsetWidth + 'px',
+				},
 			});
 			const link = document.createElement('a');
 			link.href = dataUrl;
-			link.download = 'table_data.svg'; 
+			link.download = 'category.svg';
 			link.click();
 		} catch (error) {
-			console.error('Error generating SVG: ', error); 
+			console.error('Error generating SVG: ', error);
 		}
 	};
-	
 	// Function to export the table data in PNG format using library html-to-image
 	const downloadTableAsPNG = async (table: HTMLElement) => {
 		try {
 			const dataUrl = await toPng(table, {
-				backgroundColor: 'white', 
-				cacheBust: true, 
-				style: { 
-					width: table.offsetWidth + 'px'
-				}
+				backgroundColor: 'white',
+				cacheBust: true,
+				style: {
+					width: table.offsetWidth + 'px',
+				},
 			});
 			const link = document.createElement('a');
 			link.href = dataUrl;
-			link.download = 'table_data.png'; 
+			link.download = 'category.png';
 			link.click();
 		} catch (error) {
-			console.error('Error generating PNG: ', error); 
+			console.error('Error generating PNG: ', error);
 		}
 	};
-
 	// JSX for rendering the page
 	return (
 		<PageWrapper>
@@ -254,7 +254,7 @@ const Index: NextPage = () => {
 								</DropdownToggle>
 								<DropdownMenu isAlignmentEnd>
 									<DropdownItem onClick={() => handleExport('svg')}>Download SVG</DropdownItem>
-									<DropdownItem onClick={() => handleExport('png')}>Download PNG</DropdownItem>
+							
 									<DropdownItem onClick={() => handleExport('csv')}>Download CSV</DropdownItem>
 									<DropdownItem onClick={() => handleExport('pdf')}>Download PDF</DropdownItem>
 								</DropdownMenu>

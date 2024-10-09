@@ -57,7 +57,8 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 				});
 				await updateknit(values).unwrap();
 
-				Swal.fire('Added!', 'Knit Type has been update successfully.', 'success');
+				Swal.fire('Updated!', 'Knit Type has been update successfully.', 'success');
+				setIsOpen(false)
 				formik.resetForm();
 			} catch (error) {
 				console.error('Error during handleUpload: ', error);

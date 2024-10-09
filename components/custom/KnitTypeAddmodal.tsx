@@ -62,9 +62,10 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					// Success feedback
 					await Swal.fire({
 						icon: 'success',
-						title: 'Knit Type added Successfully',
+						title: 'Knit Type Added Successfully',
 					});
 					setIsOpen(false);
+					formik.resetForm()
 			} catch (error) {
 				console.error('Error during handleUpload: ', error);
 				alert('An error occurred during file upload. Please try again later.');
