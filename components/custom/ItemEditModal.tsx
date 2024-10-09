@@ -45,15 +45,19 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 
 	const { data: lots } = useGetLotsQuery(undefined);
 	const [updateLot, { isLoading }] = useUpdateLotMutation();
-
 	const lotToEdit = lots?.find((lot: any) => lot.id === id);
-	
 	const { refetch } = useGetLotsQuery(undefined);
 	const { data: fabric } = useGetFabricsQuery(undefined);
 	const { data: gsm } = useGetGSMsQuery(undefined);
 	const { data: knit } = useGetKnitTypesQuery(undefined);
 	const { data: categories } = useGetCategoriesQuery(undefined);
 	const { data: color } = useGetColorsQuery(undefined);
+
+	useEffect(() => {
+		if (lotToEdit) {
+			setSelectedImage(lotToEdit?.type);
+		}
+	}, [lots]);
 
 	const formik = useFormik({
 		initialValues: {
@@ -68,7 +72,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 			width: lotToEdit?.width || '',
 			knit_type: lotToEdit?.knit_type || '',
 			GRN_number: lotToEdit?.GRN_number || '',
-			quentity: lotToEdit?.quentity|| '',
+			quentity: lotToEdit?.quentity || '',
 			status: lotToEdit?.status || true,
 			category: lotToEdit?.category || '',
 			subcategory: lotToEdit?.subcategory || '',
@@ -82,8 +86,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 			suppl_gatepass_no: lotToEdit?.suppl_gatepass_no || '',
 			suppl_invoice_no: lotToEdit?.suppl_invoice_no || '',
 			operater: lotToEdit?.operater || '',
-			rolls:lotToEdit?.rolls|| '',
-			
+			rolls: lotToEdit?.rolls || '',
 		},
 		enableReinitialize: true,
 		validate: (values) => {
@@ -139,7 +142,6 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 
 				formik.resetForm();
 				setIsOpen(false);
-				
 			} catch (error) {
 				console.error('Error during handleUpload: ', error);
 				Swal.close();
@@ -150,7 +152,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 
 	const handleResetForm = () => {
 		formik.resetForm();
-	
+
 		setIsAddingNewColor(false);
 		setIsAddingNewFabric(false);
 		setIsAddingNewGSM(false);
@@ -675,7 +677,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 						</>
 					)}
 
-					{selectedOption === 'grayFabric' && (
+					{selectedOption === 'Gray Fabric' && (
 						<>
 							<FormGroup id='supplier' label=' Machine Number ' className='col-md-6'>
 								<Input

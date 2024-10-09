@@ -15,10 +15,14 @@ import {
 	useGetStockOutsQuery,
 	useAddStockOutMutation,
 } from '../../../redux/slices/stockOutApiSlice'; // Import the query
+import {
+	useGetLotMovementsQuery,
+	useDeleteLotMovementMutation,
+	useGetDeletedLotMovementsQuery,
+} from '../../../redux/slices/LotMovementApiSlice';
 
 function index() {
 	const [toggleRightPanel, setToggleRightPanel] = useState(false);
-	const [orderedItems, setOrderedItems] = useState<any>([]);
 	const [id, setId] = useState<number>(1530);
 	const customerNameInputRef = useRef<HTMLInputElement>(null);
 	const customerAmountInputRef = useRef<HTMLInputElement>(null);
@@ -33,58 +37,10 @@ function index() {
 	const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setSelectedOption(event.target.value);
 	};
-	console.log(orderedItems);
-	const addbill = async () => {
-		try {
-			const result = await Swal.fire({
-				title: 'Are you sure?',
-				text: 'You will not be able to recover this!',
-				// text: id,
-				icon: 'warning',
-				showCancelButton: true,
-				confirmButtonColor: '#3085d6',
-				cancelButtonColor: '#d33',
-				confirmButtonText: 'Yes, update it!',
-			});
+	const { data: orderedItems, error } = useGetLotMovementsQuery(undefined);
+	const [deletelot] = useDeleteLotMovementMutation();
 
-			if (result.isConfirmed) {
-				const currentDate = new Date();
-				const formattedDate = currentDate.toLocaleDateString();
-
-				const year = currentDate.getFullYear();
-				const month = String(currentDate.getMonth() + 1).padStart(2, '0');
-				const day = String(currentDate.getDate()).padStart(2, '0');
-				const formattedDate1 = `${year}-${month}-${day}`;
-
-				for (const orderedItem of orderedItems) {
-					const values = {
-						stock_id: orderedItem.id,
-						fabric_type: orderedItem.fabric_type,
-						type: orderedItem.type,
-						code: orderedItem.code,
-						category: orderedItem.category,
-						subcategory: orderedItem.subcategory,
-						time: currentTime,
-						date: formattedDate1,
-						quentity: orderedItem.order_quantity,
-						stock_received: selectedOption,
-						price: formik.values.price,
-						customer_name: formik.values.name,
-						customer_mobile: formik.values.mobile,
-						vehicle_number: formik.values.vehiclenumber,
-						gate_pass_No: formik.values.gatepassno,
-					};
-					const response: any = await addtransaction(values).unwrap();
-				}
-
-				refetch();
-				Swal.fire('Added!', 'transaction has been added successfully.', 'success');
-			}
-		} catch (error) {
-			console.error('Error during handleUpload: ', error);
-			alert('An error occurred during file upload. Please try again later.');
-		}
-	};
+	
 	const handleKeyPress = (event: KeyboardEvent) => {
 		if (event.ctrlKey && event.key.toLowerCase() === 'b') {
 			setToggleRightPanel((prevState) => !prevState);
@@ -190,7 +146,7 @@ function index() {
 								subcategory: orderedItem.subcategory,
 								time: currentTime,
 								date: formattedDate1,
-								quentity: orderedItem.order_quantity,
+								quentity: orderedItem.quentity,
 								stock_received: selectedOption,
 								price: values.price,
 								customer_name: values.name,
@@ -200,8 +156,11 @@ function index() {
 							};
 							const response: any = await addtransaction(values1).unwrap();
 						}
-						setOrderedItems([]);
+						for (const orderedItem of orderedItems) {
+							await deletelot(orderedItem.id).unwrap();
+						}
 						refetch();
+						formik.resetForm()
 						Swal.fire('Added!', 'transaction has been added successfully.', 'success');
 					}
 				} catch (error) {
@@ -212,23 +171,7 @@ function index() {
 		},
 	});
 
-	// Define TypeScript interfaces for Category and Item
-	interface Category {
-		cid: string;
-		categoryname: string;
-	}
-	const cdata = [
-		{ status: true, categoryname: 'Gray Fabric', cid: '0bc5HUELspDzvrUdt5u6' },
 
-		{ status: true, categoryname: 'Finished Fabric', cid: 'LKcV57ThRnHtE9bxBHMb' },
-
-		{ status: true, categoryname: 'Gray Collar Cuff', cid: '0bc5HUELspDzvrUdt5u6' },
-
-		{ status: true, categoryname: 'Finished Collar Cuff', cid: '0bc5HUELspDzvrUdt5u6' },
-
-		{ status: true, categoryname: 'Yarn', cid: 'LKcV57ThRnHtE9bxBHMb' },
-	];
-	const [category, setCategory] = useState<Category[]>(cdata);
 	return (
 		<PageWrapper className=''>
 			{/* <div>
@@ -244,16 +187,15 @@ function index() {
 			<div className='row'>
 				<div className='col-4  mb-sm-0'>
 					<Additem
-						orderedItems={orderedItems}
-						setOrderedItems={setOrderedItems}
+					
 						isActive={activeComponent === 'additem'}
 						setActiveComponent={setActiveComponent}
 					/>{' '}
 				</div>
 				<div className='col-4 '>
 					<Edit
-						orderedItems={orderedItems}
-						setOrderedItems={setOrderedItems}
+					
+						
 						isActive={activeComponent === 'edit'}
 						setActiveComponent={setActiveComponent}
 					/>{' '}
@@ -267,7 +209,7 @@ function index() {
 										type='radio'
 										id='customer'
 										label='Customer'
-										name='type'
+										name='type1'
 										value='Customer'
 										onChange={handleOptionChange}
 										checked={selectedOption}
@@ -276,7 +218,7 @@ function index() {
 										type='radio'
 										id='Dye Plant'
 										label='Dye Plant'
-										name='type'
+										name='type1'
 										value='Dye Plant'
 										onChange={handleOptionChange}
 										checked={selectedOption}

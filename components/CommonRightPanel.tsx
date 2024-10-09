@@ -140,7 +140,7 @@ const CommonRightPanel: FC<ICommonRightPanel> = ({ setOpen, isOpen, orderedItems
 							</div>
 						<hr />
 
-						{orderedItems.map(({ name, quantity, price }: any, index: any) => (
+						{orderedItems?.map(({ name, quantity, price }: any, index: any) => (
 							<div className='row'>
 								<div className='col-sm-3 mb-3 mb-sm-0'>{name}</div>
 								<div className='col-sm-3'>{quantity}</div>
@@ -157,7 +157,7 @@ const CommonRightPanel: FC<ICommonRightPanel> = ({ setOpen, isOpen, orderedItems
 							<div>
 								<strong>
 									LKR:{' '}
-									{orderedItems.reduce(
+									{orderedItems?.reduce(
 										(total: any, item: any) =>
 											total + item.quantity * item.price,
 										0,

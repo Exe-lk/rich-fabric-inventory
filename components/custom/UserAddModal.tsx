@@ -95,6 +95,7 @@ const UserAddModal: FC<UserAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 						icon: 'success',
 						title: 'User Created Successfully',
 					});
+					formik.resetForm()
 					setIsOpen(false); // Close the modal after successful addition
 				} catch (error) {
 					console.error('Error during handleSubmit: ', error);

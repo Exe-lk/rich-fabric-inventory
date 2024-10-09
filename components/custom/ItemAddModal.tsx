@@ -15,6 +15,8 @@ import { useGetGSMsQuery } from '../../redux/slices/gsmApiSlice';
 import { useGetKnitTypesQuery } from '../../redux/slices/knitTypeApiSlice';
 import { useGetCategoriesQuery } from '../../redux/slices/categoryApiSlice'; // Import the RTK Query hook
 import { useGetColorsQuery } from '../../redux/slices/colorApiSlice';
+import QRCode from 'react-qr-code';
+import ReactDOMServer from 'react-dom/server';
 
 interface ItemAddModalProps {
 	id: string;
@@ -48,20 +50,32 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 	const { data: lot } = useGetLotsQuery(undefined);
 	const { data: categories } = useGetCategoriesQuery(undefined);
 	const { data: color } = useGetColorsQuery(undefined);
+	const [maxCode, setMaxCode] = useState(0);
+	const [maxGRN, setMaxGRN] = useState(0);
 
+	useEffect(() => {
+		if (lot) {
+			// Find max values for code and GRN_number in the lot data
+			const maxCodeValue = Math.max(...lot.map((item: any) => item.code || 0), 0);
+			const maxGRNValue = Math.max(...lot.map((item: any) => item.GRN_number || 0), 0);
+			setMaxCode(maxCodeValue + 1); // Auto increment by 1
+			setMaxGRN(maxGRNValue + 1); // Auto increment by 1
+		}
+	}, [lot]);
 	const formik = useFormik({
 		initialValues: {
 			type: selectedOption,
 			date: '',
-			code: lot && lot.length > 0 ? lot[0].code + 1 : 0,
+			code: maxCode,
 			description: '',
 			color: '',
 			fabric_type: '',
 			gsm: '',
 			width: '',
 			knit_type: '',
-			GRN_number: lot && lot.length > 0 ? lot[0].GRN_number + 1 : 0,
-			quentity: '',
+			GRN_number:maxGRN,
+			quentity: 0,
+			current_quantity:0,
 			status: true,
 			category: '',
 			subcategory: '',
@@ -127,6 +141,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 					showCancelButton: false,
 					showConfirmButton: false,
 				});
+				 values.current_quantity=values.quentity
 				const response: any = await addLot(values).unwrap();
 				console.log(response);
 
@@ -135,8 +150,58 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 
 				setIsOpen(false);
 
-				Swal.fire('Added!', 'Lot has been added successfully.', 'success');
-				formik.resetForm();
+				  // Create a QR code using the react-qr-code component as an HTML string
+				  const qrCodeHtml = ReactDOMServer.renderToString(
+					<QRCode size={128} value={values.code.toString()}  />
+				  );
+			
+				  Swal.fire({
+					title: 'QR Code Generated!',
+					html: `
+					  <div>
+						${qrCodeHtml}
+						<br/>
+						<label>Enter Quantity:</label>
+						<input type="number" id="quantityInput" class="swal2-input" placeholder="Quantity">
+					  </div>
+					`,
+					showCancelButton: true,
+					confirmButtonText: 'Print',
+					preConfirm: () => {
+					  const quantity = (document.getElementById('quantityInput') as HTMLInputElement).value;
+					  if (!quantity) {
+						Swal.showValidationMessage('Please enter the quantity');
+					  } else {
+						return quantity;
+					  }
+					},
+				  }).then((result) => {
+					if (result.isConfirmed) {
+					  const quantity = result.value;
+			
+					  // Add printing logic here
+					  const printWindow = window.open('', '_blank');
+					  printWindow?.document.write(`
+						<html>
+						  <head>
+							<title>Print QR Code</title>
+						  </head>
+						  <body>
+							<div style="text-align: center;">
+							  <h3>QR Code for ${values.code}</h3>
+							  <p>Quantity: ${quantity}</p>
+							  ${qrCodeHtml}
+							</div>
+						  </body>
+						</html>
+					  `);
+					  printWindow?.document.close();
+					  printWindow?.focus();
+					  printWindow?.print();
+					}
+				  });
+			
+				  formik.resetForm();
 			} catch (error) {
 				console.error('Error during handleUpload: ', error);
 				Swal.close();
@@ -697,7 +762,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 						</>
 					)}
 
-					{selectedOption === 'grayFabric' && (
+					{selectedOption === 'Gray Fabric' && (
 						<>
 							<FormGroup
 								id='machine_no'
@@ -713,7 +778,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 									validFeedback='Looks good!'
 								/>
 							</FormGroup>
-							<FormGroup id='operater' label='Operator Name' className='col-md-6'>
+							{/* <FormGroup id='operater' label='Operator Name' className='col-md-6'>
 								<Input
 									onChange={formik.handleChange}
 									value={formik.values.operater}
@@ -723,7 +788,7 @@ const ItemAddModal: FC<ItemAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 									invalidFeedback={formik.errors.operater}
 									validFeedback='Looks good!'
 								/>
-							</FormGroup>
+							</FormGroup> */}
 						</>
 					)}
 				</div>

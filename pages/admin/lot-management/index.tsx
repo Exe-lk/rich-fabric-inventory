@@ -164,6 +164,7 @@ const Index: NextPage = () => {
 											<th>Description</th>
 											<th>Category</th>
 											<th>Quantity</th>
+											<th>Current Quantity</th>
 											<th>Gate Pass No</th>
 											<th>Invoice No</th>
 											<th></th>
@@ -201,7 +202,8 @@ const Index: NextPage = () => {
 														<td>{lot.description}</td>
 														<td>{lot.category||lot.type}</td>
 														
-														<td>{lot.quentity}</td>
+														<td>{lot.quentity} Kg</td>
+														<td>{lot.current_quantity} Kg</td>
 														<td>{lot.suppl_gatepass_no}</td>
 														<td>{lot.suppl_invoice_no}</td>
 														
@@ -216,7 +218,7 @@ const Index: NextPage = () => {
 																Edit
 															</Button>
 															<Button
-																className='ms-2'
+																className='m-2'
 																icon='Delete'
 																color='danger'
 																onClick={() =>
@@ -227,7 +229,7 @@ const Index: NextPage = () => {
 
 															{lot.type === 'Yarn' && (
 																<Button
-																	className='ms-2'
+																	className=''
 																	icon='Transform'
 																	color='success'
 																	onClick={() => (
