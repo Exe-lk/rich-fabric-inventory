@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Card, { CardActions, CardBody, CardHeader, CardLabel, CardTitle } from './bootstrap/Card';
+import Card, { CardBody, CardHeader, CardLabel, CardTitle } from './bootstrap/Card';
 import classNames from 'classnames';
 import useDarkMode from '../hooks/useDarkMode';
-import { getFirstLetter, priceFormat } from '../helpers/helpers';
+import { getFirstLetter } from '../helpers/helpers';
 import Keyboard from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
 import Input from './bootstrap/forms/Input';
@@ -17,50 +17,27 @@ import {
 import { useFormik } from 'formik';
 import Button from './bootstrap/Button';
 
-interface Item {
-	cid: string;
-	category: string;
-	image: string;
-	name: string;
-	price: number;
-	quentity: number;
-	reorderlevel: number;
-}
-
-// Define props for the Keyboard component
 interface KeyboardProps {
-	// orderedItems: Item[];
-	// setOrderedItems: React.Dispatch<React.SetStateAction<Item[]>>;
 	isActive: boolean;
 	setActiveComponent: React.Dispatch<React.SetStateAction<'additem' | 'edit'>>;
 }
 
-const Index: React.FC<KeyboardProps> = ({
-	// orderedItems,
-	// setOrderedItems,
-	isActive,
-	setActiveComponent,
-}) => {
-	// Custom hook to manage dark mode
+const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }) => {
 	const { darkModeStatus } = useDarkMode();
-
-	// State variables
-	const [category1, setCategory1] = useState<string>('');
 	const [input, setInput] = useState<string>('');
 	const keyboard = useRef<any>(null);
 	const [showPopup, setShowPopup] = useState<boolean>(false);
-	// const [popupInput, setPopupInput] = useState<any>('');
-	// const [popupInput1, setPopupInput1] = useState<any>();
 	const [selectedItem, setSelectedItem] = useState<any>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const popupInputRef = useRef<HTMLInputElement>(null);
 	const [selectedType, setSelectedType] = useState<any>('Return');
 	const [layout, setLayout] = useState<string>('default');
 	const [focusedIndex, setFocusedIndex] = useState<number>(0);
-	const { data: items, error, isLoading } = useGetLotsQuery(undefined);
+	const { data: items } = useGetLotsQuery(undefined);
 	const [updateLot] = useUpdateLotMutation();
 	const [addlotmovement] = useAddLotMovementMutation();
 	const { refetch } = useGetLotMovementsQuery(undefined);
+
 	// Handle input change
 	const onChangeInput = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const input = event.target.value;
@@ -75,7 +52,6 @@ const Index: React.FC<KeyboardProps> = ({
 	const onChange = (input: string) => {
 		const numericInput = input.replace(/\D/g, '');
 		if (showPopup) {
-			//   setPopupInput(numericInput);
 		} else {
 			setInput(numericInput);
 		}
@@ -104,30 +80,25 @@ const Index: React.FC<KeyboardProps> = ({
 			if (selectedItem.current_quantity < Number(values.quentity))
 				errors.quentity = `please enter the quantity less than ${selectedItem.current_quantity}`;
 			if (selectedType != 'Return' && !values.Job_ID) errors.Job_ID = 'Required';
-
 			return errors;
 		},
 		onSubmit: async (values) => {
 			try {
 				if (selectedItem) {
-					const { id, ...rest } = selectedItem; // Destructure to remove id
+					const { id, ...rest } = selectedItem;
 					const updatedItem = {
-						...rest, // Spread the remaining properties without id
-						stock_id: id, // Add stock_id with the value of id
+						...rest,
+						stock_id: id,
 						quentity: values.quentity,
 						order_type: selectedType,
 						Job_ID: values.Job_ID,
 					};
 					await addlotmovement(updatedItem).unwrap();
-
-					// Refetch categories to update the list
 					refetch();
-
 					const quentity = selectedItem.current_quantity - Number(values.quentity);
-
 					const updatedItem1 = {
 						...selectedItem,
-						current_quantity: quentity, // Update current_quantity with the new quentity
+						current_quantity: quentity,
 					};
 					await updateLot(updatedItem1).unwrap();
 					refetch();
@@ -178,7 +149,6 @@ const Index: React.FC<KeyboardProps> = ({
 	// Add event listener for keyboard events
 	useEffect(() => {
 		window.addEventListener('keydown', handleKeyPress);
-
 		return () => {
 			window.removeEventListener('keydown', handleKeyPress);
 		};
@@ -199,11 +169,6 @@ const Index: React.FC<KeyboardProps> = ({
 						<CardLabel>
 							<CardTitle>Lot</CardTitle>
 						</CardLabel>
-						{/* <CardActions>
-						 <Button color='info' isLink icon='Summarize' tag='a'>
-								View
-							</Button> 
-						</CardActions> */}
 					</CardHeader>
 					<CardBody isScrollable>
 						<div className='row g-3'>
@@ -220,7 +185,7 @@ const Index: React.FC<KeyboardProps> = ({
 									.filter((val: any) => {
 										if (val.type != 'Yarn') {
 											return val;
-										} 
+										}
 									})
 									.map((item: any, index: any) => (
 										<div
@@ -352,10 +317,10 @@ const Index: React.FC<KeyboardProps> = ({
 									label={'Return'}
 									name='type'
 									value={'Return'}
-									onClick={(e: any) => {
+									onChange={(e: any) => {
 										setSelectedType(e.target.value);
 									}}
-									checked={selectedType}
+								checked={selectedType}
 								/>
 								<Checks
 									type='radio'
@@ -363,7 +328,7 @@ const Index: React.FC<KeyboardProps> = ({
 									label={'Restore'}
 									name='type'
 									value={'Restore'}
-									onClick={(e: any) => {
+									onChange={(e: any) => {
 										setSelectedType(e.target.value);
 									}}
 									checked={selectedType}
@@ -374,22 +339,14 @@ const Index: React.FC<KeyboardProps> = ({
 									label={'Stock Out'}
 									name='type'
 									value={'Stock Out'}
-									onClick={(e: any) => {
+									onChange={(e: any) => {
 										setSelectedType(e.target.value);
 									}}
 									checked={selectedType}
 								/>
 							</ChecksGroup>
 						</FormGroup>
-						{/* <h6 className='mt-4'>Enter a Quantity</h6> */}
-						{/* <Input
-							type='number'
-							value={popupInput}
-							onChange={(e: any) => setPopupInput(e.target.value)}
-							min={1}
-							className='form-control mb-4 p-2'
-							ref={popupInputRef}
-						/> */}
+
 						<FormGroup id='quentity' label='Quantity' className='col-md-12'>
 							<Input
 								type='number'
@@ -404,18 +361,8 @@ const Index: React.FC<KeyboardProps> = ({
 								validFeedback='Looks good!'
 							/>
 						</FormGroup>
-
 						{selectedType !== 'Return' && (
 							<>
-								{/* <h6 className='mb-4'>Job ID</h6>
-								<Input
-									type='text'
-									value={popupInput1}
-									onChange={(e: any) => setPopupInput1(e.target.value)}
-									className='form-control mb-4 p-2'
-									ref={popupInputRef}
-								/> */}
-
 								<FormGroup id='Job_ID' label='Job Id' className='col-md-12'>
 									<Input
 										onChange={formik.handleChange}

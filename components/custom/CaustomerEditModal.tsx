@@ -1,18 +1,11 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { useFormik } from 'formik';
 import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../bootstrap/Modal';
-import showNotification from '../extras/showNotification';
-import Icon from '../icon/Icon';
 import FormGroup from '../bootstrap/forms/FormGroup';
 import Input from '../bootstrap/forms/Input';
 import Button from '../bootstrap/Button';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
-import { firestore, storage } from '../../firebaseConfig';
 import Swal from 'sweetalert2';
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
-import Select from '../bootstrap/forms/Select';
-import Option from '../bootstrap/Option';
 import {
 	useGetCustomersQuery,
 	useUpdateCustomerMutation,
@@ -25,25 +18,15 @@ interface UserEditModalProps {
 }
 interface User {
 	cid: string;
-
 	name: string;
-
 	mobile: string;
 	email?: string;
 	nic?: string;
 	status?: boolean;
 }
-// UserEditModal component definition
+
 const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen, refetch }) => {
-	const [user, setUser] = useState<User>({
-		cid: '',
-		name: '',
-		mobile: '',
-		email: '',
-		nic: '',
-		status: true,
-	});
-	const { data: userData, isSuccess } = useGetCustomersQuery(id);
+	const { data: userData } = useGetCustomersQuery(id);
 	const UserToEdit = userData?.find((userData: any) => userData.id === id);
 	const [updateUser] = useUpdateCustomerMutation();
 
@@ -55,7 +38,7 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen, refetch 
 			email: UserToEdit?.email,
 			nic: UserToEdit?.nic,
 		},
-		enableReinitialize: true, // Reinitialize formik when the user data is updated
+		enableReinitialize: true,
 		validate: (values) => {
 			const errors: Partial<User> = {};
 			if (!values.name) {
@@ -63,12 +46,22 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen, refetch 
 			}
 			if (!values.mobile) {
 				errors.mobile = 'Required';
-			}
-			if (!values.email) {
-				errors.email = 'Required';
+			} else if (values.mobile.length !== 10) {
+				errors.mobile = 'Mobile number must be exactly 10 digits';
+			} else if (!/^0\d{9}$/.test(values.mobile)) {
+				errors.mobile = 'Mobile number must start with 0 and be exactly 10 digits';
 			}
 			if (!values.nic) {
 				errors.nic = 'Required';
+			} else if (!/^\d{9}[Vv]$/.test(values.nic) && !/^\d{12}$/.test(values.nic)) {
+				errors.nic = 'NIC must be 9 digits followed by "V" or 12 digits';
+			}
+			if (!values.email) {
+				errors.email = 'Required';
+			} else if (!values.email.includes('@')) {
+				errors.email = 'Invalid email format.';
+			} else if (values.email.includes(' ')) {
+				errors.email = 'Email should not contain spaces.';
 			}
 			return errors;
 		},
@@ -76,9 +69,8 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen, refetch 
 			try {
 				await updateUser(values).unwrap();
 				setIsOpen(false);
-
 				Swal.fire('Updated!', 'User has been updated successfully.', 'success');
-				refetch(); // Trigger refetch of users list after update
+				refetch();
 				formik.resetForm();
 			} catch (error) {
 				console.error('Error updating document: ', error);
@@ -101,6 +93,8 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen, refetch 
 							onChange={formik.handleChange}
 							onBlur={formik.handleBlur}
 							isValid={formik.isValid}
+							isTouched={formik.touched.name}
+							invalidFeedback={formik.errors.name}
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
@@ -112,6 +106,8 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen, refetch 
 							onChange={formik.handleChange}
 							onBlur={formik.handleBlur}
 							isValid={formik.isValid}
+							isTouched={formik.touched.mobile}
+							invalidFeedback={formik.errors.mobile}
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
@@ -122,6 +118,8 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen, refetch 
 							onChange={formik.handleChange}
 							onBlur={formik.handleBlur}
 							isValid={formik.isValid}
+							isTouched={formik.touched.email}
+							invalidFeedback={formik.errors.email}
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
@@ -132,6 +130,8 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen, refetch 
 							onChange={formik.handleChange}
 							onBlur={formik.handleBlur}
 							isValid={formik.isValid}
+							isTouched={formik.touched.nic}
+							invalidFeedback={formik.errors.nic}
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
@@ -146,7 +146,6 @@ const UserEditModal: FC<UserEditModalProps> = ({ id, isOpen, setIsOpen, refetch 
 	);
 };
 
-// Prop types definition for CustomerEditModal component
 UserEditModal.propTypes = {
 	id: PropTypes.string.isRequired,
 	isOpen: PropTypes.bool.isRequired,

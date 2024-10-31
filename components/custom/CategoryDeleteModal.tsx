@@ -1,19 +1,10 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import { useFormik } from 'formik';
-import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../bootstrap/Modal';
-import showNotification from '../extras/showNotification';
-import Icon from '../icon/Icon';
-import FormGroup from '../bootstrap/forms/FormGroup';
-import Input from '../bootstrap/forms/Input';
+import Modal, { ModalBody, ModalHeader, ModalTitle } from '../bootstrap/Modal';
 import Button from '../bootstrap/Button';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
-import { firestore } from '../../firebaseConfig';
 import Swal from 'sweetalert2';
-import useDarkMode from '../../hooks/useDarkMode';
 import {
 	useDeleteCategoryMutation,
-	useGetCategoriesQuery,
 	useGetDeleteCategoriesQuery,
 	useUpdateCategoryMutation,
 } from '../../redux/slices/categoryApiSlice';
@@ -49,11 +40,8 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 			});
 
 			if (inputText === 'DELETE') {
-				// Call the delete mutation from Redux
 				await deleteCategory(category.id).unwrap();
 				Swal.fire('Deleted!', 'The category has been deleted.', 'success');
-
-				// Refetch categories to update the list
 				refetch();
 			}
 		} catch (error) {
@@ -66,7 +54,6 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -80,9 +67,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					status: true,
 					subcategory: category.subcategory,
 				};
-
 				await updateCategory(values);
-
 				Swal.fire('Restored!', 'The category has been restored.', 'success');
 			}
 		} catch (error) {
@@ -92,8 +77,8 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 	};
 
 	const handleDeleteAll = async () => {
-		if(categories.length==0){
-			return
+		if (categories.length == 0) {
+			return;
 		}
 		try {
 			const { value: inputText } = await Swal.fire({
@@ -117,8 +102,6 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					await deleteCategory(category.id).unwrap();
 				}
 				Swal.fire('Deleted!', 'All categories have been deleted.', 'success');
-
-				// Refetch categories after deletion
 				refetch();
 			}
 		} catch (error) {
@@ -129,8 +112,8 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 
 	// Handle restore all categories
 	const handleRestoreAll = async () => {
-		if(categories.length==0){
-			return
+		if (categories.length == 0) {
+			return;
 		}
 		try {
 			const result = await Swal.fire({
@@ -142,20 +125,17 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 				cancelButtonColor: '#d33',
 				confirmButtonText: 'Yes, restore all!',
 			});
-
 			if (result.isConfirmed) {
 				for (const category of categories) {
 					const values = {
 						id: category.id,
 						name: category.name,
-						status: true, // Assuming restoring means setting status to true
+						status: true,
 						subcategory: category.subcategory,
 					};
 					await updateCategory(values).unwrap();
 				}
 				Swal.fire('Restored!', 'All categories have been restored.', 'success');
-
-				// Refetch categories after restoring
 				refetch();
 			}
 		} catch (error) {
@@ -170,8 +150,8 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 				<ModalTitle id=''>{'New Category'}</ModalTitle>
 			</ModalHeader>
 			<ModalBody className='px-4'>
-				<table className='table table-bordered border-primary table-modern table-hover text-center'>
-					<thead>
+			<table className='table table-hover table-bordered border-primary'>
+			<thead className={'table-dark border-primary'}>
 						<tr>
 							<th>Category name</th>
 							<th>
@@ -207,7 +187,6 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 							categories.map((category: any) => (
 								<tr key={category.cid}>
 									<td>{category.name}</td>
-
 									<td>
 										<Button
 											icon='Restore'

@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { useFormik } from 'formik';
 import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../bootstrap/Modal';
@@ -9,30 +9,27 @@ import Swal from 'sweetalert2';
 import { useGetLotsQuery, useUpdateLotMutation } from '../../redux/slices/stockInAPISlice';
 import { useGetStockOutsQuery, useAddStockOutMutation } from '../../redux/slices/stockOutApiSlice';
 
-// Define the props for the CategoryEditModal component
 interface CategoryEditModalProps {
 	id: string;
 	isOpen: boolean;
 	setIsOpen(...args: unknown[]): unknown;
 }
 
-// CategoryEditModal component definition
 const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }) => {
-	// Initialize formik for form management
 	const { data: data } = useGetLotsQuery(undefined);
 	const [updateLot] = useUpdateLotMutation();
 	const stockToEdit = data?.find((data: any) => data.id === id);
-	const currentTime = new Date().toLocaleTimeString('en-GB', {
-		hour: '2-digit',
-		minute: '2-digit',
-	});
-	const [addstock, { isLoading }] = useAddStockOutMutation();
+	const [addstock] = useAddStockOutMutation();
 	const { refetch } = useGetStockOutsQuery(undefined);
 	const currentDate = new Date();
 	const year = currentDate.getFullYear();
 	const month = String(currentDate.getMonth() + 1).padStart(2, '0');
 	const day = String(currentDate.getDate()).padStart(2, '0');
 	const formattedDate1 = `${year}-${month}-${day}`;
+	const currentTime = new Date().toLocaleTimeString('en-GB', {
+		hour: '2-digit',
+		minute: '2-digit',
+	});
 
 	const formik = useFormik({
 		initialValues: {
@@ -57,7 +54,6 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 			}
 			if (stockToEdit.current_quantity < Number(values.quentity))
 				errors.quentity = `please enter the quantity less than ${stockToEdit.current_quantity}`;
-			
 			if (!values.location) {
 				errors.location = 'Required';
 			}
@@ -72,18 +68,16 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					showCancelButton: false,
 					showConfirmButton: false,
 				});
-
-				const response: any = await addstock(values).unwrap();
+				await addstock(values).unwrap();
 				const updatedItem1 = {
 					...stockToEdit,
-					current_quantity: stockToEdit.current_quantity-Number(values.quentity), // Update current_quantity with the new quentity
+					current_quantity: stockToEdit.current_quantity - Number(values.quentity),
 				};
 				await updateLot(updatedItem1).unwrap();
 				refetch();
-
 				Swal.fire('Updated!', 'Data has been update successfully.', 'success');
 				formik.resetForm();
-				setIsOpen(false)
+				setIsOpen(false);
 			} catch (error) {
 				console.error('Error during handleUpload: ', error);
 				alert('An error occurred during file upload. Please try again later.');
@@ -133,7 +127,6 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 				</div>
 			</ModalBody>
 			<ModalFooter className='px-4 pb-4'>
-				{/* Save button to submit the form */}
 				<Button color='info' onClick={formik.handleSubmit}>
 					Save
 				</Button>
@@ -141,7 +134,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 		</Modal>
 	);
 };
-// Prop types definition for CustomerEditModal component
+
 CategoryEditModal.propTypes = {
 	id: PropTypes.string.isRequired,
 	isOpen: PropTypes.bool.isRequired,

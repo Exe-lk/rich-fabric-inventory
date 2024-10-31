@@ -47,21 +47,14 @@ export const addminPagesMenu = {
 		subMenu: null,
 	},
 	lot: {
-		id: 'lot',
+		id: 'lot5',
 		text: 'Stock Management',
 		path: 'admin/lot-management',
 		icon: 'Ballot',
 		subMenu: null,
 	},
-	// seller: {
-	// 	id: 'lot',
-	// 	text: 'Cashier Management',
-	// 	path: 'admin/cashier-management',
-	// 	icon: 'SelectAll',
-	// 	subMenu: null,
-	// },
 	employee: {
-		id: 'lot',
+		id: 'lot4',
 		text: 'Employee Management',
 		path: 'admin/employ-management',
 		icon: 'Group',
@@ -88,25 +81,25 @@ export const addminPagesMenu = {
 			// 	icon: 'Groups',
 			// },
 			color: {
-				id: 'fluidSingle',
+				id: 'fluidSingle9',
 				text: 'Color',
 				path: 'admin/setting/color',
 				icon: 'ColorLens',
 			},
 			fabric: {
-				id: 'fluidSingle',
+				id: 'fluidSingle1',
 				text: 'Fabric',
 				path: 'admin/setting/fabric-type',
 				icon: 'AppSettingsAlt',
 			},
 			gsm: {
-				id: 'fluidSingle',
+				id: 'fluidSingle2',
 				text: 'GSM',
 				path: 'admin/setting/gsm',
 				icon: 'AlignVerticalCenter',
 			},
 			knet: {
-				id: 'fluidSingle',
+				id: 'fluidSingle3',
 				text: 'Knit type',
 				path: 'admin/setting/knit-type',
 				icon: 'AirlineSeatLegroomExtra',
@@ -120,25 +113,25 @@ export const addminPagesMenu = {
 					
 					
 					color: {
-						id: 'fluidSingle',
+						id: 'fluidSingle4',
 						text: 'Color',
 						path: 'admin/setting/recycle-bin/color',
 						icon: 'ColorLens',
 					},
 					fabric: {
-						id: 'fluidSingle',
+						id: 'fluidSingle5',
 						text: 'Fabric',
 						path: 'admin/setting/recycle-bin/fabric',
 						icon: 'AppSettingsAlt',
 					},
 					gsm: {
-						id: 'fluidSingle',
+						id: 'fluidSingle6',
 						text: 'GSM',
 						path: 'admin/setting/recycle-bin/gsm',
 						icon: 'AlignVerticalCenter',
 					},
 					knet: {
-						id: 'fluidSingle',
+						id: 'fluidSingle7',
 						text: 'Knit type',
 						path: 'admin/setting/recycle-bin/knit-type',
 						icon: 'AirlineSeatLegroomExtra',
@@ -171,7 +164,7 @@ export const stockkeeperPagesMenu = {
 		subMenu: null,
 	},
 	stockIn: {
-		id: 'Lot',
+		id: 'Lot3',
 		text: ' Stock In',
 		path: 'cashier/stock-in-management',
 		icon: 'AssignmentTurnedIn',
@@ -203,7 +196,7 @@ export const stockkeeperPagesMenu = {
 
 
 	Supplier: {
-		id: 'lot',
+		id: 'lot1',
 		text: 'Supplier Management',
 		path: 'cashier/supplier',
 		icon: 'PermIdentity',
@@ -385,7 +378,7 @@ export const demoPagesMenu = {
 				icon: 'ViewArray',
 			},
 			fluidSingle: {
-				id: 'fluidSingle',
+				id: 'fluidSingle8',
 				text: 'Fluid',
 				path: 'single-pages/fluid',
 				icon: 'ViewDay',
