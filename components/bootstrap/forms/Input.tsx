@@ -27,11 +27,11 @@ export interface IInputProps extends HTMLAttributes<HTMLInputElement>, Partial<I
 	ariaLabel?: string;
 	value?: string | number | readonly string[] | undefined;
 	min?: number;
-	max?: number;
+	max?: any;
 	step?: number;
-	isTouched?: boolean;
+	isTouched?: any;
 	isValid?: boolean;
-	invalidFeedback?: string;
+	invalidFeedback?: any;
 	validFeedback?: string;
 	isValidMessage?: boolean;
 	isTooltipFeedback?: boolean;

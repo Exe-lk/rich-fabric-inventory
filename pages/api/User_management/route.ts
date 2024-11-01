@@ -10,12 +10,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     switch (req.method) {
       case 'POST': {
-        const { name,role,nic,email,mobile } = req.body;
-        if (!name) {
+        const data = req.body;
+        if (!data.name) {
           res.status(400).json({ error: 'Name is required' });
           return;
         }
-        const id = await createUser(name,role,nic,email,mobile);
+        const id = await createUser(data);
         res.status(201).json({ message: 'User created', id });
         break;
       }

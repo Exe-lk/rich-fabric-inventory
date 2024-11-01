@@ -65,22 +65,22 @@ const Index: NextPage = () => {
 		{ position: 'Customer' },
 		{ position: 'Dye Plant' },
 	];
-		// Filter transactions based on date range
-		const filteredTransactions = transaction?.filter((trans: any) => {
-			const transactionDate = new Date(trans.date);
-			const start = startDate ? new Date(startDate) : null;
-			const end = endDate ? new Date(endDate) : null;
-	
-			// Check if transaction date is within the selected range
-			if (start && end) {
-				return transactionDate >= start && transactionDate <= end;
-			} else if (start) {
-				return transactionDate >= start;
-			} else if (end) {
-				return transactionDate <= end;
-			}
-			return true;
-		});
+	// Filter transactions based on date range
+	const filteredTransactions = transaction?.filter((trans: any) => {
+		const transactionDate = new Date(trans.date);
+		const start = startDate ? new Date(startDate) : null;
+		const end = endDate ? new Date(endDate) : null;
+
+		// Check if transaction date is within the selected range
+		if (start && end) {
+			return transactionDate >= start && transactionDate <= end;
+		} else if (start) {
+			return transactionDate >= start;
+		} else if (end) {
+			return transactionDate <= end;
+		}
+		return true;
+	});
 	return (
 		<PageWrapper>
 			<SubHeader>
@@ -107,7 +107,11 @@ const Index: NextPage = () => {
 					<SubheaderSeparator />
 					<Dropdown>
 						<DropdownToggle hasIcon={false}>
-							<Button icon='FilterAlt' color='dark' isLight className='btn-only-icon position-relative'></Button>
+							<Button
+								icon='FilterAlt'
+								color='dark'
+								isLight
+								className='btn-only-icon position-relative'></Button>
 						</DropdownToggle>
 						<DropdownMenu isAlignmentEnd size='lg'>
 							<div className='container py-2'>
@@ -138,13 +142,17 @@ const Index: NextPage = () => {
 													label={type.position}
 													name={type.position}
 													value={type.position}
-													checked={selectedStockOutTypes.includes(type.position)}
+													checked={selectedStockOutTypes.includes(
+														type.position,
+													)}
 													onChange={(event: any) => {
 														const { checked, value } = event.target;
 														setSelectedStockOutTypes((prevTypes) =>
 															checked
 																? [...prevTypes, value]
-																: prevTypes.filter((type) => type !== value)
+																: prevTypes.filter(
+																		(type) => type !== value,
+																  ),
 														);
 													}}
 												/>
@@ -162,13 +170,18 @@ const Index: NextPage = () => {
 													label={category.position}
 													name={category.position}
 													value={category.position}
-													checked={selectedCategories.includes(category.position)}
+													checked={selectedCategories.includes(
+														category.position,
+													)}
 													onChange={(event: any) => {
 														const { checked, value } = event.target;
 														setSelectedCategories((prevCategories) =>
 															checked
 																? [...prevCategories, value]
-																: prevCategories.filter((category) => category !== value)
+																: prevCategories.filter(
+																		(category) =>
+																			category !== value,
+																  ),
 														);
 													}}
 												/>
@@ -199,7 +212,7 @@ const Index: NextPage = () => {
 										validFeedback='Looks good!'
 									/>
 								</FormGroup> */}
-							
+
 								<div className='flex-grow-1 text-center text-info'>
 									Transaction Report
 								</div>
@@ -214,69 +227,13 @@ const Index: NextPage = () => {
 								<table className='table table-modern table-bordered border-primary table-hover '>
 									<thead>
 										<tr>
-											<th>
-												<Checks
-													type='checkbox'
-													id='Code'
-													name='type'
-													label='Code'
-													value='Code'
-												/>
-											</th>
-											<th>
-												<Checks
-													type='checkbox'
-													id='GRN number'
-													name='type'
-													label='GRN number'
-													value='GRN number'
-												/>
-											</th>
-											<th>
-												<Checks
-													type='checkbox'
-													id='Dater'
-													name='type'
-													label='Date'
-													value='Date'
-												/>
-											</th>
-											<th>
-												<Checks
-													type='checkbox'
-													id='colour'
-													name='type'
-													label='Quantity'
-													value='Colour'
-												/>
-											</th>
-											<th>
-												<Checks
-													type='checkbox'
-													id='Type'
-													name='type'
-													label='Stock Out Type'
-													value='Type'
-												/>{' '}
-											</th>
-											<th>
-												<Checks
-													type='checkbox'
-													id='colour'
-													name='type'
-													label='Price (Rs.)'
-													value='Colour'
-												/>
-											</th>
-											<th>
-												<Checks
-													type='checkbox'
-													id='Category'
-													name='type'
-													label='Category'
-													value='Category'
-												/>
-											</th>
+											<th>Code</th>
+											<th>GRN number</th>
+											<th>Date</th>
+											<th>Quantity</th>
+											<th>Stock Out Type</th>
+											<th>Price (Rs.)</th>
+											<th>Category</th>
 										</tr>
 									</thead>
 
@@ -291,26 +248,36 @@ const Index: NextPage = () => {
 												<td>Error fetching categories.</td>
 											</tr>
 										)}
-										{filteredTransactions  &&
-											filteredTransactions 
+										{filteredTransactions &&
+											filteredTransactions
 												.filter((transaction: any) =>
-													searchTerm? 
-												transaction.code.toString().includes(searchTerm.toLowerCase()) ||
-												// transaction.category.toLowerCase().includes(searchTerm.toLowerCase())||
-												// transaction.price.toString().includes(searchTerm.toLowerCase())||
-												transaction.date.includes(searchTerm.toLowerCase())
-												// transaction.GRN_number.toString().includes(searchTerm.toLowerCase())
-												
-											  : true
+													searchTerm
+														? transaction.code
+																.toString()
+																.includes(
+																	searchTerm.toLowerCase(),
+																) ||
+														  // transaction.category.toLowerCase().includes(searchTerm.toLowerCase())||
+														  // transaction.price.toString().includes(searchTerm.toLowerCase())||
+														  transaction.date.includes(
+																searchTerm.toLowerCase(),
+														  )
+														: // transaction.GRN_number.toString().includes(searchTerm.toLowerCase())
+
+														  true,
 												)
 												.filter((transaction: any) =>
 													selectedCategories.length > 0
-														? selectedCategories.includes(transaction.type)
+														? selectedCategories.includes(
+																transaction.type,
+														  )
 														: true,
 												)
 												.filter((transaction: any) =>
 													selectedStockOutTypes.length > 0
-														? selectedStockOutTypes.includes(transaction.stock_received)
+														? selectedStockOutTypes.includes(
+																transaction.stock_received,
+														  )
 														: true,
 												)
 												.map((transaction: any) => {

@@ -2,41 +2,24 @@ import React, { useEffect, useState } from 'react';
 import Card, { CardBody, CardHeader, CardLabel, CardTitle } from './bootstrap/Card';
 import classNames from 'classnames';
 import useDarkMode from '../hooks/useDarkMode';
-import { getFirstLetter, priceFormat } from '../helpers/helpers';
+import { getFirstLetter } from '../helpers/helpers';
 import Button from './bootstrap/Button';
 import {
 	useGetLotMovementsQuery,
 	useDeleteLotMovementMutation,
 	useGetDeletedLotMovementsQuery,
 } from '../redux/slices/LotMovementApiSlice';
-import { useUpdateLotMutation, useGetLotsQuery } from '../redux/slices/stockInAPISlice';
+import { useUpdateLotMutation } from '../redux/slices/stockInAPISlice';
 
-interface Item {
-	cid: string;
-	category: string;
-	image: string;
-	name: string;
-	price: number;
-	quentity: number;
-	reorderlevel: number;
-}
 interface KeyboardProps {
-	// orderedItems: Item[];
-	// setOrderedItems: React.Dispatch<React.SetStateAction<Item[]>>;
 	isActive: boolean;
 	setActiveComponent: React.Dispatch<React.SetStateAction<'additem' | 'edit'>>;
 }
 
-const Index: React.FC<KeyboardProps> = ({
-	// orderedItems,
-	// setOrderedItems,
-	isActive,
-	setActiveComponent,
-}: any) => {
-	const { themeStatus } = useDarkMode();
+const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }: any) => {
 	const { darkModeStatus } = useDarkMode();
 	const [focusedIndex, setFocusedIndex] = useState<number>(0);
-	const { data: orderedItems, error, isLoading } = useGetLotMovementsQuery(undefined);
+	const { data: orderedItems } = useGetLotMovementsQuery(undefined);
 	const [deletelot] = useDeleteLotMovementMutation();
 	const { refetch } = useGetDeletedLotMovementsQuery(undefined);
 	const [updateLot] = useUpdateLotMutation();
@@ -48,14 +31,12 @@ const Index: React.FC<KeyboardProps> = ({
 			id: order.stock_id,
 			current_quantity,
 		};
-
 		await updateLot(values).unwrap();
 		refetch();
 	};
 
 	const handleKeyPress = (event: KeyboardEvent) => {
 		if (!isActive) return;
-
 		if (event.key === 'ArrowDown') {
 			setFocusedIndex((prevIndex) => (prevIndex + 1) % orderedItems.length);
 		} else if (event.key === 'ArrowUp') {
@@ -72,6 +53,7 @@ const Index: React.FC<KeyboardProps> = ({
 			handleDelete(focusedIndex);
 		}
 	};
+
 	useEffect(() => {
 		window.addEventListener('keydown', handleKeyPress);
 
@@ -79,6 +61,7 @@ const Index: React.FC<KeyboardProps> = ({
 			window.removeEventListener('keydown', handleKeyPress);
 		};
 	}, [orderedItems, focusedIndex, isActive]);
+
 	return (
 		<div>
 			<Card className='mt-4' style={{ height: '75vh' }}>
@@ -90,6 +73,7 @@ const Index: React.FC<KeyboardProps> = ({
 					</CardLabel>
 				</CardHeader>
 				<CardBody isScrollable className='table-responsive'>
+					<>
 					{orderedItems?.map((order: any, index: any) => (
 						<Card
 							key={index}
@@ -129,7 +113,6 @@ const Index: React.FC<KeyboardProps> = ({
 											</div>
 										</div>
 									)}
-
 									<div className='flex-grow-1'>
 										<div className='fs-6'>{order.category}</div>
 										<div className='text-muted'>
@@ -143,22 +126,7 @@ const Index: React.FC<KeyboardProps> = ({
 									<div className='flex-grow-1'>
 										<div className='fs-6'>{order.order_type}</div>
 									</div>
-									<div className='me-2'>
-										{/* <Input
-											type='number'
-											value={order.quentity}
-											onChange={(e: any) =>
-												handleQuantityChange(
-													index,
-													parseInt(e.target.value),
-												)
-											}
-											className='form-control '
-										/> */}
-									</div>
-									{/* <div className='me-2'>
-										<strong>{priceFormat(order.quentity * order.price)}</strong>
-									</div> */}
+									<div className='me-2'></div>
 								</div>
 								<div className='todo-extras'>
 									<span>
@@ -168,45 +136,9 @@ const Index: React.FC<KeyboardProps> = ({
 									</span>
 								</div>
 							</div>
-							<div>
-								{/* <ChecksGroup isInline>
-										<Checks
-											type='radio'
-											id={`return-${index}`}
-											label={'Return'}
-											// name='type'
-											value={'Return'}
-											onChange={(e: any) => {
-												handleTypeChange(e.target.value, index);
-											}}
-											checked={order.order_type}
-										/>
-										<Checks
-											type='radio'
-											id={`restore-${index}`}
-											label={'Restore'}
-											// name='type'
-											value={'Restore'}
-											onChange={(e: any) => {
-												handleTypeChange(e.target.value, index);
-											}}
-											checked={order.order_type}
-										/>
-										<Checks
-											type='radio'
-											id={`stockout-${index}`}
-											label={'Stock Out'}
-											// name='type'
-											value={'Stock Out'}
-											onChange={(e: any) => {
-												handleTypeChange(e.target.value, index);
-											}}
-											checked={order.order_type}
-										/>
-									</ChecksGroup> */}
-							</div>
 						</Card>
 					))}
+					</>
 				</CardBody>
 			</Card>
 		</div>

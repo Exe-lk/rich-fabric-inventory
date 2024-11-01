@@ -547,8 +547,8 @@ const Index: NextPage = () => {
 														)
 														.filter((transaction: any) => {
 															if (
-																transaction.stock_received ==
-																'Yarn Transaction'
+																transaction.type ==
+																'Gray Fabric'
 															) {
 																return transaction;
 															}

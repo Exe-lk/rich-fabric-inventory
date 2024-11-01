@@ -1,10 +1,8 @@
-// pages/index.tsx
 import React, { useState } from 'react';
 import { NextPage } from 'next';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
-import useDarkMode from '../../../hooks/useDarkMode';
 import Page from '../../../layout/Page/Page';
-import { useGetCategoriesQuery } from '../../../redux/slices/categoryApiSlice'; // Import the RTK Query hook
+import { useGetCategoriesQuery } from '../../../redux/slices/categoryApiSlice';
 import SubHeader, {
 	SubHeaderLeft,
 	SubHeaderRight,
@@ -19,16 +17,14 @@ import CategoryDeleteModal from '../../../components/custom/CategoryDeleteModal'
 import CategoryEditModal from '../../../components/custom/CategoryEditModal';
 import Swal from 'sweetalert2';
 import { useUpdateCategoryMutation } from '../../../redux/slices/categoryApiSlice';
-// Define the functional component for the index page
+import ExportDropdown from '../../../components/ExportDropdown';
+
 const Index: NextPage = () => {
-	const { darkModeStatus } = useDarkMode();
 	const [searchTerm, setSearchTerm] = useState('');
 	const [addModalStatus, setAddModalStatus] = useState(false);
 	const [deleteModalStatus, setDeleteModalStatus] = useState(false);
 	const [editModalStatus, setEditModalStatus] = useState(false);
 	const [id, setId] = useState<string>('');
-
-	// Fetch categories using RTK Query from the custom API
 	const { data: categories, error, isLoading } = useGetCategoriesQuery(undefined);
 	const [updateCategory] = useUpdateCategoryMutation();
 
@@ -36,7 +32,6 @@ const Index: NextPage = () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-				// text: 'You will not be able to recover this category!',
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -50,9 +45,7 @@ const Index: NextPage = () => {
 					status: false,
 					subcategory: category.subcategory,
 				};
-
 				await updateCategory(values);
-
 				Swal.fire('Deleted!', 'The category has been deleted.', 'success');
 			}
 		} catch (error) {
@@ -61,7 +54,6 @@ const Index: NextPage = () => {
 		}
 	};
 
-	// JSX for rendering the page
 	return (
 		<PageWrapper>
 			<SubHeader>
@@ -96,20 +88,17 @@ const Index: NextPage = () => {
 					<div className='col-12'>
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
-								<div className='flex-grow-1 text-center text-info'>
+								<div className='flex-grow-1 text-center text-info '>
 									Manage Category
 								</div>
-								<Button
-									icon='UploadFile'
-									color='warning'
-									onClick={() => setAddModalStatus(true)}>
-									Export
-								</Button>
+								<ExportDropdown
+									tableSelector='table'
+									title='Category Management Report'
+								/>
 							</CardTitle>
-
 							<CardBody isScrollable className='table-responsive'>
-								<table className='table table-modern table-bordered border-primary table-hover text-center'>
-									<thead>
+								<table className='table table-hover table-bordered border-primary'>
+									<thead className={'table-dark border-primary'}>
 										<tr>
 											<th>Category name</th>
 											<th>Sub Category</th>
@@ -136,14 +125,14 @@ const Index: NextPage = () => {
 																.includes(searchTerm.toLowerCase())
 														: true,
 												)
-												.map((category: any) => (
-													<tr key={category.cid}>
+												.map((category: any, index: any) => (
+													<tr key={index}>
 														<td>{category.name}</td>
 														<td>
 															<ul>
 																{category.subcategory?.map(
 																	(sub: any, index: any) => (
-																		<p>{sub}</p>
+																		<p key={index}>{sub}</p>
 																	),
 																)}
 															</ul>
@@ -152,10 +141,10 @@ const Index: NextPage = () => {
 															<Button
 																icon='Edit'
 																color='info'
-																onClick={() =>(
+																onClick={() => (
 																	setEditModalStatus(true),
-																	setId(category.id))
-																}>
+																	setId(category.id)
+																)}>
 																Edit
 															</Button>
 															<Button
@@ -193,5 +182,4 @@ const Index: NextPage = () => {
 		</PageWrapper>
 	);
 };
-
 export default Index;

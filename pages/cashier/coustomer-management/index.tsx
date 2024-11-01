@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import type { NextPage } from 'next';
-import useDarkMode from '../../../hooks/useDarkMode';
 import PageWrapper from '../../../layout/PageWrapper/PageWrapper';
 import SubHeader, {
 	SubHeaderLeft,
@@ -14,52 +13,23 @@ import Page from '../../../layout/Page/Page';
 import Card, { CardBody, CardTitle } from '../../../components/bootstrap/Card';
 import CoustomerAddModal from '../../../components/custom/CaustomerAddModal';
 import CoustomerEditModal from '../../../components/custom/CaustomerEditModal';
-import { doc, deleteDoc, collection, getDocs, updateDoc, query, where } from 'firebase/firestore';
-import { firestore } from '../../../firebaseConfig';
-import Dropdown, { DropdownToggle, DropdownMenu } from '../../../components/bootstrap/Dropdown';
-import { getColorNameWithIndex } from '../../../common/data/enumColors';
-import { getFirstLetter } from '../../../helpers/helpers';
 import Swal from 'sweetalert2';
-import FormGroup from '../../../components/bootstrap/forms/FormGroup';
-import Checks, { ChecksGroup } from '../../../components/bootstrap/forms/Checks';
 import CoustomerDeleteModal from '../../../components/custom/CaustomerDeleteModal';
 import {
 	useGetCustomersQuery,
 	useUpdateCustomerMutation,
 } from '../../../redux/slices/coustomerApiSlice';
 
-interface User {
-	cid: string;
-	image: string;
-	name: string;
-	position: string;
-	email: string;
-	password: string;
-	mobile: number;
-	pin_number: number;
-	status: boolean;
-}
-
 const Index: NextPage = () => {
-	// Dark mode
-	const { darkModeStatus } = useDarkMode();
 	const [searchTerm, setSearchTerm] = useState('');
 	const [addModalStatus, setAddModalStatus] = useState<boolean>(false);
 	const [editModalStatus, setEditModalStatus] = useState<boolean>(false);
 	const [deleteModalStatus, setDeleteModalStatus] = useState<boolean>(false);
-	const [user, setuser] = useState<User[]>([]);
 	const [id, setId] = useState<string>('');
-	const [status, setStatus] = useState(true);
 	const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-	const role = [
-		{ role: 'bill keeper' },
-		{ role: 'accessosry stock keeper' },
-		{ role: 'display stock keeper' },
-		{ role: 'cashier' },
-	];
 	const { data: users, error, isLoading, refetch } = useGetCustomersQuery(undefined);
 	const [updateuser] = useUpdateCustomerMutation();
-	//delete user
+
 	// Update the user's status to false instead of deleting
 	const handleClickDelete = async (user: any) => {
 		try {
@@ -74,15 +44,12 @@ const Index: NextPage = () => {
 			});
 			if (result.isConfirmed) {
 				try {
-					// Set the user's status to false (soft delete)
 					const values = await {
 						...user,
 						status: false,
 					};
 					await updateuser(values);
-					// Refresh the list after deletion
 					Swal.fire('Deleted!', 'User has been deleted.', 'success');
-					// This will refresh the list of users to reflect the changes
 				} catch (error) {
 					console.error('Error during handleDelete: ', error);
 					Swal.fire(
@@ -102,7 +69,6 @@ const Index: NextPage = () => {
 		<PageWrapper>
 			<SubHeader>
 				<SubHeaderLeft>
-					{/* Search input  */}
 					<label
 						className='border-0 bg-transparent cursor-pointer me-0'
 						htmlFor='searchInput'>
@@ -113,7 +79,6 @@ const Index: NextPage = () => {
 						type='search'
 						className='border-0 shadow-none bg-transparent'
 						placeholder='Search...'
-						// onChange={formik.handleChange}
 						onChange={(event: any) => {
 							setSearchTerm(event.target.value);
 						}}
@@ -121,48 +86,6 @@ const Index: NextPage = () => {
 					/>
 				</SubHeaderLeft>
 				<SubHeaderRight>
-					<Dropdown>
-						<DropdownToggle hasIcon={false}>
-							<Button
-								icon='FilterAlt'
-								color='dark'
-								isLight
-								className='btn-only-icon position-relative'></Button>
-						</DropdownToggle>
-						<DropdownMenu isAlignmentEnd size='lg'>
-							<div className='container py-2'>
-								<div className='row g-3'>
-									<FormGroup label='User type' className='col-12'>
-										<ChecksGroup>
-											{role.map((user, index) => (
-												<Checks
-													key={user.role}
-													id={user.role}
-													label={user.role}
-													name={user.role}
-													value={user.role}
-													checked={selectedUsers.includes(user.role)}
-													onChange={(event: any) => {
-														const { checked, value } = event.target;
-														setSelectedUsers(
-															(prevUsers) =>
-																checked
-																	? [...prevUsers, value] // Add category if checked
-																	: prevUsers.filter(
-																			(user) =>
-																				user !== value,
-																	  ), // Remove category if unchecked
-														);
-													}}
-												/>
-											))}
-										</ChecksGroup>
-									</FormGroup>
-								</div>
-							</div>
-						</DropdownMenu>
-					</Dropdown>
-
 					<SubheaderSeparator />
 					<Button
 						icon='PersonAdd'
@@ -176,7 +99,6 @@ const Index: NextPage = () => {
 			<Page>
 				<div className='row h-100'>
 					<div className='col-12'>
-						{/* Table for displaying user data */}
 						<Card stretch>
 							<CardTitle className='d-flex justify-content-between align-items-center m-4'>
 								<div className='flex-grow-1 text-center text-info'>
@@ -184,14 +106,13 @@ const Index: NextPage = () => {
 								</div>
 							</CardTitle>
 							<CardBody isScrollable className='table-responsive'>
-								<table className='table table-bordered border-primary table-modern table-hover'>
-									<thead>
+								<table className='table table-hover table-bordered border-primary'>
+									<thead className={'table-dark border-primary'}>
 										<tr>
 											<th>User</th>
 											<th>Email</th>
 											<th>Mobile number</th>
 											<th>NIC</th>
-
 											<th></th>
 										</tr>
 									</thead>
@@ -208,7 +129,7 @@ const Index: NextPage = () => {
 										)}
 										{users &&
 											users
-												.filter((user: any) => user.status === true) // Only show users where status is true
+												.filter((user: any) => user.status === true)
 												.filter((user: any) =>
 													searchTerm
 														? user.nic
@@ -227,7 +148,6 @@ const Index: NextPage = () => {
 														<td>{user.email}</td>
 														<td>{user.mobile}</td>
 														<td>{user.nic}</td>
-
 														<td>
 															<Button
 																icon='Edit'
@@ -268,10 +188,13 @@ const Index: NextPage = () => {
 				setIsOpen={setEditModalStatus}
 				isOpen={editModalStatus}
 				id={id}
-				refetch={refetch} // Pass refetch function here
+				refetch={refetch}
 			/>
-
-			<CoustomerDeleteModal setIsOpen={setDeleteModalStatus} isOpen={deleteModalStatus} id='' />
+			<CoustomerDeleteModal
+				setIsOpen={setDeleteModalStatus}
+				isOpen={deleteModalStatus}
+				id=''
+			/>
 		</PageWrapper>
 	);
 };

@@ -1,102 +1,82 @@
-import React, { FC, useRef, useState } from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
 import { useFormik } from 'formik';
 import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../bootstrap/Modal';
-import showNotification from '../extras/showNotification';
-import Icon from '../icon/Icon';
 import FormGroup from '../bootstrap/forms/FormGroup';
 import Input from '../bootstrap/forms/Input';
 import Button from '../bootstrap/Button';
-import { collection, addDoc } from 'firebase/firestore';
-import { firestore, storage,auth } from '../../firebaseConfig';
 import Swal from 'sweetalert2';
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
-import Select from '../bootstrap/forms/Select';
-import Option from '../bootstrap/Option';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { useAddCustomerMutation,useGetCustomersQuery} from '../../redux/slices/coustomerApiSlice';
+import { useAddCustomerMutation, useGetCustomersQuery } from '../../redux/slices/coustomerApiSlice';
 
-
-// Define the props for the UserAddModal component
 interface UserAddModalProps {
 	id: string;
 	isOpen: boolean;
 	setIsOpen(...args: unknown[]): unknown;
 }
-// UserAddModal component definition
+
 const UserAddModal: FC<UserAddModalProps> = ({ id, isOpen, setIsOpen }) => {
-	const [imageurl, setImageurl] = useState<any>(null);
-	const [selectedImage, setSelectedImage] = useState<string | null>(null);
-	const [addUser , {isLoading}] = useAddCustomerMutation();
-	const {refetch} = useGetCustomersQuery(undefined);
+	const [addUser] = useAddCustomerMutation();
+	const { refetch } = useGetCustomersQuery(undefined);
 
 	// Initialize formik for form management
 	const formik = useFormik({
 		initialValues: {
-			
 			name: '',
-			
 			nic: '',
 			email: '',
 			mobile: '',
-			
-			status:true
+			status: true,
 		},
 		validate: (values) => {
 			const errors: {
-				
-				
 				name?: string;
 				nic?: string;
 				email?: string;
-			
 				password?: string;
 				mobile?: string;
-				
 			} = {};
-			
+
 			if (!values.name) {
 				errors.name = 'Required';
 			}
-		
 			if (!values.mobile) {
 				errors.mobile = 'Required';
+			} else if (values.mobile.length !== 10) {
+				errors.mobile = 'Mobile number must be exactly 10 digits';
+			} else if (!/^0\d{9}$/.test(values.mobile)) {
+				errors.mobile = 'Mobile number must start with 0 and be exactly 10 digits';
 			}
 			if (!values.nic) {
 				errors.nic = 'Required';
+			} else if (!/^\d{9}[Vv]$/.test(values.nic) && !/^\d{12}$/.test(values.nic)) {
+				errors.nic = 'NIC must be 9 digits followed by "V" or 12 digits';
 			}
 			if (!values.email) {
 				errors.email = 'Required';
+			} else if (!values.email.includes('@')) {
+				errors.email = 'Invalid email format.';
+			} else if (values.email.includes(' ')) {
+				errors.email = 'Email should not contain spaces.';
 			}
-
-			
 			return errors;
 		},
 		onSubmit: async (values) => {
 			try {
-				// Show a processing modal
-				const process = Swal.fire({
+				Swal.fire({
 					title: 'Processing...',
 					html: 'Please wait while the data is being processed.<br><div class="spinner-border" role="status"></div>',
 					allowOutsideClick: false,
 					showCancelButton: false,
 					showConfirmButton: false,
 				});
-				
 				try {
-					// Add the new category
-					const response: any = await addUser(values).unwrap();
-					console.log(response);
-
-					// Refetch categories to update the list
+					await addUser(values).unwrap();
 					refetch();
-
-					// Success feedback
 					await Swal.fire({
 						icon: 'success',
 						title: 'Customer Created Successfully',
 					});
-					setIsOpen(false); // Close the modal after successful addition
+					setIsOpen(false);
 				} catch (error) {
 					console.error('Error during handleSubmit: ', error);
 					await Swal.fire({
@@ -105,7 +85,6 @@ const UserAddModal: FC<UserAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 						text: 'Failed to add the user. Please try again.',
 					});
 				}
-				
 			} catch (error) {
 				console.error('Error during handleUpload: ', error);
 				Swal.close;
@@ -131,8 +110,6 @@ const UserAddModal: FC<UserAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-			
-					
 					<FormGroup id='mobile' label='Mobile number' className='col-md-6'>
 						<Input
 							onChange={formik.handleChange}
@@ -166,12 +143,9 @@ const UserAddModal: FC<UserAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 							validFeedback='Looks good!'
 						/>
 					</FormGroup>
-					
-					
 				</div>
 			</ModalBody>
 			<ModalFooter className='px-4 pb-4'>
-				{/* Save button to submit the form */}
 				<Button color='info' onClick={formik.handleSubmit}>
 					Save
 				</Button>
@@ -179,7 +153,7 @@ const UserAddModal: FC<UserAddModalProps> = ({ id, isOpen, setIsOpen }) => {
 		</Modal>
 	);
 };
-// Prop types definition for UserAddModal component
+
 UserAddModal.propTypes = {
 	id: PropTypes.string.isRequired,
 	isOpen: PropTypes.bool.isRequired,

@@ -3,28 +3,16 @@ import Card, { CardActions, CardBody, CardHeader, CardLabel, CardTitle } from '.
 import classNames from 'classnames';
 import useDarkMode from '../hooks/useDarkMode';
 import { getFirstLetter, priceFormat } from '../helpers/helpers';
-import Keyboard from 'react-simple-keyboard';
 import 'react-simple-keyboard/build/css/index.css';
 import Input from './bootstrap/forms/Input';
 import FormGroup from './bootstrap/forms/FormGroup';
 import Label from './bootstrap/forms/Label';
 import Checks, { ChecksGroup } from './bootstrap/forms/Checks';
 import { useUpdateLotMutation, useGetLotsQuery } from '../redux/slices/stockInAPISlice';
-import {
-	useAddLotMovementMutation,
-	useGetLotMovementsQuery,
-} from '../redux/slices/LotMovementApiSlice';
+import { useAddLotMovementMutation } from '../redux/slices/LotMovementApiSlice';
 import { Scanner } from '@yudiel/react-qr-scanner';
-
-interface Item {
-	cid: string;
-	category: string;
-	image: string;
-	name: string;
-	price: number;
-	quentity: number;
-	reorderlevel: number;
-}
+import Button from './bootstrap/Button';
+import { useFormik } from 'formik';
 
 // Define props for the Keyboard component
 interface KeyboardProps {
@@ -39,8 +27,6 @@ const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }) => {
 	const [input, setInput] = useState<string>('');
 	const keyboard = useRef<any>(null);
 	const [showPopup, setShowPopup] = useState<boolean>(false);
-	const [popupInput, setPopupInput] = useState<any>('');
-	const [popupInput1, setPopupInput1] = useState<any>();
 	const [selectedItem, setSelectedItem] = useState<any>(null);
 	const inputRef = useRef<HTMLInputElement>(null);
 	const popupInputRef = useRef<HTMLInputElement>(null);
@@ -50,10 +36,9 @@ const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }) => {
 	const { data: items, error, isLoading, refetch } = useGetLotsQuery(undefined);
 	const [updateLot] = useUpdateLotMutation();
 	const [addlotmovement] = useAddLotMovementMutation();
-	// const { refetch } = useGetLotMovementsQuery(undefined);
 	const [data, setData] = useState<any[]>([]);
 	const [status, setStatus] = useState<boolean>(false);
-	// Handle input change
+
 	const onChangeInput = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const input = event.target.value;
 		const numericInput = input.replace(/\D/g, '');
@@ -63,62 +48,55 @@ const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }) => {
 		}
 	};
 
-	// Toggle between default and shift layouts on virtual keyboard
-	const handleShift = () => {
-		const newLayoutName = layout === 'default' ? 'shift' : 'default';
-		setLayout(newLayoutName);
-	};
-
 	// Handle OK button click in the popup
-	const handlePopupOk = async () => {
-		if (
-			popupInput <= 0 ||
-			selectedType === '' ||
-			(selectedType != 'Return' && popupInput1 == null) ||
-			selectedItem.current_quantity < Number(popupInput)
-		) {
-			return;
-		}
-		if (selectedItem) {
-			const { id, ...rest } = selectedItem; // Destructure to remove id
-			const updatedItem = {
-				...rest, // Spread the remaining properties without id
-				stock_id: id, // Add stock_id with the value of id
-				quentity: Number(popupInput),
-				order_type: selectedType,
-				Job_ID: popupInput1,
-			};
-			await addlotmovement(updatedItem).unwrap();
+	const formik = useFormik({
+		initialValues: {
+			order_type: selectedType,
+			quentity: '',
+			Job_ID: '',
+		},
+		validate: (values) => {
+			const errors: Record<string, string> = {};
+			if (!values.quentity) errors.quentity = 'Required';
+			if (selectedItem.current_quantity < Number(values.quentity))
+				errors.quentity = `please enter the quantity less than ${selectedItem.current_quantity}`;
+			if (selectedType != 'Return' && !values.Job_ID) errors.Job_ID = 'Required';
+			return errors;
+		},
+		onSubmit: async (values) => {
+			try {
+				if (selectedItem) {
+					const { id, ...rest } = selectedItem; // Destructure to remove id
+					const updatedItem = {
+						...rest, // Spread the remaining properties without id
+						stock_id: id, // Add stock_id with the value of id
+						quentity: values.quentity,
+						order_type: selectedType,
+						Job_ID: values.Job_ID,
+					};
+					await addlotmovement(updatedItem).unwrap();
 
-			// Refetch categories to update the list
-			refetch();
+					refetch();
 
-			const quentity = selectedItem.current_quantity - Number(popupInput);
+					const quentity = selectedItem.current_quantity - Number(values.quentity);
 
-			const updatedItem1 = {
-				...selectedItem,
-				current_quantity: quentity, // Update current_quantity with the new quentity
-			};
-			await updateLot(updatedItem1).unwrap();
-			refetch();
-			// await setOrderedItems((prevItems: any) => {
-			// 	const itemIndex = prevItems.findIndex((item: any) => item.id === updatedItem.id);
-			// 	if (itemIndex > -1) {
-			// 		const updatedItems = [...prevItems];
-			// 		updatedItems[itemIndex] = updatedItem;
-			// 		return updatedItems;
-			// 	} else {
-			// 		return [...prevItems, updatedItem];
-			// 	}
-			// });
-			setPopupInput('');
-			setPopupInput1('');
-			setSelectedType('');
-		}
-		setShowPopup(false);
-		setFocusedIndex(-1);
-	};
-
+					const updatedItem1 = {
+						...selectedItem,
+						current_quantity: quentity, // Update current_quantity with the new quentity
+					};
+					await updateLot(updatedItem1).unwrap();
+					refetch();
+					setSelectedType('Return');
+				}
+				formik.resetForm();
+				setShowPopup(false);
+				setFocusedIndex(-1);
+			} catch (error) {
+				console.error('Error during handleUpload: ', error);
+				alert('An error occurred during file upload. Please try again later.');
+			}
+		},
+	});
 	// Open the popup to enter quantity
 	const handlePopupOpen = async (selectedIndex1: any) => {
 		setSelectedItem(items[selectedIndex1] || null);
@@ -150,7 +128,6 @@ const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }) => {
 			setFocusedIndex(-1);
 		}
 	};
-
 	// Add event listener for keyboard events
 	useEffect(() => {
 		window.addEventListener('keydown', handleKeyPress);
@@ -159,7 +136,6 @@ const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }) => {
 			window.removeEventListener('keydown', handleKeyPress);
 		};
 	}, [focusedIndex, showPopup, isActive]);
-
 	// Focus input in the popup when it is shown
 	useEffect(() => {
 		if (showPopup) {
@@ -168,9 +144,6 @@ const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }) => {
 	}, [showPopup]);
 
 	const finditem = async (result: any) => {
-		// Ensure items are defined before proceeding
-
-	
 		await console.log(data);
 		await console.log(result[0]);
 		// Proceed to find the ite
@@ -195,7 +168,6 @@ const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }) => {
 				console.log(data);
 			}
 		};
-
 		getdata();
 	}, [items, finditem, selectedItem]);
 
@@ -203,13 +175,13 @@ const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }) => {
 		<div>
 			<div>
 				<Scanner
-					onScan={(result) => finditem(result)} 
+					onScan={(result) => finditem(result)}
 					onError={(error) => console.error(error)}
 					constraints={{ facingMode: 'environment' }} // Use the back camera
 					allowMultiple
 					// styles={{ "width": '300px', height: '300px' }} // Set scanner size
 				/>
-				
+
 				{/* {data && <p>Scanned QR Data: {data}</p>} */}
 				<Input
 					id='keyboardinput'
@@ -244,7 +216,13 @@ const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }) => {
 												return val;
 											}
 										}
+										
 										return null;
+									})
+									.filter((val: any) => {
+										if (val.type != 'Yarn') {
+											return val;
+										} 
 									})
 									.map((item: any, index: any) => (
 										<div
@@ -313,10 +291,10 @@ const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }) => {
 					<div
 						className={classNames('p-4 rounded-4', {
 							'bg-l10-dark': !darkModeStatus,
-							'bg-l90-dark': darkModeStatus,
+							'bg-dark': darkModeStatus,
 						})}
 						style={{ zIndex: 1051, width: 600 }}>
-						<FormGroup id='membershipDate' className='col-md-6'>
+						<FormGroup id='order_type' className='col-md-6'>
 							<Label htmlFor='ChecksGroup'>Type</Label>
 							<ChecksGroup isInline>
 								<Checks
@@ -354,37 +332,50 @@ const Index: React.FC<KeyboardProps> = ({ isActive, setActiveComponent }) => {
 								/>
 							</ChecksGroup>
 						</FormGroup>
-						<h6 className='mt-4'>Enter a Quantity</h6>
-						<Input
-							type='number'
-							value={popupInput}
-							onChange={(e: any) => setPopupInput(e.target.value)}
-							min={1}
-							className='form-control mb-4 p-2'
-							ref={popupInputRef}
-						/>
+
+						<FormGroup id='quentity' label='Quantity' className='col-md-12'>
+							<Input
+								type='number'
+								onChange={formik.handleChange}
+								value={formik.values.quentity}
+								onBlur={formik.handleBlur}
+								isValid={formik.isValid}
+								isTouched={formik.touched.quentity}
+								invalidFeedback={formik.errors.quentity}
+								ref={popupInputRef}
+								min={1}
+								validFeedback='Looks good!'
+							/>
+						</FormGroup>
+
 						{selectedType !== 'Return' && (
 							<>
-								<h6 className='mb-4'>Job ID</h6>
-								<Input
-									type='text'
-									value={popupInput1}
-									onChange={(e: any) => setPopupInput1(e.target.value)}
-									className='form-control mb-4 p-2'
-									ref={popupInputRef}
-								/>
+								<FormGroup id='Job_ID' label='Job Id' className='col-md-12'>
+									<Input
+										onChange={formik.handleChange}
+										value={formik.values.Job_ID}
+										onBlur={formik.handleBlur}
+										isValid={formik.isValid}
+										isTouched={formik.touched.Job_ID}
+										invalidFeedback={formik.errors.Job_ID}
+										ref={popupInputRef}
+										validFeedback='Looks good!'
+									/>
+								</FormGroup>
 							</>
 						)}
 
-						<div className='d-flex justify-content-end'>
-							<button
-								onClick={() => setShowPopup(false)}
-								className='btn btn-danger me-2'>
-								Cancel
-							</button>
-							<button className='btn btn-success' onClick={handlePopupOk}>
-								OK
-							</button>
+						<div className='d-flex pt-3 justify-content-end'>
+							<FormGroup>
+								<Button
+									onClick={() => setShowPopup(false)}
+									className='btn btn-danger me-2'>
+									Cancel
+								</Button>
+								<Button className='btn btn-success' onClick={formik.handleSubmit}>
+									OK
+								</Button>
+							</FormGroup>
 						</div>
 					</div>
 				</div>

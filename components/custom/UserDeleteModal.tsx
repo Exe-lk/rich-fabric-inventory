@@ -1,24 +1,14 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC } from 'react';
 import PropTypes from 'prop-types';
-import { useFormik } from 'formik';
-import Modal, { ModalBody, ModalFooter, ModalHeader, ModalTitle } from '../bootstrap/Modal';
-import showNotification from '../extras/showNotification';
-import Icon from '../icon/Icon';
-import FormGroup from '../bootstrap/forms/FormGroup';
-import Input from '../bootstrap/forms/Input';
+import Modal, { ModalBody, ModalHeader, ModalTitle } from '../bootstrap/Modal';
 import Button from '../bootstrap/Button';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
-import { firestore } from '../../firebaseConfig';
 import Swal from 'sweetalert2';
-import useDarkMode from '../../hooks/useDarkMode';
-import Dropdown, { DropdownMenu, DropdownToggle } from '../bootstrap/Dropdown';
-
 import {
 	useDeleteUserMutation,
-	useGetUsersQuery,
 	useGetDeleteUsersQuery,
 	useUpdateUserMutation,
 } from '../../redux/slices/userManagementApiSlice';
+
 interface CategoryEditModalProps {
 	id: string;
 	isOpen: boolean;
@@ -26,12 +16,12 @@ interface CategoryEditModalProps {
 }
 
 const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }) => {
-	
 	const { data: user, error, isLoading } = useGetDeleteUsersQuery(undefined);
 	const [updateuser] = useUpdateUserMutation();
 	const [deleteuser] = useDeleteUserMutation();
-	const { refetch } = useGetDeleteUsersQuery(undefined)
-	const handleClickDelete = async (user:any) => {
+	const { refetch } = useGetDeleteUsersQuery(undefined);
+
+	const handleClickDelete = async (user: any) => {
 		try {
 			const { value: inputText } = await Swal.fire({
 				title: 'Are you sure?',
@@ -50,11 +40,9 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 			});
 
 			if (inputText === 'DELETE') {
-				// Perform delete action here
 				await deleteuser(user.id).unwrap();
+				refetch();
 				Swal.fire('Deleted!', 'The user has been deleted.', 'success');
-
-				console.log('Delete confirmed');
 			}
 		} catch (error) {
 			console.error('Error deleting document: ', error);
@@ -65,7 +53,6 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -77,9 +64,8 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					...user,
 					status: true,
 				};
-
 				await updateuser(values);
-
+				refetch();
 				Swal.fire('Restored!', 'The user has been restored.', 'success');
 			}
 		} catch (error) {
@@ -89,8 +75,8 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 	};
 
 	const handleDeleteAll = async () => {
-		if(user.length==0){
-			return
+		if (user.length == 0) {
+			return;
 		}
 		try {
 			const { value: inputText } = await Swal.fire({
@@ -108,26 +94,22 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 				cancelButtonColor: '#d33',
 				confirmButtonText: 'Yes, delete all!',
 			});
-
 			if (inputText === 'DELETE ALL') {
 				for (const users of user) {
 					await deleteuser(users.id).unwrap();
 				}
 				Swal.fire('Deleted!', 'All users have been deleted.', 'success');
-
-				// Refetch categories after deletion
 				refetch();
 			}
 		} catch (error) {
-			
 			Swal.fire('Error', 'Failed to delete all suppliers.', 'error');
 		}
 	};
 
 	// Handle restore all categories
 	const handleRestoreAll = async () => {
-		if(user.length==0){
-			return
+		if (user.length == 0) {
+			return;
 		}
 		try {
 			const result = await Swal.fire({
@@ -139,19 +121,15 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 				cancelButtonColor: '#d33',
 				confirmButtonText: 'Yes, restore all!',
 			});
-
 			if (result.isConfirmed) {
 				for (const users of user) {
 					const values = {
 						...users,
-						status: true, // Assuming restoring means setting status to true
-						
+						status: true,
 					};
 					await updateuser(values).unwrap();
 				}
 				Swal.fire('Restored!', 'All users have been restored.', 'success');
-
-				// Refetch categories after restoring
 				refetch();
 			}
 		} catch (error) {
@@ -165,16 +143,15 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 				<ModalTitle id=''>{'Recycle Bin'}</ModalTitle>
 			</ModalHeader>
 			<ModalBody className='px-4'>
-				<table className='table table-bordered border-primary table-modern table-hover'>
-					<thead>
+				<table className='table table-hover table-bordered border-primary'>
+					<thead className={'table-dark border-primary'}>
 						<tr>
 							<th>User</th>
 							<th>Position</th>
 							<th>Email</th>
 							<th>Mobile number</th>
-
 							<th>
-							<Button
+								<Button
 									icon='Delete'
 									onClick={handleDeleteAll}
 									color='danger'
@@ -192,7 +169,7 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 						</tr>
 					</thead>
 					<tbody>
-					{isLoading && (
+						{isLoading && (
 							<tr>
 								<td>Loading...</td>
 							</tr>
@@ -209,7 +186,6 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 									<td>{user.role}</td>
 									<td>{user.email}</td>
 									<td>{user.mobile}</td>
-
 									<td>
 										<Button
 											icon='Restore'
@@ -218,7 +194,6 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 											onClick={() => handleClickRestore(user)}>
 											Restore
 										</Button>
-
 										<Button
 											className='m-2'
 											icon='Delete'
@@ -232,7 +207,6 @@ const CategoryEditModal: FC<CategoryEditModalProps> = ({ id, isOpen, setIsOpen }
 					</tbody>
 				</table>
 			</ModalBody>
-			
 		</Modal>
 	);
 };

@@ -14,11 +14,10 @@ import { useFormik } from 'formik';
 import {
 	useGetStockOutsQuery,
 	useAddStockOutMutation,
-} from '../../../redux/slices/stockOutApiSlice'; // Import the query
+} from '../../../redux/slices/stockOutApiSlice';
 import {
 	useGetLotMovementsQuery,
 	useDeleteLotMovementMutation,
-	useGetDeletedLotMovementsQuery,
 } from '../../../redux/slices/LotMovementApiSlice';
 
 function index() {
@@ -28,36 +27,33 @@ function index() {
 	const customerAmountInputRef = useRef<HTMLInputElement>(null);
 	const [activeComponent, setActiveComponent] = useState<'additem' | 'edit'>('additem');
 	const [selectedOption, setSelectedOption] = useState<string>('Customer');
+	const { data: orderedItems, error } = useGetLotMovementsQuery(undefined);
+	const [deletelot] = useDeleteLotMovementMutation();
+	const [addtransaction] = useAddStockOutMutation();
+	const { refetch } = useGetStockOutsQuery(undefined);
 	const currentTime = new Date().toLocaleTimeString('en-GB', {
 		hour: '2-digit',
 		minute: '2-digit',
 	});
-	const [addtransaction, { isLoading }] = useAddStockOutMutation();
-	const { refetch } = useGetStockOutsQuery(undefined);
+
 	const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setSelectedOption(event.target.value);
 	};
-	const { data: orderedItems, error } = useGetLotMovementsQuery(undefined);
-	const [deletelot] = useDeleteLotMovementMutation();
 
-	
 	const handleKeyPress = (event: KeyboardEvent) => {
 		if (event.ctrlKey && event.key.toLowerCase() === 'b') {
 			setToggleRightPanel((prevState) => !prevState);
-			event.preventDefault(); // Prevent default browser behavior
+			event.preventDefault();
 		} else if (event.ctrlKey && event.key.toLowerCase() === 'p') {
 			formik.handleSubmit();
-			event.preventDefault(); // Prevent default browser behavior
+			event.preventDefault();
 		} else if (event.key === 'Shift') {
-			// Check if the focus is on the input fields
 			if (
 				document.activeElement === customerNameInputRef.current ||
 				document.activeElement === customerAmountInputRef.current
 			) {
-				// Prevent default action of the Shift key press
 				event.preventDefault();
 			} else {
-				// Focus the customer name input
 				customerNameInputRef.current?.focus();
 			}
 		}
@@ -69,7 +65,6 @@ function index() {
 				customerAmountInputRef.current?.focus();
 			}
 		};
-
 		const handleAmountEnter = (event: KeyboardEvent) => {
 			if (event.key === 'Shift') {
 				event.stopPropagation();
@@ -77,17 +72,12 @@ function index() {
 				formik.handleSubmit();
 			}
 		};
-
 		const customerNameInput = customerNameInputRef.current;
 		const customerAmountInput = customerAmountInputRef.current;
-
 		customerNameInput?.addEventListener('keydown', handleCustomerNameEnter);
 		customerAmountInput?.addEventListener('keydown', handleAmountEnter);
-
 		window.addEventListener('keydown', handleKeyPress);
-
 		return () => {
-			// customerNameInput?.removeEventListener('keydown', handleCustomerNameEnter);
 			customerAmountInput?.removeEventListener('keydown', handleAmountEnter);
 			window.removeEventListener('keydown', handleKeyPress);
 		};
@@ -106,10 +96,15 @@ function index() {
 			if (!values.price) errors.price = 'Required';
 			if (selectedOption == 'Dye Plant' && !values.gatepassno) errors.gatepassno = 'Required';
 			if (selectedOption == 'Customer' && !values.name) errors.name = 'Required';
-			if (selectedOption == 'Customer' && !values.mobile) errors.mobile = 'Required';
+			if (selectedOption == 'Customer' && !values.mobile) {
+				errors.mobile = 'Required';
+			} else if (values.mobile.length !== 10) {
+				errors.mobile = 'Mobile number must be exactly 10 digits';
+			} else if (!/^0\d{9}$/.test(values.mobile)) {
+				errors.mobile = 'Mobile number must start with 0 and be exactly 10 digits';
+			}
 			if (selectedOption == 'Dye Plant' && !values.vehiclenumber)
 				errors.vehiclenumber = 'Required';
-
 			return errors;
 		},
 		onSubmit: async (values) => {
@@ -118,7 +113,6 @@ function index() {
 					const result = await Swal.fire({
 						title: 'Are you sure?',
 						text: 'You will not be able to recover this!',
-						// text: id,
 						icon: 'warning',
 						showCancelButton: true,
 						confirmButtonColor: '#3085d6',
@@ -128,8 +122,6 @@ function index() {
 
 					if (result.isConfirmed) {
 						const currentDate = new Date();
-						const formattedDate = currentDate.toLocaleDateString();
-
 						const year = currentDate.getFullYear();
 						const month = String(currentDate.getMonth() + 1).padStart(2, '0');
 						const day = String(currentDate.getDate()).padStart(2, '0');
@@ -141,7 +133,7 @@ function index() {
 								fabric_type: orderedItem.fabric_type,
 								type: orderedItem.type,
 								code: orderedItem.code,
-								GRN_number:orderedItem.GRN_number,
+								GRN_number: orderedItem.GRN_number,
 								category: orderedItem.category,
 								subcategory: orderedItem.subcategory,
 								time: currentTime,
@@ -154,13 +146,13 @@ function index() {
 								vehicle_number: values.vehiclenumber,
 								gate_pass_No: values.gatepassno,
 							};
-							const response: any = await addtransaction(values1).unwrap();
+							await addtransaction(values1).unwrap();
 						}
 						for (const orderedItem of orderedItems) {
 							await deletelot(orderedItem.id).unwrap();
 						}
 						refetch();
-						formik.resetForm()
+						formik.resetForm();
 						Swal.fire('Added!', 'transaction has been added successfully.', 'success');
 					}
 				} catch (error) {
@@ -171,34 +163,20 @@ function index() {
 		},
 	});
 
-
 	return (
 		<PageWrapper className=''>
-			{/* <div>
-				<div className='mt-5'>
-					<Button className='btn btn-outline-warning '>All</Button>
-					{category.map((category, index) => (
-						<Button key={index} className='btn btn-outline-warning'>
-							{category.categoryname}
-						</Button>
-					))}
-				</div>
-			</div> */}
 			<div className='row'>
 				<div className='col-4  mb-sm-0'>
 					<Additem
-					
 						isActive={activeComponent === 'additem'}
 						setActiveComponent={setActiveComponent}
-					/>{' '}
+					/>
 				</div>
 				<div className='col-4 '>
 					<Edit
-					
-						
 						isActive={activeComponent === 'edit'}
 						setActiveComponent={setActiveComponent}
-					/>{' '}
+					/>
 				</div>
 				<div className='col-4 mt-4 '>
 					<Card stretch className=' p-4' style={{ height: '75vh' }}>
@@ -225,7 +203,6 @@ function index() {
 									/>
 								</ChecksGroup>
 							</FormGroup>
-
 							<div className='row g-4 mt-1'>
 								<FormGroup id='price' label='Price' className='col-md-12'>
 									<Input
@@ -238,7 +215,6 @@ function index() {
 										validFeedback='Looks good!'
 									/>
 								</FormGroup>
-
 								{selectedOption === 'Dye Plant' && (
 									<div>
 										<FormGroup
@@ -271,7 +247,6 @@ function index() {
 										</FormGroup>
 									</div>
 								)}
-
 								{selectedOption === 'Customer' && (
 									<div>
 										<FormGroup
@@ -288,7 +263,6 @@ function index() {
 												validFeedback='Looks good!'
 											/>
 										</FormGroup>
-
 										<FormGroup
 											id='mobile'
 											label='Contact No.'

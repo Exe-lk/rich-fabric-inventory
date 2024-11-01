@@ -1,9 +1,7 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import type { NextPage } from 'next';
 import PageWrapper from '../../../../../layout/PageWrapper/PageWrapper';
-import useDarkMode from '../../../../../hooks/useDarkMode';
 import Page from '../../../../../layout/Page/Page';
-import { firestore } from '../../../../../firebaseConfig';
 import SubHeader, {
 	SubHeaderLeft,
 	SubHeaderRight,
@@ -20,10 +18,8 @@ import {
 	useUpdateFabricMutation,
 } from '../../../../../redux/slices//fabricApiSlice';
 
-// Define the functional component for the index page
 const Index: NextPage = () => {
-	const { darkModeStatus } = useDarkMode(); // Dark mode
-	const [searchTerm, setSearchTerm] = useState(''); // State for search term
+	const [searchTerm, setSearchTerm] = useState('');
 	const { data: data, error, isLoading } = useGetDeletedFabricsQuery(undefined);
 	const [updatedata] = useUpdateFabricMutation();
 	const [deletedata] = useDeleteFabricMutation();
@@ -46,13 +42,9 @@ const Index: NextPage = () => {
 				cancelButtonColor: '#d33',
 				confirmButtonText: 'Yes, delete it!',
 			});
-
 			if (inputText === 'DELETE') {
 				await deletedata(data.id).unwrap();
 				Swal.fire('Deleted!', 'The data has been deleted.', 'success');
-
-				// Perform delete action here
-				console.log('Delete confirmed');
 				refetch();
 			}
 		} catch (error) {
@@ -64,7 +56,6 @@ const Index: NextPage = () => {
 		try {
 			const result = await Swal.fire({
 				title: 'Are you sure?',
-
 				icon: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
@@ -76,9 +67,7 @@ const Index: NextPage = () => {
 					...data,
 					status: true,
 				};
-
 				await updatedata(values);
-
 				Swal.fire('Restored!', 'The data has been restored.', 'success');
 			}
 		} catch (error) {
@@ -86,10 +75,9 @@ const Index: NextPage = () => {
 			Swal.fire('Error', 'Failed to delete data.', 'error');
 		}
 	};
-
 	const handleDeleteAll = async () => {
-		if(data.length==0){
-			return
+		if (data?.length == 0) {
+			return;
 		}
 		try {
 			const { value: inputText } = await Swal.fire({
@@ -107,26 +95,23 @@ const Index: NextPage = () => {
 				cancelButtonColor: '#d33',
 				confirmButtonText: 'Yes, delete all!',
 			});
-
 			if (inputText === 'DELETE ALL') {
 				for (const datas of data) {
 					await deletedata(datas.id).unwrap();
 				}
 				Swal.fire('Deleted!', 'All data have been deleted.', 'success');
-
-				// Refetch categories after deletion
 				refetch();
 			}
 		} catch (error) {
-		
+			console.error('Error deleting all categories:', error);
 			Swal.fire('Error', 'Failed to delete all data.', 'error');
 		}
 	};
 
 	// Handle restore all categories
 	const handleRestoreAll = async () => {
-		if(data.length==0){
-			return
+		if (data?.length == 0) {
+			return;
 		}
 		try {
 			const result = await Swal.fire({
@@ -138,31 +123,26 @@ const Index: NextPage = () => {
 				cancelButtonColor: '#d33',
 				confirmButtonText: 'Yes, restore all!',
 			});
-
 			if (result.isConfirmed) {
 				for (const datas of data) {
 					const values = {
 						...datas,
-						status: true, // Assuming restoring means setting status to true
+						status: true,
 					};
 					await updatedata(values).unwrap();
 				}
 				Swal.fire('Restored!', 'All data have been restored.', 'success');
-
-				// Refetch categories after restoring
 				refetch();
 			}
 		} catch (error) {
-			console.error('Error restoring all categories:', error);
 			Swal.fire('Error', 'Failed to restore all data.', 'error');
 		}
 	};
-	// JSX for rendering the page
+
 	return (
 		<PageWrapper>
 			<SubHeader>
 				<SubHeaderLeft>
-					{/* Search input */}
 					<label
 						className='border-0 bg-transparent cursor-pointer me-0'
 						htmlFor='searchInput'>
@@ -181,7 +161,6 @@ const Index: NextPage = () => {
 				</SubHeaderLeft>
 				<SubHeaderRight>
 					<SubheaderSeparator />
-					{/* Button to open New category */}
 					<Button icon='Delete' onClick={handleDeleteAll} color='danger' isLight>
 						Delete All
 					</Button>
@@ -197,19 +176,17 @@ const Index: NextPage = () => {
 			<Page>
 				<div className='row h-100'>
 					<div className='col-12'>
-						{/* Table for displaying customer data */}
 						<Card stretch>
 							<CardBody isScrollable className='table-responsive'>
-								{/* <table className='table table-modern table-hover'> */}
-								<table className='table table-bordered border-primary table-modern table-hover text-center'>
-									<thead>
+								<table className='table table-hover table-bordered border-primary'>
+									<thead className={'table-dark border-primary'}>
 										<tr>
 											<th>Fabric name</th>
 											<th></th>
 										</tr>
 									</thead>
 									<tbody>
-									{isLoading && (
+										{isLoading && (
 											<tr>
 												<td>Loading...</td>
 											</tr>
@@ -221,37 +198,40 @@ const Index: NextPage = () => {
 										)}
 										{data &&
 											data
-											.filter((color: any) =>
-												searchTerm
-													? color.name
-															.toLowerCase()
-															.includes(searchTerm.toLowerCase())
-													: true,
-											).map((data: any) => (
-												<tr key={data.id}>
-													<td>{data.name}</td>
+												.filter((data: any) =>
+													searchTerm
+														? data.name
+																.toLowerCase()
+																.includes(searchTerm.toLowerCase())
+														: true,
+												)
+												.map((data: any) => (
+													<tr key={data.id}>
+														<td>{data.name}</td>
 
-													<td>
-														<Button
-															icon='Restore'
-															tag='a'
-															color='info'
-															onClick={() =>
-																handleClickRestore(data)
-															}>
-															Restore
-														</Button>
+														<td>
+															<Button
+																icon='Restore'
+																tag='a'
+																color='info'
+																onClick={() =>
+																	handleClickRestore(data)
+																}>
+																Restore
+															</Button>
 
-														<Button
-															className='m-2'
-															icon='Delete'
-															color='danger'
-															onClick={() => handleClickDelete(data)}>
-															Delete
-														</Button>
-													</td>
-												</tr>
-											))}
+															<Button
+																className='m-2'
+																icon='Delete'
+																color='danger'
+																onClick={() =>
+																	handleClickDelete(data)
+																}>
+																Delete
+															</Button>
+														</td>
+													</tr>
+												))}
 									</tbody>
 								</table>
 							</CardBody>
