@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const gsmApiSlice = createApi({
   reducerPath: 'gsmApi',
-  baseQuery: fetchBaseQuery({ baseUrl: '/api/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: 'https://richfrab.netlify.app/api/' }),
   tagTypes: ['GSM'],
   endpoints: (builder) => ({
     getGSMs: builder.query({

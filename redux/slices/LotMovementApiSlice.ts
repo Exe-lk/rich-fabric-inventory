@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const lotMovementApiSlice = createApi({
   reducerPath: 'lotMovementApi',
-  baseQuery: fetchBaseQuery({ baseUrl:  '/api/' }),
+  baseQuery: fetchBaseQuery({ baseUrl:  'https://richfrab.netlify.app/api/' }),
   tagTypes: ['LotMovement'],
   endpoints: (builder) => ({
     // Read: Fetch all active lot movements
