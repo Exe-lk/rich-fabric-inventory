@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const customerApiSlice = createApi({
   reducerPath: 'customerApi',
-  baseQuery: fetchBaseQuery({ baseUrl: '/api/'}),
+  baseQuery: fetchBaseQuery({ baseUrl: 'https://richfrab.netlify.app/api/'}),
   tagTypes: ['Customer'],
   endpoints: (builder) => ({
     // Fetch all active customers
