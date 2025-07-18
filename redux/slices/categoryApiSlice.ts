@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 export const categoryApiSlice = createApi({
   reducerPath: 'categoryApi',
-  baseQuery: fetchBaseQuery({ baseUrl: 'https://richfabricinventory.netlify.app/api/' }),
+  baseQuery: fetchBaseQuery({ baseUrl: '/api/' }),
   tagTypes: ['Category'],
   endpoints: (builder) => ({
     // Read: Fetch all categories
